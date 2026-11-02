@@ -4,6 +4,7 @@ import { LEVELS, loadAllLevels } from '../content';
 import type { Level } from '../content/types';
 import { useAuth } from '../core/auth/AuthContext';
 import { useProgress } from '../core/progress/ProgressContext';
+import { isMastered } from '../core/progress/misses';
 import { isDue } from '../core/srs/leitner';
 import { MODULES } from '../modules/registry';
 import '../styles/game-banner.css';
@@ -25,6 +26,7 @@ export default function DashboardPage() {
     return total ? Math.round((done / total) * 100) : 0;
   };
   const dueWords = Object.values(data.srs).filter((c) => isDue(c)).length;
+  const bugs = Object.values(data.misses).filter((r) => !isMastered(r)).length;
 
   return (
     <div>
@@ -61,6 +63,16 @@ export default function DashboardPage() {
         <span>
           <strong>Vocab Boss Game</strong>
           <small>Practica el vocabulario de tu nivel (A1–C2) peleando contra 10 bosses. ¡Cada acierto es un ataque!</small>
+        </span>
+      </Link>
+
+      <Link to="/repaso" className="game-banner game-banner--bugs">
+        <span className="game-banner__emoji" aria-hidden="true">
+          🐛
+        </span>
+        <span>
+          <strong>Caza de bugs{bugs > 0 ? ` · ${bugs} por repasar` : ''}</strong>
+          <small>Repasa jugando las palabras que fallaste en las prácticas. Acierta 3 veces seguidas para aplastarlas 💥.</small>
         </span>
       </Link>
 

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useAuth } from '../auth/AuthContext';
 import type { SupabaseAuthService } from '../auth/supabaseAuthService';
 import { review as srsReview, type SrsCard } from '../srs/leitner';
+import { applyAnswer } from './misses';
 import { LocalProgressRepository, SupabaseProgressRepository } from './repositories';
 import { emptyProgress, type ProgressData, type ProgressRepository } from './types';
 
@@ -10,6 +11,8 @@ interface ProgressState {
   markSection: (topicKey: string, section: string, score?: number) => void;
   reviewWord: (wordKey: string, correct: boolean) => void;
   getCard: (wordKey: string) => SrsCard | undefined;
+  /** Registra un acierto/fallo solo en la lista de palabras falladas (sin tocar la repetición espaciada). */
+  recordAnswer: (wordKey: string, correct: boolean) => void;
 }
 
 const ProgressContext = createContext<ProgressState | null>(null);
@@ -92,13 +95,30 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const reviewWord = useCallback(
     (wordKey: string, correct: boolean) =>
-      update((d) => ({ ...d, streak: bumpStreak(d), srs: { ...d.srs, [wordKey]: srsReview(d.srs[wordKey], correct) } })),
+      update((d) => ({
+        ...d,
+        streak: bumpStreak(d),
+        srs: { ...d.srs, [wordKey]: srsReview(d.srs[wordKey], correct) },
+        misses: applyAnswer(d.misses, wordKey, correct),
+      })),
+    [update],
+  );
+
+  const recordAnswer = useCallback(
+    (wordKey: string, correct: boolean) =>
+      update((d) => {
+        const misses = applyAnswer(d.misses, wordKey, correct);
+        return misses === d.misses ? d : { ...d, misses };
+      }),
     [update],
   );
 
   const getCard = useCallback((wordKey: string) => data.srs[wordKey], [data]);
 
-  const value = useMemo(() => ({ data, markSection, reviewWord, getCard }), [data, markSection, reviewWord, getCard]);
+  const value = useMemo(
+    () => ({ data, markSection, reviewWord, getCard, recordAnswer }),
+    [data, markSection, reviewWord, getCard, recordAnswer],
+  );
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }
 

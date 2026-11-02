@@ -28,3 +28,31 @@
   display: block;
   color: #a7b2aa;
 }
+/* Acceso a la Caza de bugs (repaso de palabras falladas). */
+.game-banner--bugs {
+  border-color: #15803d;
+  background: linear-gradient(120deg, #052e16, #14532d 60%, #3f1d38);
+}
+.game-banner--bugs strong {
+  color: #bbf7d0;
+}
+.game-banner--bugs small {
+  color: #d1fae5;
+}
+/* Contador del menú superior. */
+.nav-badge {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+.topbar__nav a {
+  white-space: nowrap;
+}

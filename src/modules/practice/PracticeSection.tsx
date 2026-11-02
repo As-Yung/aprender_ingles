@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { SpeakButton } from '../../components/SpeakButton';
-import type { Topic } from '../../content/types';
+import type { Topic, VocabItem } from '../../content/types';
+import { useProgress } from '../../core/progress/ProgressContext';
 import { speak } from '../../core/speech/speech';
 import type { SectionProps } from '../types';
 import { buildGaps, buildListen, buildMatch, buildOrder, buildSort, shuffle } from './generators';
@@ -14,9 +15,15 @@ const GAMES: { id: GameId; emoji: string; label: string; help: string }[] = [
   { id: 'clasificar', emoji: '🗂️', label: 'Clasifica', help: 'Toca cada palabra y luego la caja a la que pertenece.' },
 ];
 
-type GameProps = { topic: Topic; onDone: (score: number) => void };
+type GameProps = {
+  topic: Topic;
+  onDone: (score: number) => void;
+  /** Registra el acierto/fallo de una palabra (alimenta el repaso de palabras falladas). */
+  onAnswer: (item: VocabItem, correct: boolean) => void;
+};
 
-export default function PracticeSection({ topic, onComplete }: SectionProps) {
+export default function PracticeSection({ topic, topicKey, onComplete }: SectionProps) {
+  const { recordAnswer } = useProgress();
   const sortable = useMemo(() => buildSort(topic) !== null, [topic]);
   const games = GAMES.filter((g) => g.id !== 'clasificar' || sortable);
   const [game, setGame] = useState<GameId>('emparejar');
@@ -33,7 +40,8 @@ export default function PracticeSection({ topic, onComplete }: SectionProps) {
     }
   };
 
-  const props: GameProps = { topic, onDone: done };
+  const onAnswer = (item: VocabItem, correct: boolean) => recordAnswer(`${topicKey}/${item.term}`, correct);
+  const props: GameProps = { topic, onDone: done, onAnswer };
   return (
     <div className="practice">
       <div className="card">
@@ -103,7 +111,7 @@ function Finished({ score, onAgain }: { score: number; onAgain?: () => void }) {
 const pct = (ok: number, total: number) => (total ? Math.round((ok / total) * 100) : 0);
 
 /* 🧩 Emparejar -------------------------------------------------------- */
-function MatchGame({ topic, onDone }: GameProps) {
+function MatchGame({ topic, onDone, onAnswer }: GameProps) {
   const data = useMemo(() => buildMatch(topic), [topic]);
   const [selected, setSelected] = useState<string | null>(null); // es seleccionado (término correcto)
   const [matched, setMatched] = useState<string[]>([]);
@@ -113,6 +121,8 @@ function MatchGame({ topic, onDone }: GameProps) {
 
   const tryTerm = (term: string) => {
     if (!selected || matched.includes(term)) return;
+    const item = data.items.find((v) => v.term === selected);
+    if (item) onAnswer(item, selected === term);
     if (selected === term) {
       const next = [...matched, term];
       setMatched(next);
@@ -163,7 +173,7 @@ function MatchGame({ topic, onDone }: GameProps) {
 }
 
 /* 👂 Escucha y elige --------------------------------------------------- */
-function ListenGame({ topic, onDone }: GameProps) {
+function ListenGame({ topic, onDone, onAnswer }: GameProps) {
   const tasks = useMemo(() => buildListen(topic), [topic]);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -174,6 +184,7 @@ function ListenGame({ topic, onDone }: GameProps) {
     if (picked) return;
     setPicked(term);
     const good = term === task.item.term;
+    onAnswer(task.item, good);
     const nextOk = ok + (good ? 1 : 0);
     setOk(nextOk);
     if (i + 1 === tasks.length) setTimeout(() => onDone(pct(nextOk, tasks.length)), 0);
@@ -219,7 +230,7 @@ function ListenGame({ topic, onDone }: GameProps) {
 }
 
 /* ✏️ Completar ---------------------------------------------------------- */
-function GapGame({ topic, onDone }: GameProps) {
+function GapGame({ topic, onDone, onAnswer }: GameProps) {
   const tasks = useMemo(() => buildGaps(topic), [topic]);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -231,6 +242,7 @@ function GapGame({ topic, onDone }: GameProps) {
   const answer = (o: string) => {
     if (picked) return;
     setPicked(o);
+    onAnswer(task.item, o === correct);
     const nextOk = ok + (o === correct ? 1 : 0);
     setOk(nextOk);
     if (o === correct) void speak(task.item.example);
@@ -344,7 +356,7 @@ function OrderGame({ topic, onDone }: GameProps) {
 }
 
 /* 🗂️ Clasificar ---------------------------------------------------------- */
-function SortGame({ topic, onDone }: GameProps) {
+function SortGame({ topic, onDone, onAnswer }: GameProps) {
   const task = useMemo(() => buildSort(topic), [topic]);
   const [selected, setSelected] = useState<string | null>(null);
   const [placed, setPlaced] = useState<Record<string, string>>({});
@@ -357,6 +369,7 @@ function SortGame({ topic, onDone }: GameProps) {
   const drop = (cat: string) => {
     if (!selected) return;
     const item = task.items.find((v) => v.term === selected)!;
+    onAnswer(item, item.category === cat);
     if (item.category === cat) {
       const next = { ...placed, [selected]: cat };
       setPlaced(next);
