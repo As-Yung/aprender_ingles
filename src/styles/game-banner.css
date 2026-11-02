@@ -74,3 +74,11 @@
 .game-banner--voice small {
   color: #e0f2fe;
 }
+/* Game Arcade (all games + leaderboards). */
+.game-banner--arcade {
+  border-color: #b45309;
+  background: linear-gradient(120deg, #1c1917, #3b2a10 55%, #1d2a25);
+}
+.game-banner--arcade strong {
+  color: #fde68a;
+}

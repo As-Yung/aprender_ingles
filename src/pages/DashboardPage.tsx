@@ -105,6 +105,15 @@ export default function DashboardPage() {
 
       <h2 className="section-title">🎮 Play &amp; practice</h2>
       <div className="quick-grid">
+        <Link to="/arcade" className="game-banner game-banner--arcade">
+          <span className="game-banner__emoji" aria-hidden="true">
+            🕹️
+          </span>
+          <span>
+            <strong>Game Arcade · 31 games</strong>
+            <small>Spelling, listening, sentences, speed rounds and more. Climb the leaderboards solo or in duels.</small>
+          </span>
+        </Link>
         <Link to="/juego" className="game-banner">
           <span className="game-banner__emoji" aria-hidden="true">
             ⚔️

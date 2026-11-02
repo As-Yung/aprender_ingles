@@ -33,7 +33,7 @@ export function Layout() {
 
   const items: NavItem[] = [
     { to: '/', icon: '🏠', label: 'Home', end: true },
-    { to: '/juego', icon: '⚔️', label: 'Play' },
+    { to: '/arcade', icon: '🕹️', label: 'Games' },
     { to: '/duelo', icon: '🤺', label: 'Duel' },
     { to: '/repaso', icon: '🐛', label: 'Bug Hunt', badge: bugs },
     { to: '/voz', icon: '🔊', label: 'Voice' },
