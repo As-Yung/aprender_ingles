@@ -101,3 +101,22 @@ describe('Vocab Boss Game', async () => {
     expect(siguientes).toContain(p.palabra.item.term);
   });
 });
+
+describe('Duelos: preguntas compartidas', async () => {
+  const { preguntaDuelo } = await import('../modules/vocab-duel/questions');
+  const levels = await loadAllLevels();
+  it('las dos personas reciben la misma secuencia de preguntas', () => {
+    for (const level of levels) {
+      const palabras = palabrasDelNivel(level);
+      const a = Array.from({ length: 60 }, (_, i) => preguntaDuelo(palabras, 123456, i));
+      const b = Array.from({ length: 60 }, (_, i) => preguntaDuelo(palabras, 123456, i));
+      expect(a).toEqual(b);
+      a.forEach((p) => expect(p.opciones).toContain(p.respuesta));
+      // Las primeras preguntas no repiten palabra.
+      const primeras = a.slice(0, Math.min(30, palabras.length)).map((p) => p.palabra.item.term);
+      expect(new Set(primeras).size).toBe(primeras.length);
+    }
+    const otra = preguntaDuelo(palabrasDelNivel(levels[0]!), 999, 0);
+    expect(otra).toBeDefined();
+  });
+});
