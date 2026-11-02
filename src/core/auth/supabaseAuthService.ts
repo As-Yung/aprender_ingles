@@ -83,6 +83,9 @@ export class SupabaseAuthService implements AuthService {
     });
     if (error) {
       let message = 'No se pudo completar la operación.';
+      if ((error as { name?: string }).name === 'FunctionsFetchError') {
+        throw new AuthError('No se pudo conectar con el servidor. Revisa tu conexión.', 'network');
+      }
       const ctx = (error as { context?: unknown }).context;
       if (ctx instanceof Response) {
         try {
