@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LEVELS, loadAllLevels } from '../content';
 import type { Level } from '../content/types';
@@ -8,6 +8,13 @@ import { isMastered } from '../core/progress/misses';
 import { isDue } from '../core/srs/leitner';
 import { MODULES } from '../modules/registry';
 import '../styles/game-banner.css';
+
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 19) return 'Good afternoon';
+  return 'Good evening';
+}
 
 export default function DashboardPage() {
   const { session } = useAuth();
@@ -28,71 +35,131 @@ export default function DashboardPage() {
   const dueWords = Object.values(data.srs).filter((c) => isDue(c)).length;
   const bugs = Object.values(data.misses).filter((r) => !isMastered(r)).length;
 
+  // "Continue where you left off": the most recently touched topic.
+  const resume = useMemo(() => {
+    let best: { key: string; at: number } | null = null;
+    for (const [key, sections] of Object.entries(data.topics)) {
+      for (const s of Object.values(sections)) {
+        if (!best || s.updatedAt > best.at) best = { key, at: s.updatedAt };
+      }
+    }
+    if (!best) return null;
+    const [levelId, topicId] = best.key.split('/');
+    const level = levels.find((l) => l.id === levelId);
+    const topic = level?.topics.find((t) => t.id === topicId);
+    if (!level || !topic) return null;
+    const done = Object.values(data.topics[best.key] ?? {}).filter((s) => s.completed).length;
+    return { level, topic, done };
+  }, [data.topics, levels]);
+
   return (
-    <div>
-      <section className="hero">
-        <h1>¡Hola, {session?.user.username}! 👋</h1>
-        <p>
-          🎯 <strong>Tu objetivo:</strong> hablar inglés con fluidez y naturalidad, de forma casual, sobre ingeniería de sistemas, IoT, ciberseguridad, inteligencia artificial, ciencia de datos y servidores:
-          dailies con tu equipo, explicar un bug o un incidente, presentar datos, debatir sobre IA o charlar con colegas de cualquier país.
-        </p>
-        <p className="muted">
-          Elige tu nivel. Cada tema tiene tarjetas visuales, apuntes, vocabulario, 🎮 práctica visual con mini‑juegos, conversación, lectura asistida, dictado y
-          autoevaluación. En cada nivel hay temas de tecnología: 🛠️ sistemas e IoT, 🔐 ciberseguridad e IA y 📊 datos y servidores. Escucha con la <Link to="/voz">voz más natural de tu dispositivo</Link> y repite en voz alta.
-        </p>
-        <div className="stats">
-          <div className="stat">
+    <div className="dashboard">
+      <section className="hero hero--dashboard">
+        <div className="hero__text">
+          <p className="eyebrow">Your English for tech</p>
+          <h1>
+            {greeting()}, {session?.user.username}! 👋
+          </h1>
+          <p className="hero__lead">
+            Speak casual, natural English about systems, IoT, cybersecurity, AI, data and servers: stand-ups, explaining a bug, presenting data or
+            chatting with teammates from anywhere.
+          </p>
+        </div>
+        <div className="stats" role="list">
+          <div className="stat" role="listitem">
             <strong>🔥 {data.streak.count}</strong>
-            <span>días seguidos</span>
+            <span>day streak</span>
           </div>
-          <div className="stat">
+          <div className="stat" role="listitem">
             <strong>🧠 {Object.keys(data.srs).length}</strong>
-            <span>palabras estudiadas</span>
+            <span>words studied</span>
           </div>
-          <div className="stat">
+          <div className="stat" role="listitem">
             <strong>🔁 {dueWords}</strong>
-            <span>para repasar hoy</span>
+            <span>due today</span>
+          </div>
+          <div className="stat" role="listitem">
+            <strong>🐛 {bugs}</strong>
+            <span>bugs to squash</span>
           </div>
         </div>
       </section>
 
-      <Link to="/juego" className="game-banner">
-        <span className="game-banner__emoji" aria-hidden="true">
-          ⚔️
-        </span>
-        <span>
-          <strong>Vocab Boss Game</strong>
-          <small>Practica el vocabulario de tu nivel (A1–C2) peleando contra 10 bosses. ¡Cada acierto es un ataque!</small>
-        </span>
-      </Link>
+      {resume && (
+        <Link className="resume-card" to={`/nivel/${resume.level.id}/${resume.topic.id}`} style={{ ['--level' as string]: resume.level.color }}>
+          <span className="resume-card__emoji" aria-hidden="true">
+            {resume.topic.emoji}
+          </span>
+          <span className="resume-card__body">
+            <small className="eyebrow">Continue where you left off · {resume.level.name}</small>
+            <strong>{resume.topic.title}</strong>
+            <span className="progress-bar">
+              <span style={{ width: `${(resume.done / MODULES.length) * 100}%`, background: resume.level.color }} />
+            </span>
+          </span>
+          <span className="resume-card__cta" aria-hidden="true">
+            Resume ➜
+          </span>
+        </Link>
+      )}
 
-      <Link to="/repaso" className="game-banner game-banner--bugs">
-        <span className="game-banner__emoji" aria-hidden="true">
-          🐛
-        </span>
-        <span>
-          <strong>Caza de bugs{bugs > 0 ? ` · ${bugs} por repasar` : ''}</strong>
-          <small>Repasa jugando las palabras que fallaste en las prácticas. Acierta 3 veces seguidas para aplastarlas 💥.</small>
-        </span>
-      </Link>
+      <h2 className="section-title">🎮 Play &amp; practice</h2>
+      <div className="quick-grid">
+        <Link to="/juego" className="game-banner">
+          <span className="game-banner__emoji" aria-hidden="true">
+            ⚔️
+          </span>
+          <span>
+            <strong>Vocab Boss Game</strong>
+            <small>Beat 10 bosses with the vocabulary of your level (A1–C2). Every right answer is an attack!</small>
+          </span>
+        </Link>
+        <Link to="/duelo" className="game-banner game-banner--duel">
+          <span className="game-banner__emoji" aria-hidden="true">
+            🤺
+          </span>
+          <span>
+            <strong>Online duels</strong>
+            <small>Challenge another player in real time. Fastest correct answer wins the round.</small>
+          </span>
+        </Link>
+        <Link to="/repaso" className="game-banner game-banner--bugs">
+          <span className="game-banner__emoji" aria-hidden="true">
+            🐛
+          </span>
+          <span>
+            <strong>Bug Hunt{bugs > 0 ? ` · ${bugs} to review` : ''}</strong>
+            <small>Review the words you missed. Get them right 3 times in a row to squash them 💥.</small>
+          </span>
+        </Link>
+        <Link to="/voz" className="game-banner game-banner--voice">
+          <span className="game-banner__emoji" aria-hidden="true">
+            🔊
+          </span>
+          <span>
+            <strong>Voice settings</strong>
+            <small>Pick the most natural voice on your device, then listen and repeat out loud.</small>
+          </span>
+        </Link>
+      </div>
 
+      <h2 className="section-title">🗺️ Your learning path</h2>
       <div className="level-grid">
         {LEVELS.map((meta) => {
           const lv = levels.find((l) => l.id === meta.id);
           const p = lv ? pct(lv) : 0;
           return (
-            <Link key={meta.id} to={`/nivel/${meta.id}`} className="level-card" style={{ borderColor: meta.color }}>
-              <span className="level-card__badge" style={{ background: meta.color }}>
-                {meta.name}
-              </span>
-              <h2>{meta.label}</h2>
+            <Link key={meta.id} to={`/nivel/${meta.id}`} className="level-card" style={{ ['--level' as string]: meta.color }}>
+              <div className="level-card__top">
+                <span className="level-card__badge">{meta.name}</span>
+                <span className="level-card__pct">{p}%</span>
+              </div>
+              <h3>{meta.label}</h3>
               <p>{meta.description}</p>
-              <div className="progress-bar" aria-label={`Progreso ${p}%`}>
+              <div className="progress-bar" aria-label={`Progress ${p}%`}>
                 <span style={{ width: `${p}%`, background: meta.color }} />
               </div>
-              <small className="muted">
-                {lv ? `${lv.topics.length} temas · ${p}% completado` : 'Cargando…'}
-              </small>
+              <small className="muted">{lv ? `${lv.topics.length} topics` : 'Loading…'}</small>
             </Link>
           );
         })}

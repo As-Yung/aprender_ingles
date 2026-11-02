@@ -7,15 +7,15 @@ import { dataC2 } from './tech/data-c';
 const c2: Level = {
   id: 'c2',
   name: 'C2',
-  label: 'Maestría',
-  description: 'Jerga real de equipos de ingeniería, modismos, matices finos y escritura académica.',
+  label: 'Mastery',
+  description: 'Real engineering-team slang, idioms, fine nuance and academic writing.',
   color: '#ec4899',
   canDo: [
-    'Comprender prácticamente todo lo que oyes o lees, incluidos matices implícitos.',
-    'Usar modismos y expresiones idiomáticas con naturalidad y precisión.',
-    'Adaptar el registro (coloquial, neutro, académico) con total control.',
-    'Escribir textos académicos claros, cohesionados y bien estructurados.',
-    'Hablar como un ingeniero nativo: jerga, ironía y phrasal verbs técnicos.',
+    'Understand virtually everything you hear or read, including implicit nuance.',
+    'Use idioms and idiomatic expressions naturally and precisely.',
+    'Switch register (casual, neutral, academic) with full control.',
+    'Write clear, cohesive and well-structured academic texts.',
+    'Talk like a native engineer: slang, irony and technical phrasal verbs.',
   ],
   topics: [
     {

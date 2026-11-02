@@ -7,15 +7,15 @@ import { dataB2 } from './tech/data-b';
 const b2: Level = {
   id: 'b2',
   name: 'B2',
-  label: 'Intermedio alto',
-  description: 'Hipótesis, explicar arquitecturas IoT y textos de tecnología y actualidad.',
+  label: 'Upper-intermediate',
+  description: 'Hypotheses, explaining IoT architectures, and tech & news articles.',
   color: '#6366f1',
   canDo: [
-    'Expresar hipótesis, deseos y arrepentimientos.',
-    'Entender las ideas principales de textos complejos y noticias.',
-    'Describir procesos y cambios con la voz pasiva.',
-    'Participar en debates con fluidez razonable.',
-    'Explicar a un cliente cómo funciona un sistema IoT: flujo de datos, fallos y seguridad.',
+    'Express hypotheses, wishes and regrets.',
+    'Understand the main ideas of complex texts and news.',
+    'Describe processes and changes with the passive voice.',
+    'Take part in debates with reasonable fluency.',
+    'Explain to a client how an IoT system works: data flow, failures and security.',
   ],
   topics: [
     {

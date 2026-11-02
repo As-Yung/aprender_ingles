@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, NavLink, useParams } from 'react-router-dom';
+import { Es } from '../components/Es';
 import { Loading } from '../components/Loading';
 import { isLevelId, loadTopic } from '../content';
 import type { Level, Topic } from '../content/types';
@@ -40,27 +41,30 @@ export default function TopicPage() {
   return (
     <div>
       <nav className="breadcrumb">
-        <Link to="/">Inicio</Link> › <Link to={`/nivel/${level.id}`}>Nivel {level.name}</Link> › {topic.titleEs}
+        <Link to="/">Home</Link> › <Link to={`/nivel/${level.id}`}>Level {level.name}</Link> › {topic.title}
       </nav>
       <header className="topic-header">
         <span className="topic-card__emoji" aria-hidden="true">
           {topic.emoji}
         </span>
         <div>
-          <h1>{topic.titleEs}</h1>
+          <h1>{topic.title}</h1>
           <p className="muted">
-            {topic.title} · {topic.grammarFocus}
+            <Es text={topic.titleEs} level={level.id} /> · {topic.grammarFocus}
           </p>
         </div>
       </header>
-      <nav className="section-nav" aria-label="Secciones del tema">
+      <nav className="section-nav" aria-label="Topic sections">
         {available.map((m) => (
           <NavLink key={m.id} to={`/nivel/${level.id}/${topic.id}/${m.id}`} className="section-nav__item" title={m.description}>
             <span aria-hidden="true">{m.emoji}</span> {m.label}
-            {progress[m.id]?.completed && <span className="check" aria-label="completado">✓</span>}
+            {progress[m.id]?.completed && <span className="check" aria-label="completed">✓</span>}
           </NavLink>
         ))}
       </nav>
+      <div className="topic-progress" aria-label={`${available.filter((m) => progress[m.id]?.completed).length} of ${available.length} sections completed`}>
+        <span style={{ width: `${(available.filter((m) => progress[m.id]?.completed).length / available.length) * 100}%`, background: level.color }} />
+      </div>
       <p className="section-desc muted">{mod.description}</p>
       <Suspense fallback={<Loading />}>
         <Section key={`${topicKey}/${mod.id}`} level={level} topic={topic} topicKey={topicKey} onComplete={onComplete} />
@@ -68,7 +72,7 @@ export default function TopicPage() {
       {next && (
         <div className="next-section">
           <Link className="btn" to={`/nivel/${level.id}/${topic.id}/${next.id}`}>
-            Siguiente: {next.emoji} {next.label} ➜
+            Next: {next.emoji} {next.label} ➜
           </Link>
         </div>
       )}

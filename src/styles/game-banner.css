@@ -11,10 +11,11 @@
   color: #efebdf;
   text-decoration: none;
   box-shadow: var(--shadow);
-  transition: transform 0.12s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s;
 }
 .game-banner:hover {
   transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 .game-banner__emoji {
   font-size: 2rem;
@@ -39,7 +40,7 @@
 .game-banner--bugs small {
   color: #d1fae5;
 }
-/* Contador del menú superior. */
+/* Nav counter badge. */
 .nav-badge {
   display: inline-block;
   min-width: 18px;
@@ -53,6 +54,23 @@
   line-height: 18px;
   text-align: center;
 }
-.topbar__nav a {
-  white-space: nowrap;
+.game-banner--duel {
+  border-color: #b45309;
+  background: linear-gradient(120deg, #2a1606, #7c2d12 70%, #451a03);
+}
+.game-banner--duel strong {
+  color: #fed7aa;
+}
+.game-banner--duel small {
+  color: #ffedd5;
+}
+.game-banner--voice {
+  border-color: #0e7490;
+  background: linear-gradient(120deg, #082f49, #155e75 70%, #1e1b4b);
+}
+.game-banner--voice strong {
+  color: #a5f3fc;
+}
+.game-banner--voice small {
+  color: #e0f2fe;
 }

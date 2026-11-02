@@ -83,7 +83,7 @@ export class LocalAuthService implements AuthService {
       if (err) throw new AuthError(err, 'invalid_username');
       const username = normalizeUsername(rawUsername);
       if (this.users().some((u) => u.username === username)) {
-        throw new AuthError('Ese usuario ya existe.', 'user_exists');
+        throw new AuthError('That username already exists.', 'user_exists');
       }
       const pw = temporaryPassword || generateTemporaryPassword();
       const check = checkPassword(pw, username);
@@ -119,12 +119,12 @@ export class LocalAuthService implements AuthService {
     },
     resetMfa: async (userId) => {
       const me = this.requireAdmin();
-      if (me.id === userId) throw new AuthError('No puedes reiniciar tu propio 2FA desde aquí.', 'self_action');
+      if (me.id === userId) throw new AuthError('You cannot reset your own 2FA from here.', 'self_action');
       this.update(userId, { totpSecret: undefined, totpPending: undefined, totpLastCounter: undefined });
     },
     setDisabled: async (userId, disabled) => {
       const me = this.requireAdmin();
-      if (me.id === userId) throw new AuthError('No puedes desactivar tu propia cuenta.', 'self_action');
+      if (me.id === userId) throw new AuthError('You cannot disable your own account.', 'self_action');
       this.update(userId, { disabled });
     },
   };
@@ -144,13 +144,13 @@ export class LocalAuthService implements AuthService {
   }
   private findById(id: string): StoredUser {
     const u = this.users().find((x) => x.id === id);
-    if (!u) throw new AuthError('Usuario no encontrado.', 'not_found');
+    if (!u) throw new AuthError('User not found.', 'not_found');
     return u;
   }
   private update(id: string, patch: Partial<StoredUser>) {
     const users = this.users();
     const i = users.findIndex((u) => u.id === id);
-    if (i < 0) throw new AuthError('Usuario no encontrado.', 'not_found');
+    if (i < 0) throw new AuthError('User not found.', 'not_found');
     users[i] = { ...users[i]!, ...patch };
     this.save(users);
   }
@@ -174,7 +174,7 @@ export class LocalAuthService implements AuthService {
     const s = this.rawSession();
     const u = this.currentUser();
     if (!s || !u || s.aal !== 'aal2' || u.role !== 'admin') {
-      throw new AuthError('Acción reservada al administrador con 2FA verificado.', 'forbidden');
+      throw new AuthError('Only a 2FA-verified administrator can do this.', 'forbidden');
     }
     return u;
   }
@@ -185,7 +185,7 @@ export class LocalAuthService implements AuthService {
     const pw = config.localAdminPassword;
     if (!pw) {
       throw new AuthError(
-        'Modo local sin administrador: define VITE_LOCAL_ADMIN_PASSWORD en .env.local (o el secreto ADMIN_INITIAL_PASSWORD en Codespaces) y reinicia "npm run dev".',
+        'Local mode has no administrator: set VITE_LOCAL_ADMIN_PASSWORD in .env.local (or the ADMIN_INITIAL_PASSWORD secret in Codespaces) and restart "npm run dev".',
         'admin_not_seeded',
       );
     }
@@ -224,7 +224,7 @@ export class LocalAuthService implements AuthService {
   async signIn(rawUsername: string, password: string): Promise<SignInNext> {
     await this.ensureAdminSeeded();
     const username = normalizeUsername(rawUsername);
-    const generic = new AuthError('Usuario o contraseña incorrectos.', 'invalid_credentials');
+    const generic = new AuthError('Incorrect username or password.', 'invalid_credentials');
     const user = this.users().find((u) => u.username === username);
     if (!user) {
       // Coste similar al de un usuario real para no revelar qué usuarios existen
@@ -233,7 +233,7 @@ export class LocalAuthService implements AuthService {
     }
     if (user.lockedUntil && user.lockedUntil > Date.now()) {
       const min = Math.ceil((user.lockedUntil - Date.now()) / 60000);
-      throw new AuthError(`Cuenta bloqueada temporalmente. Inténtalo en ${min} min.`, 'locked');
+      throw new AuthError(`Account temporarily locked. Try again in ${min} min.`, 'locked');
     }
     const ok = await verifyPassword(password, user.password);
     if (!ok) {
@@ -244,7 +244,7 @@ export class LocalAuthService implements AuthService {
       });
       throw generic;
     }
-    if (user.disabled) throw new AuthError('Esta cuenta está desactivada. Contacta al administrador.', 'disabled');
+    if (user.disabled) throw new AuthError('This account is disabled. Contact the administrator.', 'disabled');
     this.update(user.id, { failedAttempts: 0, lockedUntil: undefined });
     this.setSession({ userId: user.id, aal: 'aal1', expiresAt: Date.now() + SESSION_TTL_MS });
     return user.totpSecret ? 'mfa-verify' : 'mfa-enroll';
@@ -252,8 +252,8 @@ export class LocalAuthService implements AuthService {
 
   async startMfaEnrollment(): Promise<MfaEnrollment> {
     const u = this.currentUser();
-    if (!u) throw new AuthError('Sesión no válida.', 'no_session');
-    if (u.totpSecret) throw new AuthError('Ya tienes 2FA configurado.', 'already_enrolled');
+    if (!u) throw new AuthError('Invalid session.', 'no_session');
+    if (u.totpSecret) throw new AuthError('You already have 2FA set up.', 'already_enrolled');
     const secret = createTotpSecret();
     const factorId = randomId();
     this.update(u.id, { totpPending: { factorId, secret } });
@@ -263,13 +263,13 @@ export class LocalAuthService implements AuthService {
   async confirmMfaEnrollment(factorId: string, code: string): Promise<void> {
     const u = this.currentUser();
     const s = this.rawSession();
-    if (!u || !s) throw new AuthError('Sesión no válida.', 'no_session');
+    if (!u || !s) throw new AuthError('Invalid session.', 'no_session');
     if (!u.totpPending || u.totpPending.factorId !== factorId) {
-      throw new AuthError('Inicia de nuevo la configuración del 2FA.', 'no_pending_factor');
+      throw new AuthError('Please restart the 2FA setup.', 'no_pending_factor');
     }
-    if (!isValidTotpCode(code)) throw new AuthError('El código debe tener 6 dígitos.', 'invalid_code');
+    if (!isValidTotpCode(code)) throw new AuthError('The code must have 6 digits.', 'invalid_code');
     const counter = validateTotp(u.totpPending.secret, code);
-    if (counter === null) throw new AuthError('Código incorrecto. Revisa la hora de tu teléfono.', 'invalid_code');
+    if (counter === null) throw new AuthError('Wrong code. Check the time on your phone.', 'invalid_code');
     this.update(u.id, {
       totpSecret: u.totpPending.secret,
       totpPending: undefined,
@@ -282,8 +282,8 @@ export class LocalAuthService implements AuthService {
   async verifyMfa(code: string): Promise<void> {
     const u = this.currentUser();
     const s = this.rawSession();
-    if (!u || !s || !u.totpSecret) throw new AuthError('Sesión no válida.', 'no_session');
-    if (!isValidTotpCode(code)) throw new AuthError('El código debe tener 6 dígitos.', 'invalid_code');
+    if (!u || !s || !u.totpSecret) throw new AuthError('Invalid session.', 'no_session');
+    if (!isValidTotpCode(code)) throw new AuthError('The code must have 6 digits.', 'invalid_code');
     const counter = validateTotp(u.totpSecret, code, u.totpLastCounter);
     if (counter === null) {
       const failed = u.failedAttempts + 1;
@@ -292,7 +292,7 @@ export class LocalAuthService implements AuthService {
         lockedUntil: failed >= MAX_FAILED ? Date.now() + LOCK_MS : u.lockedUntil,
       });
       if (failed >= MAX_FAILED) this.setSession(null);
-      throw new AuthError('Código incorrecto o ya utilizado.', 'invalid_code');
+      throw new AuthError('Wrong or already used code.', 'invalid_code');
     }
     this.update(u.id, { totpLastCounter: counter, failedAttempts: 0, lastSignInAt: new Date().toISOString() });
     this.setSession({ ...s, aal: 'aal2' });
@@ -301,11 +301,11 @@ export class LocalAuthService implements AuthService {
   async changeOwnPassword(newPassword: string): Promise<void> {
     const u = this.currentUser();
     const s = this.rawSession();
-    if (!u || !s || s.aal !== 'aal2') throw new AuthError('Debes verificar el 2FA primero.', 'aal2_required');
+    if (!u || !s || s.aal !== 'aal2') throw new AuthError('You must verify 2FA first.', 'aal2_required');
     const check = checkPassword(newPassword, u.username);
     if (!check.ok) throw new AuthError(check.problems.join(' '), 'weak_password');
     if (await verifyPassword(newPassword, u.password)) {
-      throw new AuthError('La nueva contraseña debe ser diferente de la actual.', 'same_password');
+      throw new AuthError('The new password must be different from the current one.', 'same_password');
     }
     this.update(u.id, { password: await hashPassword(newPassword), mustChangePassword: false });
     void this.emit();

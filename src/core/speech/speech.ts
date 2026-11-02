@@ -303,7 +303,7 @@ export function listenOnce(lang = 'en-US'): Promise<string> {
       resolve(e.results[0]?.[0]?.transcript ?? '');
     };
     r.onerror = () => {
-      if (!done) reject(new Error('No se pudo reconocer la voz. Revisa el permiso del micrófono.'));
+      if (!done) reject(new Error('Could not recognize your voice. Check the microphone permission.'));
     };
     r.onend = () => {
       if (!done) resolve('');

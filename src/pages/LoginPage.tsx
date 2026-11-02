@@ -27,7 +27,7 @@ export default function LoginPage() {
       setPassword('');
       navigate('/mfa');
     } catch (err) {
-      setError(err instanceof AuthError ? err.message : 'No se pudo iniciar sesión. Inténtalo de nuevo.');
+      setError(err instanceof AuthError ? err.message : 'Could not sign in. Please try again.');
     } finally {
       setBusy(false);
     }
@@ -39,10 +39,10 @@ export default function LoginPage() {
         <div className="auth-card__logo" aria-hidden="true">
           EN
         </div>
-        <h1>Aprender Inglés</h1>
-        <p className="muted">De A1 a C2, de forma visual y didáctica.</p>
+        <h1>Tech Talk English</h1>
+        <p className="muted">Casual English for tech, from A1 to C2. Visual, playful and hands-on.</p>
         <label className="field">
-          <span>Usuario</span>
+          <span>Username</span>
           <input
             className="input"
             name="username"
@@ -56,7 +56,7 @@ export default function LoginPage() {
           />
         </label>
         <label className="field">
-          <span>Contraseña</span>
+          <span>Password</span>
           <input
             className="input"
             name="password"
@@ -74,12 +74,12 @@ export default function LoginPage() {
           </div>
         )}
         <button className="btn btn--block" type="submit" disabled={busy || !username || !password}>
-          {busy ? 'Verificando…' : 'Entrar'}
+          {busy ? 'Checking…' : 'Sign in'}
         </button>
         <p className="muted small">
-          🔐 Después te pediremos un código de tu app autenticadora (Google Authenticator, Microsoft Authenticator, Authy…).
+          🔐 Next, we'll ask for a code from your authenticator app (Google Authenticator, Microsoft Authenticator, Authy…).
         </p>
-        {config.authMode === 'local' && <p className="dev-banner">🧪 Modo local de desarrollo</p>}
+        {config.authMode === 'local' && <p className="dev-banner">🧪 Local development mode</p>}
       </form>
     </main>
   );

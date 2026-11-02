@@ -13,10 +13,19 @@ export function normalizeUsername(raw: string): string {
 export function validateUsername(raw: string): string | null {
   const u = normalizeUsername(raw);
   if (!USERNAME_PATTERN.test(u)) {
-    return 'El usuario debe tener 3–32 caracteres: letras minúsculas, números, punto, guion o guion bajo.';
+    return 'Usernames must be 3–32 characters: lowercase letters, numbers, dot, hyphen or underscore.';
   }
   return null;
 }
+
+/** Password policy, shown as a checklist on the change-password page. */
+export const PASSWORD_RULES = [
+  `At least ${PASSWORD_MIN_LENGTH} characters.`,
+  'At least one lowercase letter.',
+  'At least one uppercase letter.',
+  'At least one number.',
+  'At least one symbol (e.g. - _ ! @ #).',
+] as const;
 
 export interface PasswordCheck {
   ok: boolean;
@@ -25,14 +34,15 @@ export interface PasswordCheck {
 
 export function checkPassword(pw: string, username?: string): PasswordCheck {
   const problems: string[] = [];
-  if (pw.length < PASSWORD_MIN_LENGTH) problems.push(`Mínimo ${PASSWORD_MIN_LENGTH} caracteres.`);
-  if (pw.length > PASSWORD_MAX_LENGTH) problems.push(`Máximo ${PASSWORD_MAX_LENGTH} caracteres.`);
-  if (!/[a-z]/.test(pw)) problems.push('Al menos una letra minúscula.');
-  if (!/[A-Z]/.test(pw)) problems.push('Al menos una letra mayúscula.');
-  if (!/[0-9]/.test(pw)) problems.push('Al menos un número.');
-  if (!/[^A-Za-z0-9]/.test(pw)) problems.push('Al menos un símbolo (por ejemplo - _ ! @ #).');
+  const [minLen, lower, upper, digit, symbol] = PASSWORD_RULES;
+  if (pw.length < PASSWORD_MIN_LENGTH) problems.push(minLen);
+  if (pw.length > PASSWORD_MAX_LENGTH) problems.push(`At most ${PASSWORD_MAX_LENGTH} characters.`);
+  if (!/[a-z]/.test(pw)) problems.push(lower);
+  if (!/[A-Z]/.test(pw)) problems.push(upper);
+  if (!/[0-9]/.test(pw)) problems.push(digit);
+  if (!/[^A-Za-z0-9]/.test(pw)) problems.push(symbol);
   if (username && pw.toLowerCase().includes(normalizeUsername(username))) {
-    problems.push('No debe contener el nombre de usuario.');
+    problems.push('Must not contain your username.');
   }
   return { ok: problems.length === 0, problems };
 }

@@ -7,15 +7,15 @@ import { dataC1 } from './tech/data-c';
 const c1: Level = {
   id: 'c1',
   name: 'C1',
-  label: 'Avanzado',
-  description: 'Argumentar con matices en revisiones de diseño, énfasis y registro formal.',
+  label: 'Advanced',
+  description: 'Argue with nuance in design reviews, use emphasis and formal register.',
   color: '#a855f7',
   canDo: [
-    'Expresarte con fluidez y espontaneidad sin buscar palabras de forma evidente.',
-    'Argumentar, matizar y suavizar opiniones (hedging).',
-    'Usar estructuras de énfasis como la inversión y las oraciones hendidas.',
-    'Comprender textos largos y exigentes, captando significados implícitos.',
-    'Debatir decisiones de arquitectura y compromisos técnicos con tacto.',
+    'Express yourself fluently and spontaneously without obviously searching for words.',
+    'Argue, qualify and soften opinions (hedging).',
+    'Use emphasis structures like inversion and cleft sentences.',
+    'Understand long, demanding texts and catch implicit meaning.',
+    'Debate architecture decisions and technical trade-offs tactfully.',
   ],
   topics: [
     {

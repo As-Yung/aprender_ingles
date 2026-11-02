@@ -7,15 +7,15 @@ import { dataA1 } from './tech/data-a';
 const a1: Level = {
   id: 'a1',
   name: 'A1',
-  label: 'Principiante',
-  description: 'Frases básicas, presentarte en tu equipo de tecnología y hablar de tu día a día.',
+  label: 'Beginner',
+  description: 'Basic phrases: introduce yourself to your tech team and talk about your day.',
   color: '#10b981',
   canDo: [
-    'Saludar, presentarte y presentar a otras personas.',
-    'Dar y pedir datos personales básicos (nombre, origen, trabajo).',
-    'Describir tu rutina diaria con frases sencillas.',
-    'Entender textos muy cortos sobre temas cotidianos.',
-    'Presentarte en un equipo de ingeniería y decir con qué tecnología trabajas.',
+    'Greet people, introduce yourself and introduce others.',
+    'Give and ask for basic personal details (name, origin, job).',
+    'Describe your daily routine with simple sentences.',
+    'Understand very short texts about everyday topics.',
+    'Introduce yourself to an engineering team and say what tech you work with.',
   ],
   topics: [
     {

@@ -3,7 +3,7 @@ import { canPlayAudio, speak } from '../core/speech/speech';
 export function SpeakButton({
   text,
   rate,
-  label = 'Escuchar',
+  label = 'Listen',
   small,
   speaker,
 }: {
