@@ -37,7 +37,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
         with:
-          version: latest
+          # Versión fija (≥2 semanas): la CLI 3.0.0 cambió flags de link/db push.
+          version: 2.121.0
 
       - name: Comprobar secretos
         run: |
