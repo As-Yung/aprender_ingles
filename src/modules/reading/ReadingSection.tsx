@@ -56,7 +56,7 @@ export default function ReadingSection({ topic, onComplete }: SectionProps) {
       <div className="card">
         <h3>📖 {r.title}</h3>
         <p className="muted">
-          Toca cualquier palabra: las <mark className="gloss-mark">resaltadas</mark> tienen explicación. Usa 🔊 para escuchar cada párrafo.
+          Tap any word: <mark className="gloss-mark">highlighted</mark> ones have an explanation. Use 🔊 to listen to each paragraph.
         </p>
         {r.paragraphs.map((p, i) => (
           <div key={i} className="reading__para">
@@ -77,28 +77,32 @@ export default function ReadingSection({ topic, onComplete }: SectionProps) {
               )}
             </p>
             <div className="row row--tight">
-              <SpeakButton text={p} small label="Escuchar párrafo" />
-              <SpeakButton text={p} rate={0.7} small label="Escuchar despacio" />
+              <SpeakButton text={p} small label="Listen to paragraph" />
+              <SpeakButton text={p} rate={0.7} small label="Listen slowly" />
               <button type="button" className="link-btn" onClick={() => setShowTr((s) => ({ ...s, [i]: !s[i] }))}>
-                {showTr[i] ? 'Ocultar traducción' : 'Ver traducción'}
+                {showTr[i] ? 'Hide Spanish' : 'Show Spanish'}
               </button>
             </div>
-            {showTr[i] && <p className="reading__tr">{r.translation[i]}</p>}
+            {showTr[i] && (
+              <p className="reading__tr" lang="es">
+                {r.translation[i]}
+              </p>
+            )}
           </div>
         ))}
       </div>
 
       {selected && (
-        <div className="gloss-pop" role="dialog" aria-label={`Significado de ${selected.word}`}>
+        <div className="gloss-pop" role="dialog" aria-label={`Meaning of ${selected.word}`}>
           <strong>{selected.word}</strong> <SpeakButton text={selected.word} small />
-          <p>{gloss.get(selected.key) ?? 'Sin glosa: escúchala y deduce su significado por el contexto. 🔎'}</p>
+          <p>{gloss.get(selected.key) ?? 'No gloss: listen to it and guess the meaning from context. 🔎'}</p>
           <button type="button" className="link-btn" onClick={() => setSelected(null)}>
-            Cerrar
+            Close
           </button>
         </div>
       )}
 
-      <QuizRunner title="Comprensión lectora" questions={r.questions} onFinish={(s) => onComplete(s)} />
+      <QuizRunner title="Reading comprehension" questions={r.questions} onFinish={(s) => onComplete(s)} />
     </div>
   );
 }

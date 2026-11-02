@@ -82,9 +82,9 @@ export class SupabaseAuthService implements AuthService {
       body: { action, ...payload },
     });
     if (error) {
-      let message = 'No se pudo completar la operación.';
+      let message = 'The operation could not be completed.';
       if ((error as { name?: string }).name === 'FunctionsFetchError') {
-        throw new AuthError('No se pudo conectar con el servidor. Revisa tu conexión.', 'network');
+        throw new AuthError('Could not reach the server. Check your connection.', 'network');
       }
       const ctx = (error as { context?: unknown }).context;
       if (ctx instanceof Response) {
@@ -124,30 +124,30 @@ export class SupabaseAuthService implements AuthService {
   }
 
   async signIn(username: string, password: string): Promise<SignInNext> {
-    if (validateUsername(username)) throw new AuthError('Usuario o contraseña incorrectos.', 'invalid_credentials');
+    if (validateUsername(username)) throw new AuthError('Incorrect username or password.', 'invalid_credentials');
     const { error } = await this.client.auth.signInWithPassword({ email: usernameToEmail(username), password });
     if (error) {
-      if (error.status === 429) throw new AuthError('Demasiados intentos. Espera unos minutos.', 'rate_limited');
+      if (error.status === 429) throw new AuthError('Too many attempts. Wait a few minutes.', 'rate_limited');
       if (!error.status || error.name === 'AuthRetryableFetchError') {
-        throw new AuthError('No se pudo conectar con el servidor. Revisa tu conexión.', 'network');
+        throw new AuthError('Could not reach the server. Check your connection.', 'network');
       }
       const code = (error as { code?: string }).code ?? '';
       if (code === 'user_banned' || /banned/i.test(error.message)) {
-        throw new AuthError('Esta cuenta está desactivada.', 'disabled');
+        throw new AuthError('This account is disabled.', 'disabled');
       }
-      if (code === 'invalid_credentials') throw new AuthError('Usuario o contraseña incorrectos.', 'invalid_credentials');
+      if (code === 'invalid_credentials') throw new AuthError('Incorrect username or password.', 'invalid_credentials');
       if (code === 'email_provider_disabled' || /logins are disabled/i.test(error.message)) {
         throw new AuthError(
-          'El inicio de sesión con contraseña está desactivado en Supabase (Authentication → Sign In / Providers → Email).',
+          'Password sign-in is disabled in Supabase (Authentication → Sign In / Providers → Email).',
           'config',
         );
       }
-      if (code === 'email_not_confirmed') throw new AuthError('La cuenta no está confirmada en Supabase.', 'config');
+      if (code === 'email_not_confirmed') throw new AuthError('The account is not confirmed in Supabase.', 'config');
       if (error.status === 401 || /api key/i.test(error.message)) {
-        throw new AuthError('La clave pública de Supabase no es válida. Revisa VITE_SUPABASE_ANON_KEY.', 'config');
+        throw new AuthError('The Supabase public key is invalid. Check VITE_SUPABASE_ANON_KEY.', 'config');
       }
       // Error inesperado: se muestra el código para poder diagnosticarlo (no revela si el usuario existe)
-      throw new AuthError(`No se pudo iniciar sesión (${code || error.status || 'desconocido'}).`, 'unknown');
+      throw new AuthError(`Could not sign in (${code || error.status || 'unknown'}).`, 'unknown');
     }
     const { data: factors } = await this.client.auth.mfa.listFactors();
     return (factors?.totp ?? []).some((f) => f.status === 'verified') ? 'mfa-verify' : 'mfa-enroll';
@@ -164,25 +164,25 @@ export class SupabaseAuthService implements AuthService {
       friendlyName: `Aprender Ingles ${new Date().toISOString().slice(0, 10)}`,
       issuer: 'Aprender Ingles',
     });
-    if (error || !data) throw new AuthError('No se pudo iniciar la configuración del 2FA.', 'enroll_failed');
+    if (error || !data) throw new AuthError('Could not start the 2FA setup.', 'enroll_failed');
     return { factorId: data.id, uri: data.totp.uri, secret: data.totp.secret };
   }
 
   async confirmMfaEnrollment(factorId: string, code: string): Promise<void> {
-    if (!isValidTotpCode(code)) throw new AuthError('El código debe tener 6 dígitos.', 'invalid_code');
+    if (!isValidTotpCode(code)) throw new AuthError('The code must have 6 digits.', 'invalid_code');
     const { error } = await this.client.auth.mfa.challengeAndVerify({ factorId, code: code.trim() });
-    if (error) throw new AuthError('Código incorrecto. Revisa la hora de tu teléfono.', 'invalid_code');
+    if (error) throw new AuthError('Wrong code. Check the time on your phone.', 'invalid_code');
   }
 
   async verifyMfa(code: string): Promise<void> {
-    if (!isValidTotpCode(code)) throw new AuthError('El código debe tener 6 dígitos.', 'invalid_code');
+    if (!isValidTotpCode(code)) throw new AuthError('The code must have 6 digits.', 'invalid_code');
     const { data: factors } = await this.client.auth.mfa.listFactors();
     const factor = (factors?.totp ?? []).find((f) => f.status === 'verified');
-    if (!factor) throw new AuthError('No tienes 2FA configurado.', 'no_factor');
+    if (!factor) throw new AuthError('You do not have 2FA set up.', 'no_factor');
     const { error } = await this.client.auth.mfa.challengeAndVerify({ factorId: factor.id, code: code.trim() });
     if (error) {
-      if (error.status === 429) throw new AuthError('Demasiados intentos. Espera unos minutos.', 'rate_limited');
-      throw new AuthError('Código incorrecto o ya utilizado.', 'invalid_code');
+      if (error.status === 429) throw new AuthError('Too many attempts. Wait a few minutes.', 'rate_limited');
+      throw new AuthError('Wrong or already used code.', 'invalid_code');
     }
   }
 

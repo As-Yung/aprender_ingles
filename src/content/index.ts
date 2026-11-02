@@ -2,12 +2,12 @@ import type { Level, LevelId, LevelMeta, Topic } from './types';
 
 /** Metadatos ligeros (siempre cargados). El contenido de cada nivel se carga bajo demanda. */
 export const LEVELS: LevelMeta[] = [
-  { id: 'a1', name: 'A1', label: 'Principiante', description: 'Frases básicas, presentarte en tu equipo de tecnología y hablar de tu día a día.', color: '#10b981' },
-  { id: 'a2', name: 'A2', label: 'Elemental', description: 'Contar experiencias pasadas, explicar qué falló en un sistema, comprar y pedir comida.', color: '#22c55e' },
-  { id: 'b1', name: 'B1', label: 'Intermedio', description: 'Planes de proyecto y de viaje, dailies con tu equipo, experiencias y opiniones sencillas.', color: '#3b82f6' },
-  { id: 'b2', name: 'B2', label: 'Intermedio alto', description: 'Hipótesis, explicar arquitecturas IoT y textos de tecnología y actualidad.', color: '#6366f1' },
-  { id: 'c1', name: 'C1', label: 'Avanzado', description: 'Argumentar con matices en revisiones de diseño, énfasis y registro formal.', color: '#a855f7' },
-  { id: 'c2', name: 'C2', label: 'Maestría', description: 'Jerga real de equipos de ingeniería, modismos, matices finos y escritura académica.', color: '#ec4899' },
+  { id: 'a1', name: 'A1', label: 'Beginner', description: 'Basic phrases: introduce yourself to your tech team and talk about your day.', color: '#10b981' },
+  { id: 'a2', name: 'A2', label: 'Elementary', description: 'Tell past stories, explain what broke in a system, shop and order food.', color: '#22c55e' },
+  { id: 'b1', name: 'B1', label: 'Intermediate', description: 'Project and travel plans, team stand-ups, experiences and simple opinions.', color: '#3b82f6' },
+  { id: 'b2', name: 'B2', label: 'Upper-intermediate', description: 'Hypotheses, explaining IoT architectures, and tech & news articles.', color: '#6366f1' },
+  { id: 'c1', name: 'C1', label: 'Advanced', description: 'Argue with nuance in design reviews, use emphasis and formal register.', color: '#a855f7' },
+  { id: 'c2', name: 'C2', label: 'Mastery', description: 'Real engineering-team slang, idioms, fine nuance and academic writing.', color: '#ec4899' },
 ];
 
 const loaders: Record<LevelId, () => Promise<{ default: Level }>> = {

@@ -1,15 +1,17 @@
 import { useMemo, useRef, useState } from 'react';
+import { Es } from '../../components/Es';
 import { SpeakButton } from '../../components/SpeakButton';
+import { getSpanishHelp, showSpanishFor } from '../../core/i18n/spanishHelp';
 import { canListen, listenOnce, similarity, speak, stopSpeaking } from '../../core/speech/speech';
 import type { SectionProps } from '../types';
 
 type Mode = 'escuchar' | 'roles';
 
-export default function ConversationSection({ topic, onComplete }: SectionProps) {
+export default function ConversationSection({ level, topic, onComplete }: SectionProps) {
   const conv = topic.conversation;
   const speakers = useMemo(() => [...new Set(conv.lines.map((l) => l.speaker))], [conv]);
   const [mode, setMode] = useState<Mode>('escuchar');
-  const [showEs, setShowEs] = useState(false);
+  const [showEs, setShowEs] = useState(() => showSpanishFor(getSpanishHelp(), level.id));
   const [playing, setPlaying] = useState<number | null>(null);
   const stopRef = useRef(false);
   const voiceOf = (name: string): 0 | 1 => (speakers.indexOf(name) % 2 ? 1 : 0);
@@ -33,10 +35,10 @@ export default function ConversationSection({ topic, onComplete }: SectionProps)
       </div>
       <div className="tabs" role="tablist">
         <button type="button" role="tab" aria-selected={mode === 'escuchar'} className={`tab ${mode === 'escuchar' ? 'is-active' : ''}`} onClick={() => setMode('escuchar')}>
-          🎧 Escuchar y leer
+          🎧 Listen & read
         </button>
         <button type="button" role="tab" aria-selected={mode === 'roles'} className={`tab ${mode === 'roles' ? 'is-active' : ''}`} onClick={() => setMode('roles')}>
-          🎭 Juego de roles
+          🎭 Role-play
         </button>
       </div>
 
@@ -45,7 +47,7 @@ export default function ConversationSection({ topic, onComplete }: SectionProps)
           <div className="row">
             {playing === null ? (
               <button className="btn" type="button" onClick={() => void playAll()}>
-                ▶️ Reproducir diálogo
+                ▶️ Play dialogue
               </button>
             ) : (
               <button
@@ -57,11 +59,11 @@ export default function ConversationSection({ topic, onComplete }: SectionProps)
                   setPlaying(null);
                 }}
               >
-                ⏹️ Detener
+                ⏹️ Stop
               </button>
             )}
             <label className="toggle">
-              <input type="checkbox" checked={showEs} onChange={(e) => setShowEs(e.target.checked)} /> Mostrar traducción
+              <input type="checkbox" checked={showEs} onChange={(e) => setShowEs(e.target.checked)} /> Show Spanish
             </label>
           </div>
           <ol className="chat">
@@ -70,23 +72,27 @@ export default function ConversationSection({ topic, onComplete }: SectionProps)
                 <span className="chat__speaker">{l.speaker}</span>
                 <span className="chat__bubble">
                   {l.en} <SpeakButton text={l.en} small speaker={voiceOf(l.speaker)} />
-                  {showEs && <small className="chat__es">{l.es}</small>}
+                  {showEs && (
+                    <small className="chat__es" lang="es">
+                      {l.es}
+                    </small>
+                  )}
                 </span>
               </li>
             ))}
           </ol>
         </>
       ) : (
-        <RolePlay key={topic.id} onComplete={onComplete} speakers={speakers} lines={conv.lines} />
+        <RolePlay key={topic.id} levelId={level.id} onComplete={onComplete} speakers={speakers} lines={conv.lines} />
       )}
 
       <div className="card">
-        <h3>🗣️ Frases útiles</h3>
+        <h3>🗣️ Useful phrases</h3>
         <ul className="phrases">
           {conv.usefulPhrases.map((p) => (
             <li key={p.en}>
               <span className="en">{p.en}</span> <SpeakButton text={p.en} small />
-              <span className="es">{p.es}</span>
+              <Es text={p.es} level={level.id} />
             </li>
           ))}
         </ul>
@@ -99,7 +105,9 @@ function RolePlay({
   speakers,
   lines,
   onComplete,
+  levelId,
 }: {
+  levelId: string;
   speakers: string[];
   lines: SectionProps['topic']['conversation']['lines'];
   onComplete: SectionProps['onComplete'];
@@ -116,7 +124,7 @@ function RolePlay({
   if (!role) {
     return (
       <div className="card">
-        <p>Elige tu personaje. La app dirá las frases del otro personaje y tú responderás en voz alta {listen ? '(con micrófono)' : '(lee en voz alta y luego comprueba)'}.</p>
+        <p>Pick your character. The app says the other character's lines and you answer out loud {listen ? '(with your microphone)' : '(read it out loud, then check)'}.</p>
         <div className="row">
           {speakers.map((s) => (
             <button
@@ -129,7 +137,7 @@ function RolePlay({
                 if (lines[0] && lines[0].speaker !== s) void speak(lines[0].en, { speaker: voiceOf(lines[0].speaker) });
               }}
             >
-              Soy {s}
+              I'm {s}
             </button>
           ))}
         </div>
@@ -143,9 +151,9 @@ function RolePlay({
     return (
       <div className="card center">
         <p className="big">🎭</p>
-        <p>¡Conversación completada! Precisión media: {avg}%</p>
+        <p>Conversation complete! Average accuracy: {avg}%</p>
         <button className="btn" type="button" onClick={() => { setRole(null); setScores([]); }}>
-          Repetir
+          Try again
         </button>
       </div>
     );
@@ -166,12 +174,14 @@ function RolePlay({
   return (
     <div className="card roleplay">
       <div className="srs__meta">
-        Turno {step + 1}/{lines.length} · Tú eres <strong>{role}</strong>
+        Turn {step + 1}/{lines.length} · You are <strong>{role}</strong>
       </div>
       {isMine ? (
         <>
-          <p className="quiz__prompt">Tu turno. Dilo en inglés:</p>
-          <p className="roleplay__hint">🇪🇸 {line.es}</p>
+          <p className="quiz__prompt">Your turn. Say it in English:</p>
+          <p className="roleplay__hint" lang="es">
+            🇪🇸 {line.es}
+          </p>
           {(revealed || attempt) && (
             <p className="roleplay__answer">
               🇬🇧 {line.en} <SpeakButton text={line.en} small />
@@ -179,7 +189,7 @@ function RolePlay({
           )}
           {attempt && (
             <div className={attempt.score >= 0.7 ? 'feedback feedback--ok' : 'feedback feedback--bad'}>
-              Dijiste: “{attempt.text || '…'}” — coincidencia {Math.round(attempt.score * 100)}%
+              You said: “{attempt.text || '…'}” — {Math.round(attempt.score * 100)}% match
             </div>
           )}
           {error && <div className="feedback feedback--bad">{error}</div>}
@@ -200,29 +210,29 @@ function RolePlay({
                   }
                 }}
               >
-                🎙️ Hablar
+                🎙️ Speak
               </button>
             )}
             {!revealed && !attempt && (
               <button className="btn btn--ghost" type="button" onClick={() => setRevealed(true)}>
-                Ver respuesta
+                Show answer
               </button>
             )}
             <button className="btn btn--ghost" type="button" onClick={advance}>
-              Continuar ➜
+              Continue ➜
             </button>
           </div>
         </>
       ) : (
         <>
-          <p className="chat__speaker">{line.speaker} dice:</p>
+          <p className="chat__speaker">{line.speaker} says:</p>
           <p className="roleplay__answer">
             {line.en} <SpeakButton text={line.en} small speaker={voiceOf(line.speaker)} />
           </p>
-          <small className="muted">{line.es}</small>
+          <Es text={line.es} level={levelId} className="muted es" block />
           <div className="row">
             <button className="btn" type="button" onClick={advance}>
-              Continuar ➜
+              Continue ➜
             </button>
           </div>
         </>

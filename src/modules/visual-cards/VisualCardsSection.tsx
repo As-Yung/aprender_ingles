@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Es } from '../../components/Es';
 import { SpeakButton } from '../../components/SpeakButton';
 import type { NoteBlock, VocabItem } from '../../content/types';
 import type { SectionProps } from '../types';
@@ -17,7 +18,7 @@ export default function VisualCardsSection({ level, topic, onComplete }: Section
   return (
     <div>
       <div className="section-toolbar">
-        <p className="muted">Guarda o imprime estas tarjetas para repasar. Pulsa 🔊 para escuchar.</p>
+        <p className="muted">Save or print these cards to review. Tap 🔊 to listen.</p>
         <button
           className="btn btn--ghost"
           type="button"
@@ -26,7 +27,7 @@ export default function VisualCardsSection({ level, topic, onComplete }: Section
             window.print();
           }}
         >
-          🖨️ Imprimir / PDF
+          🖨️ Print / PDF
         </button>
       </div>
 
@@ -48,7 +49,7 @@ export default function VisualCardsSection({ level, topic, onComplete }: Section
                   <span className="vcard__term">
                     <strong>{v.term}</strong>
                     {v.ipa && <small className="ipa">/{v.ipa}/</small>}
-                    <span className="vcard__es">{v.es}</span>
+                    <Es text={v.es} level={level.id} className="vcard__es" />
                   </span>
                   <SpeakButton text={v.term} small />
                 </li>
@@ -63,7 +64,7 @@ export default function VisualCardsSection({ level, topic, onComplete }: Section
               <span className="vcard__level" style={{ background: level.color }}>
                 {level.name}
               </span>
-              <h3>{f.label ?? 'Estructura'}</h3>
+              <h3>{f.label ?? 'Structure'}</h3>
             </header>
             <div className="formula">
               {f.parts.map((p, j) => (
@@ -81,7 +82,7 @@ export default function VisualCardsSection({ level, topic, onComplete }: Section
               {level.name}
             </span>
             <h3>
-              {topic.emoji} Repaso: {topic.titleEs}
+              {topic.emoji} Recap: {topic.title}
             </h3>
           </header>
           <ol className="vcard__points">

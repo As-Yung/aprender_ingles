@@ -10,7 +10,7 @@ interface Secret {
 }
 
 function errMsg(e: unknown): string {
-  return e instanceof AuthError ? e.message : 'Ocurrió un error inesperado.';
+  return e instanceof AuthError ? e.message : 'An unexpected error occurred.';
 }
 
 export default function AdminPage() {
@@ -65,26 +65,26 @@ export default function AdminPage() {
 
   return (
     <div>
-      <h1>🛡️ Administración de usuarios</h1>
+      <h1>🛡️ User management</h1>
       <p className="muted">
-        Solo existe un administrador. Los usuarios nuevos reciben una contraseña temporal, deben cambiarla al entrar y configurar
-        su 2FA obligatoriamente.
+        There is only one administrator. New users get a temporary password; they must change it when they sign in and set up
+        2FA (required).
       </p>
 
       {secret && (
         <div className="callout callout--tip" role="alert">
-          <strong>Contraseña temporal de “{secret.username}”</strong> (se muestra solo una vez, entrégala por un canal seguro):
+          <strong>Temporary password for “{secret.username}”</strong> (shown only once, share it through a secure channel):
           <div className="row">
             <code className="secret">{secret.password}</code>
             <button
               className="btn btn--small"
               type="button"
-              onClick={() => void navigator.clipboard?.writeText(secret.password).then(() => setNotice('Copiada al portapapeles.'))}
+              onClick={() => void navigator.clipboard?.writeText(secret.password).then(() => setNotice('Copied to clipboard.'))}
             >
-              Copiar
+              Copy
             </button>
             <button className="btn btn--ghost btn--small" type="button" onClick={() => setSecret(null)}>
-              Ocultar
+              Hide
             </button>
           </div>
         </div>
@@ -98,19 +98,19 @@ export default function AdminPage() {
 
       <form className="card row" onSubmit={create}>
         <label className="field field--inline">
-          <span>Nuevo usuario</span>
+          <span>New user</span>
           <input
             className="input"
             value={newUser}
             onChange={(e) => setNewUser(e.target.value.toLowerCase())}
-            placeholder="p. ej. maria.lopez"
+            placeholder="e.g. maria.lopez"
             maxLength={32}
             autoCapitalize="off"
             spellCheck={false}
           />
         </label>
         <button className="btn" type="submit" disabled={busy || !newUser}>
-          ➕ Crear usuario
+          ➕ Create user
         </button>
       </form>
 
@@ -121,11 +121,11 @@ export default function AdminPage() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Usuario</th>
-                <th>Rol</th>
-                <th>Estado</th>
-                <th>Último acceso</th>
-                <th>Acciones</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last sign-in</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -136,22 +136,22 @@ export default function AdminPage() {
                     <td>
                       <strong>{u.username}</strong>
                     </td>
-                    <td>{u.role === 'admin' ? '👑 Admin' : 'Estudiante'}</td>
+                    <td>{u.role === 'admin' ? '👑 Admin' : 'Student'}</td>
                     <td className="small">
-                      {u.disabled ? '⛔ Desactivado' : '✅ Activo'}
+                      {u.disabled ? '⛔ Disabled' : '✅ Active'}
                       <br />
-                      {u.hasMfa ? '🔐 2FA activo' : '⚠️ 2FA pendiente'}
+                      {u.hasMfa ? '🔐 2FA on' : '⚠️ 2FA pending'}
                       {u.mustChangePassword && (
                         <>
                           <br />
-                          🔑 Debe cambiar contraseña
+                          🔑 Must change password
                         </>
                       )}
                     </td>
                     <td className="small">{u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleString() : '—'}</td>
                     <td>
                       {isSelf ? (
-                        <span className="muted small">Tu cuenta</span>
+                        <span className="muted small">Your account</span>
                       ) : (
                         <div className="row row--tight">
                           <button
@@ -159,49 +159,49 @@ export default function AdminPage() {
                             type="button"
                             disabled={busy}
                             onClick={() =>
-                              window.confirm(`¿Asignar una contraseña temporal nueva a ${u.username}?`) &&
-                              void run('Contraseña temporal asignada.', async () => {
+                              window.confirm(`Assign a new temporary password to ${u.username}?`) &&
+                              void run('Temporary password assigned.', async () => {
                                 const pw = await service.admin.setTemporaryPassword(u.id);
                                 setSecret({ username: u.username, password: pw });
                               })
                             }
                           >
-                            🔑 Contraseña temporal
+                            🔑 Temporary password
                           </button>
                           <button
                             className="btn btn--small btn--ghost"
                             type="button"
                             disabled={busy || u.mustChangePassword}
                             onClick={() =>
-                              void run('Se pedirá cambio de contraseña en el próximo acceso.', () =>
+                              void run('A password change will be required at next sign-in.', () =>
                                 service.admin.requirePasswordChange(u.id),
                               )
                             }
                           >
-                            🔁 Pedir cambio
+                            🔁 Require change
                           </button>
                           <button
                             className="btn btn--small btn--ghost"
                             type="button"
                             disabled={busy || !u.hasMfa}
                             onClick={() =>
-                              window.confirm(`¿Reiniciar el 2FA de ${u.username}? Deberá configurarlo de nuevo.`) &&
-                              void run('2FA reiniciado.', () => service.admin.resetMfa(u.id))
+                              window.confirm(`Reset 2FA for ${u.username}? They will need to set it up again.`) &&
+                              void run('2FA reset.', () => service.admin.resetMfa(u.id))
                             }
                           >
-                            📱 Reiniciar 2FA
+                            📱 Reset 2FA
                           </button>
                           <button
                             className={`btn btn--small ${u.disabled ? 'btn--ok' : 'btn--bad'}`}
                             type="button"
                             disabled={busy}
                             onClick={() =>
-                              void run(u.disabled ? 'Usuario activado.' : 'Usuario desactivado.', () =>
+                              void run(u.disabled ? 'User enabled.' : 'User disabled.', () =>
                                 service.admin.setDisabled(u.id, !u.disabled),
                               )
                             }
                           >
-                            {u.disabled ? 'Activar' : 'Desactivar'}
+                            {u.disabled ? 'Enable' : 'Disable'}
                           </button>
                         </div>
                       )}

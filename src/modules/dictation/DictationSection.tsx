@@ -14,16 +14,16 @@ export default function DictationSection({ topic, onComplete }: SectionProps) {
   const sentence = sentences[i];
 
   if (!canPlayAudio()) {
-    return <div className="card">Tu navegador no tiene síntesis de voz. Prueba con Chrome, Edge o Safari actualizados.</div>;
+    return <div className="card">Your browser doesn't support speech synthesis. Try an up-to-date Chrome, Edge or Safari.</div>;
   }
   if (!sentence) {
     const avg = Math.round((scores.reduce((a, b) => a + b, 0) / Math.max(1, scores.length)) * 100);
     return (
       <div className="card center">
         <div className="quiz-result__score">{avg}%</div>
-        <p>Precisión media del dictado.</p>
+        <p>Average dictation accuracy.</p>
         <button className="btn" type="button" onClick={() => { setI(0); setScores([]); }}>
-          Repetir
+          Try again
         </button>
       </div>
     );
@@ -32,15 +32,15 @@ export default function DictationSection({ topic, onComplete }: SectionProps) {
   return (
     <div className="card">
       <div className="srs__meta">
-        Frase {i + 1}/{sentences.length}
+        Sentence {i + 1}/{sentences.length}
       </div>
-      <p>Escucha la frase y escríbela. Puedes repetirla las veces que necesites.</p>
+      <p>Listen to the sentence and type it. Replay it as many times as you need.</p>
       <div className="row">
         <button className="btn" type="button" onClick={() => void speak(sentence)}>
-          🔊 Escuchar
+          🔊 Listen
         </button>
         <button className="btn btn--ghost" type="button" onClick={() => void speak(sentence, { rate: 0.7 })}>
-          🐢 Despacio
+          🐢 Slow
         </button>
       </div>
       <form
@@ -58,19 +58,19 @@ export default function DictationSection({ topic, onComplete }: SectionProps) {
           value={typed}
           maxLength={300}
           onChange={(e) => setTyped(e.target.value)}
-          placeholder="Escribe lo que oyes…"
-          aria-label="Dictado"
+          placeholder="Type what you hear…"
+          aria-label="Dictation"
           spellCheck={false}
           disabled={score !== null}
         />
         {score === null ? (
           <button className="btn" type="submit">
-            Comprobar
+            Check
           </button>
         ) : (
           <div className={score >= 0.85 ? 'feedback feedback--ok' : 'feedback feedback--bad'} role="status">
-            <strong>{Math.round(score * 100)}% de coincidencia</strong>
-            <p>Correcto: “{sentence}”</p>
+            <strong>{Math.round(score * 100)}% match</strong>
+            <p>Answer: “{sentence}”</p>
             <button
               className="btn"
               type="button"
@@ -83,7 +83,7 @@ export default function DictationSection({ topic, onComplete }: SectionProps) {
                 setI(i + 1);
               }}
             >
-              Siguiente
+              Next
             </button>
           </div>
         )}

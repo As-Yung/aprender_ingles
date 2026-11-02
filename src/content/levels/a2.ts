@@ -7,15 +7,15 @@ import { dataA2 } from './tech/data-a';
 const a2: Level = {
   id: 'a2',
   name: 'A2',
-  label: 'Elemental',
-  description: 'Contar experiencias pasadas, explicar qué falló en un sistema, comprar y pedir comida.',
+  label: 'Elementary',
+  description: 'Tell past stories, explain what broke in a system, shop and order food.',
   color: '#22c55e',
   canDo: [
-    'Contar lo que hiciste el fin de semana o en tus vacaciones.',
-    'Comprar en tiendas y pedir comida en un restaurante.',
-    'Usar cantidades: some, any, much, many, a lot of.',
-    'Entender anuncios, menús y mensajes cortos.',
-    'Contar de forma sencilla un fallo técnico y cómo lo arreglaste.',
+    'Talk about what you did last weekend or on vacation.',
+    'Shop in stores and order food in a restaurant.',
+    'Use quantities: some, any, much, many, a lot of.',
+    'Understand ads, menus and short messages.',
+    'Briefly explain a technical failure and how you fixed it.',
   ],
   topics: [
     {
