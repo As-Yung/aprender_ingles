@@ -7,9 +7,15 @@
  *   permiso de micrófono y solo se usa cuando el usuario pulsa "Hablar".
  */
 import { readJson, writeJson } from '../security/storage';
+import { normalizeSpeechText } from './catalog';
 
 export function canSpeak(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
+}
+
+/** Hay alguna forma de reproducir voz (audio pregenerado o síntesis del navegador). */
+export function canPlayAudio(): boolean {
+  return typeof window !== 'undefined' && (typeof Audio !== 'undefined' || canSpeak());
 }
 
 /* ------------------------------------------------------------------ */
@@ -19,6 +25,8 @@ export function canSpeak(): boolean {
 const PREF_KEY = 'aprender-ingles.voice';
 
 export interface VoicePrefs {
+  /** 'natural' = audios pregenerados con la voz neuronal libre Kokoro; 'browser' = voces del dispositivo. */
+  engine: 'natural' | 'browser';
   /** voiceURI elegida por el usuario (vacío = automática). */
   voiceURI: string;
   /** voiceURI de la segunda voz para diálogos (vacío = automática). */
@@ -31,6 +39,7 @@ export function getVoicePrefs(): VoicePrefs {
   const p = readJson<Partial<VoicePrefs>>('local', PREF_KEY, {});
   const rate = typeof p.rate === 'number' && p.rate >= 0.5 && p.rate <= 1.5 ? p.rate : 1;
   return {
+    engine: p.engine === 'browser' ? 'browser' : 'natural',
     voiceURI: typeof p.voiceURI === 'string' ? p.voiceURI : '',
     partnerURI: typeof p.partnerURI === 'string' ? p.partnerURI : '',
     rate,
@@ -144,6 +153,73 @@ export function splitForSpeech(text: string): string[] {
   return out.length ? out : [text];
 }
 
+/* ------------------------------------------------------------------ */
+/* Voz natural: audios pregenerados (Kokoro) servidos con la web.       */
+/* ------------------------------------------------------------------ */
+
+interface AudioManifest {
+  voices: Record<string, string>;
+  ids: Set<string>;
+}
+let manifestPromise: Promise<AudioManifest | null> | null = null;
+
+function audioBase(): string {
+  const base = (import.meta.env?.BASE_URL as string | undefined) ?? '/';
+  return `${base.endsWith('/') ? base : `${base}/`}audio/`;
+}
+
+export function loadAudioManifest(): Promise<AudioManifest | null> {
+  if (!manifestPromise) {
+    manifestPromise = fetch(`${audioBase()}manifest.json`, { cache: 'no-cache' })
+      .then(async (r) => {
+        if (!r.ok) return null;
+        const m = (await r.json()) as { voices?: Record<string, string>; files?: string[] };
+        if (!m.voices || !Array.isArray(m.files)) return null;
+        return { voices: m.voices, ids: new Set(m.files) };
+      })
+      .catch(() => null);
+  }
+  return manifestPromise;
+}
+
+/** Mismo nombre de archivo que scripts/generate-audio.py: sha256(voz + "\n" + texto)[:16]. */
+export async function audioId(voice: string, text: string): Promise<string> {
+  const data = new TextEncoder().encode(`${voice}\n${normalizeSpeechText(text)}`);
+  const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+  return [...hash.slice(0, 8)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+let audioEl: HTMLAudioElement | null = null;
+
+/** Devuelve true si se reprodujo (o se canceló) con la voz natural; false si hay que usar el navegador. */
+async function playNatural(text: string, slot: 0 | 1, rate: number, token: number): Promise<boolean> {
+  try {
+    const m = await loadAudioManifest();
+    const voice = m?.voices[String(slot)];
+    if (!m || !voice) return false;
+    const id = await audioId(voice, text);
+    if (!m.ids.has(id)) return false;
+    if (token !== speakToken) return true;
+    const a = (audioEl ??= new Audio());
+    a.pause();
+    a.src = `${audioBase()}${id}.mp3`;
+    a.preservesPitch = true;
+    a.playbackRate = rate;
+    return await new Promise<boolean>((resolve) => {
+      const done = (ok: boolean) => {
+        a.onended = a.onerror = a.onpause = null;
+        resolve(ok);
+      };
+      a.onended = () => done(true);
+      a.onpause = () => done(true);
+      a.onerror = () => done(false);
+      a.play().catch(() => done(false));
+    });
+  } catch {
+    return false;
+  }
+}
+
 let speakToken = 0;
 
 export interface SpeakOptions {
@@ -156,9 +232,17 @@ export interface SpeakOptions {
 }
 
 export async function speak(text: string, opts: SpeakOptions = {}): Promise<void> {
-  if (!canSpeak() || !text.trim()) return;
+  if (!text.trim()) return;
   const token = ++speakToken;
-  window.speechSynthesis.cancel();
+  audioEl?.pause();
+  if (canSpeak()) window.speechSynthesis.cancel();
+  const prefs0 = getVoicePrefs();
+  if (prefs0.engine === 'natural' && !opts.voiceURI) {
+    const r = Math.min(1.5, Math.max(0.5, prefs0.rate * (opts.rate ?? 1)));
+    if (await playNatural(text, opts.speaker ?? 0, r, token)) return;
+    if (token !== speakToken) return;
+  }
+  if (!canSpeak()) return;
   const voices = opts.voiceURI ? await englishVoices() : [];
   const voice = voices.find((v) => v.voiceURI === opts.voiceURI) ?? (await pickVoice(opts.speaker ?? 0));
   if (token !== speakToken) return; // otra llamada más reciente tomó el control
@@ -181,6 +265,7 @@ export async function speak(text: string, opts: SpeakOptions = {}): Promise<void
 
 export function stopSpeaking(): void {
   speakToken++;
+  audioEl?.pause();
   if (canSpeak()) window.speechSynthesis.cancel();
 }
 

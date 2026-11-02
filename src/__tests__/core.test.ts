@@ -3,7 +3,9 @@ import { buildTotp, createTotpSecret, validateTotp } from '../core/auth/totp';
 import { checkPassword, generateTemporaryPassword, randomInt, validateUsername } from '../core/auth/validation';
 import { hashPassword, verifyPassword } from '../core/security/crypto';
 import { review } from '../core/srs/leitner';
-import { scoreVoice, similarity, splitForSpeech } from '../core/speech/speech';
+import { audioId, scoreVoice, similarity, splitForSpeech } from '../core/speech/speech';
+import { collectSpeech } from '../core/speech/catalog';
+import { loadAllLevels } from '../content';
 import { tokenize } from '../modules/reading/ReadingSection';
 
 describe('política de contraseñas', () => {
@@ -108,5 +110,19 @@ describe('randomInt', () => {
       seen.add(r);
     }
     expect(seen.size).toBe(7);
+  });
+});
+
+describe('audios pregenerados', () => {
+  it('audioId coincide con scripts/generate-audio.py', async () => {
+    expect(await audioId('af_heart', '  I’m a systems engineer. ')).toBe('520135ee0f4189cc');
+  });
+  it('el catálogo incluye vocabulario y diálogos con dos voces', async () => {
+    const levels = await loadAllLevels();
+    const items = collectSpeech(levels);
+    const texts = new Set(items.map((i) => `${i.voice}|${i.text}`));
+    const t = levels[0]!.topics[0]!;
+    expect(texts.has(`0|${t.vocabulary[0]!.term}`)).toBe(true);
+    expect(items.some((i) => i.voice === 1)).toBe(true);
   });
 });

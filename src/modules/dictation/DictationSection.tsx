@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { canSpeak, similarity, speak } from '../../core/speech/speech';
+import { canPlayAudio, similarity, speak } from '../../core/speech/speech';
 import type { SectionProps } from '../types';
 
 export default function DictationSection({ topic, onComplete }: SectionProps) {
@@ -13,7 +13,7 @@ export default function DictationSection({ topic, onComplete }: SectionProps) {
   const [scores, setScores] = useState<number[]>([]);
   const sentence = sentences[i];
 
-  if (!canSpeak()) {
+  if (!canPlayAudio()) {
     return <div className="card">Tu navegador no tiene síntesis de voz. Prueba con Chrome, Edge o Safari actualizados.</div>;
   }
   if (!sentence) {

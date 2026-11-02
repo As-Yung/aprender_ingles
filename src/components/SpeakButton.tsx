@@ -1,4 +1,4 @@
-import { canSpeak, speak } from '../core/speech/speech';
+import { canPlayAudio, speak } from '../core/speech/speech';
 
 export function SpeakButton({
   text,
@@ -14,7 +14,7 @@ export function SpeakButton({
   /** 0 = voz principal, 1 = segunda voz (otro personaje). */
   speaker?: 0 | 1;
 }) {
-  if (!canSpeak()) return null;
+  if (!canPlayAudio()) return null;
   return (
     <button
       type="button"
