@@ -13,6 +13,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LevelPage = lazy(() => import('./pages/LevelPage'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
 const VoicePage = lazy(() => import('./pages/VoicePage'));
+const VocabGamePage = lazy(() => import('./modules/vocab-game/VocabGamePage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
@@ -46,6 +47,7 @@ export function App() {
                 <Route path="nivel/:levelId/:topicId" element={<TopicPage />} />
                 <Route path="nivel/:levelId/:topicId/:sectionId" element={<TopicPage />} />
                 <Route path="voz" element={<VoicePage />} />
+                <Route path="juego" element={<VocabGamePage />} />
                 <Route
                   path="admin"
                   element={

@@ -6,6 +6,7 @@ import { useAuth } from '../core/auth/AuthContext';
 import { useProgress } from '../core/progress/ProgressContext';
 import { isDue } from '../core/srs/leitner';
 import { MODULES } from '../modules/registry';
+import '../styles/game-banner.css';
 
 export default function DashboardPage() {
   const { session } = useAuth();
@@ -52,6 +53,16 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <Link to="/juego" className="game-banner">
+        <span className="game-banner__emoji" aria-hidden="true">
+          ⚔️
+        </span>
+        <span>
+          <strong>Vocab Boss Game</strong>
+          <small>Practica el vocabulario de tu nivel (A1–C2) peleando contra 10 bosses. ¡Cada acierto es un ataque!</small>
+        </span>
+      </Link>
 
       <div className="level-grid">
         {LEVELS.map((meta) => {
