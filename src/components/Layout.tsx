@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { config } from '../config/env';
 import { useAuth } from '../core/auth/AuthContext';
 import { useProgress } from '../core/progress/ProgressContext';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Layout() {
   const { service, session } = useAuth();
@@ -29,6 +30,7 @@ export function Layout() {
             </span>
           )}
           <span className="muted">{session?.user.username}</span>
+          <ThemeToggle />
           <button className="btn btn--ghost btn--small" type="button" onClick={() => navigate('/cambiar-contrasena')}>
             Contraseña
           </button>
