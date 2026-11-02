@@ -1,6 +1,8 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
 import { techC1 } from './tech/c1';
+import { secAiC1 } from './tech/secai-c';
+import { dataC1 } from './tech/data-c';
 
 const c1: Level = {
   id: 'c1',
@@ -230,6 +232,8 @@ const c1: Level = {
       ],
     },
     techC1,
+    secAiC1,
+    dataC1,
   ],
 };
 

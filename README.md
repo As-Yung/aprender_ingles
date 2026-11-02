@@ -2,7 +2,9 @@
 
 Aplicación web para aprender inglés de forma **visual y didáctica**, del nivel **A1 al C2** del Marco Común Europeo (MCER).
 
-🎯 **Objetivo:** hablar inglés con fluidez y de forma **casual**, sobre todo en temas de **ingeniería de sistemas e IoT** (dailies, incidentes, arquitectura, jerga de equipo). Cada nivel incluye un tema 🛠️ de tecnología (`src/content/levels/tech/`).
+🎯 **Objetivo:** hablar inglés con fluidez y de forma **casual**, sobre todo en temas de **ingeniería de sistemas e IoT** (dailies, incidentes, arquitectura, jerga de equipo). Cada nivel incluye temas de tecnología (`src/content/levels/tech/`): sistemas e IoT, ciberseguridad e IA, y ciencia de datos y servidores.
+
+🎮 **Práctica visual:** mini‑juegos generados automáticamente para cada tema (emparejar, escuchar y elegir, completar, ordenar frases y clasificar) en `src/modules/practice/`.
 
 🔊 **Voz:** se elige automáticamente la voz más natural (neuronal) del dispositivo; en los diálogos cada personaje tiene su voz. Se puede cambiar en la página **Voz** de la app.
 Se publica como página estática en **GitHub Pages** y se puede probar al instante en **GitHub Codespaces**.

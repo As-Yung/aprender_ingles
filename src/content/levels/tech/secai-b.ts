@@ -1,0 +1,198 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** B1 · IA en el trabajo: presente perfecto, opiniones y consejos (should). */
+export const secAiB1: Topic = {
+  id: 'ai-at-work',
+  title: 'AI tools at work',
+  titleEs: '🤖 Usar IA en el trabajo',
+  emoji: '🤖',
+  grammarFocus: 'Presente perfecto (Have you tried…?) + should para recomendar',
+  summary: 'Habla de tu experiencia con herramientas de IA, qué te han funcionado y qué recomiendas, como en una charla con tu equipo.',
+  keyPoints: [
+    'Have you ever tried / used…? → preguntar experiencia.',
+    'I’ve been using it for… → algo que empezó y sigue.',
+    'You should / shouldn’t… → recomendar.',
+    'In my experience… / To be honest… → dar opinión de forma natural.',
+  ],
+  vocabulary: [
+    v('prompt', 'instrucción que le das a la IA', '⌨️', 'IA generativa', 'Write a clear prompt with examples.', 'Escribe una instrucción clara con ejemplos.'),
+    v('model', 'modelo (de IA)', '🧠', 'IA generativa', 'This model is fast but not perfect.', 'Este modelo es rápido pero no perfecto.'),
+    v('training data', 'datos de entrenamiento', '📚', 'IA generativa', 'The model learns from training data.', 'El modelo aprende de los datos de entrenamiento.'),
+    v('accurate', 'preciso/a', '🎯', 'Calidad', 'The summary was really accurate.', 'El resumen fue muy preciso.'),
+    v('make things up', 'inventarse cosas', '🦄', 'Calidad', 'Sometimes it makes things up.', 'A veces se inventa cosas.'),
+    v('review', 'revisar', '🧐', 'Calidad', 'You should review the code it writes.', 'Deberías revisar el código que escribe.'),
+    v('save time', 'ahorrar tiempo', '⏳', 'Productividad', 'It saves time on boring tasks.', 'Ahorra tiempo en tareas aburridas.'),
+    v('automate', 'automatizar', '⚙️', 'Productividad', 'We’ve automated our test reports.', 'Hemos automatizado nuestros informes de pruebas.'),
+    v('sensitive data', 'datos sensibles', '🔒', 'Productividad', 'You shouldn’t paste sensitive data.', 'No deberías pegar datos sensibles.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Preguntar y contar experiencia' },
+    { kind: 'examples', items: [
+      { en: 'Have you ever used an AI coding assistant?', es: '¿Alguna vez has usado un asistente de código con IA?' },
+      { en: 'Yeah, I’ve been using one for six months.', es: 'Sí, llevo seis meses usando uno.' },
+      { en: 'We’ve already automated the weekly report.', es: 'Ya hemos automatizado el informe semanal.' },
+    ] },
+    { kind: 'formula', label: 'Recomendar', parts: ['You', 'should / shouldn’t', 'verbo base'] },
+    { kind: 'table', headers: ['Recomendación', 'Por qué'], rows: [
+      ['You should review the output.', 'Models can make things up.'],
+      ['You shouldn’t paste passwords or client data.', 'It’s sensitive data.'],
+      ['You should give examples in your prompt.', 'The answer is more accurate.'],
+    ] },
+    { kind: 'tip', text: '“To be honest” al principio suaviza una crítica: “To be honest, it’s not great for SQL.” Muy natural en conversación.' },
+    { kind: 'warning', text: '“I use it since March” ✗ → “I’ve been using it since March” ✓. Con since/for y algo que continúa, usa presente perfecto.' },
+  ],
+  conversation: {
+    title: 'Coffee chat about AI',
+    context: 'Dos ingenieros comparan cómo usan la IA en su día a día.',
+    lines: [
+      { speaker: 'Ana', en: 'Have you tried the new AI assistant in the IDE?', es: '¿Has probado el nuevo asistente de IA del IDE?' },
+      { speaker: 'Raj', en: 'Yeah, I’ve been using it for a couple of weeks.', es: 'Sí, llevo un par de semanas usándolo.' },
+      { speaker: 'Ana', en: 'And? Is it any good?', es: '¿Y? ¿Está bien?' },
+      { speaker: 'Raj', en: 'To be honest, it saves me a ton of time on tests.', es: 'Sinceramente, me ahorra muchísimo tiempo con los tests.' },
+      { speaker: 'Ana', en: 'Nice. Does it make things up?', es: 'Bien. ¿Se inventa cosas?' },
+      { speaker: 'Raj', en: 'Sometimes, so you should always review the code.', es: 'A veces, así que siempre deberías revisar el código.' },
+      { speaker: 'Ana', en: 'Makes sense. I’ll give it a try this week.', es: 'Tiene sentido. Lo probaré esta semana.' },
+    ],
+    usefulPhrases: [
+      { en: 'Is it any good?', es: '¿Está bien? / ¿Vale la pena?' },
+      { en: 'a ton of time', es: 'muchísimo tiempo (casual)' },
+      { en: 'Makes sense.', es: 'Tiene sentido.' },
+      { en: 'I’ll give it a try.', es: 'Lo probaré.' },
+    ],
+  },
+  reading: {
+    title: 'Our AI policy in one page',
+    paragraphs: [
+      'Over the last year, our team has started using AI tools for code, documentation and data analysis.',
+      'They have saved us many hours, but we have also seen mistakes. Models sometimes make things up, so every result should be reviewed by a person.',
+      'Our rules are simple: never paste sensitive data, always mention when AI helped, and use it to learn, not just to copy.',
+    ],
+    translation: [
+      'Durante el último año, nuestro equipo ha empezado a usar herramientas de IA para código, documentación y análisis de datos.',
+      'Nos han ahorrado muchas horas, pero también hemos visto errores. Los modelos a veces se inventan cosas, así que cada resultado debe revisarlo una persona.',
+      'Nuestras reglas son sencillas: nunca pegues datos sensibles, indica siempre cuándo te ayudó la IA y úsala para aprender, no solo para copiar.',
+    ],
+    glossary: {
+      'over the last year': 'durante el último año',
+      'has started': 'ha empezado',
+      'have saved': 'han ahorrado',
+      mistakes: 'errores',
+      'be reviewed': 'ser revisado',
+      mention: 'mencionar, indicar',
+    },
+    questions: [
+      q('What has the team used AI for?', ['Only emails', 'Code, documentation and data analysis', 'Hiring people', 'Nothing'], 1),
+      q('Why should a person review every result?', ['It is the law', 'Models sometimes make things up', 'AI is slow', 'Managers want it'], 1),
+      q('Which rule is in the policy?', ['Paste all data', 'Never paste sensitive data', 'Don’t use AI', 'Only use it at night'], 1),
+    ],
+  },
+  quiz: [
+    q('___ you ever used an AI assistant?', ['Did', 'Have', 'Are', 'Do'], 1),
+    q('I’ve been using it ___ March.', ['for', 'since', 'from', 'during'], 1),
+    q('You ___ paste client passwords into a chatbot.', ['should', 'shouldn’t', 'must to', 'don’t should'], 1),
+    q('“Make things up” significa:', ['maquillarse', 'inventarse cosas', 'hacer cosas rápido', 'subir cosas'], 1),
+    q('“Ahorrar tiempo” es:', ['save time', 'safe time', 'keep time', 'spare a time'], 0),
+  ],
+  dictation: ['Have you tried the new AI assistant?', 'I’ve been using it for two weeks.', 'You should always review the code.', 'Never paste sensitive data.'],
+};
+
+/** B2 · Ciberseguridad: responder a un incidente (pasiva + tercer condicional). */
+export const secAiB2: Topic = {
+  id: 'security-incident',
+  title: 'Handling a security incident',
+  titleEs: '🚨 Gestionar un incidente de seguridad',
+  emoji: '🚨',
+  grammarFocus: 'Voz pasiva (was compromised) y tercer condicional (If we had…, we would have…)',
+  summary: 'Explica qué pasó en un incidente, qué se hizo y qué habría pasado si se hubiera actuado distinto.',
+  keyPoints: [
+    'Pasiva para incidentes: The server was compromised. / Passwords were reset.',
+    'Tercer condicional → reflexionar: If MFA had been enabled, the attack would have failed.',
+    'Vocabulario clave: breach, vulnerability, patch, malware, ransomware.',
+    'Frases de calma: We’ve contained it. / It’s under control.',
+  ],
+  vocabulary: [
+    v('breach', 'brecha, filtración', '💧', 'Incidente', 'The breach was detected on Monday.', 'La brecha se detectó el lunes.', '/briːtʃ/'),
+    v('compromised', 'comprometido, hackeado', '☠️', 'Incidente', 'One admin account was compromised.', 'Una cuenta de administrador fue comprometida.'),
+    v('malware', 'malware, software malicioso', '🦠', 'Incidente', 'The malware was hidden in a PDF.', 'El malware estaba oculto en un PDF.'),
+    v('ransomware', 'ransomware, secuestro de datos', '💰', 'Incidente', 'Ransomware encrypts your files and asks for money.', 'El ransomware cifra tus archivos y pide dinero.'),
+    v('vulnerability', 'vulnerabilidad', '🕳️', 'Defensa', 'The vulnerability was in an old library.', 'La vulnerabilidad estaba en una librería antigua.', '/ˌvʌlnərəˈbɪləti/'),
+    v('patch', 'parche / parchear', '🩹', 'Defensa', 'The patch was installed in two hours.', 'El parche se instaló en dos horas.'),
+    v('MFA', 'autenticación multifactor', '📱', 'Defensa', 'With MFA, a stolen password isn’t enough.', 'Con MFA, una contraseña robada no basta.'),
+    v('firewall', 'cortafuegos', '🧱', 'Defensa', 'The firewall blocked the traffic.', 'El cortafuegos bloqueó el tráfico.'),
+    v('contain', 'contener', '📦', 'Respuesta', 'We contained the attack quickly.', 'Contuvimos el ataque rápido.'),
+    v('reset', 'restablecer', '🔄', 'Respuesta', 'All passwords were reset.', 'Se restablecieron todas las contraseñas.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. La pasiva para contar el incidente' },
+    { kind: 'formula', label: 'Pasiva (pasado)', parts: ['Sujeto', 'was / were', 'participio', '(by…)'] },
+    { kind: 'examples', items: [
+      { en: 'The attack was detected by our monitoring.', es: 'El ataque fue detectado por nuestra monitorización.' },
+      { en: 'Affected users were notified within an hour.', es: 'Se avisó a los usuarios afectados en menos de una hora.' },
+    ] },
+    { kind: 'heading', text: '2. Lecciones aprendidas (tercer condicional)' },
+    { kind: 'formula', label: 'Tercer condicional', parts: ['If', 'had + participio', ',', 'would have + participio'] },
+    { kind: 'examples', items: [
+      { en: 'If we had patched the library, they wouldn’t have got in.', es: 'Si hubiéramos parcheado la librería, no habrían entrado.' },
+      { en: 'If MFA had been enabled, the stolen password would have been useless.', es: 'Si se hubiera activado MFA, la contraseña robada habría sido inútil.' },
+    ] },
+    { kind: 'tip', text: 'Al hablar se contrae todo: “If we’d patched it, they wouldn’t’ve got in.” (we’d = we had).' },
+    { kind: 'warning', text: '“If we would have patched…” ✗. Tras “if” va had + participio: “If we had patched…” ✓.' },
+  ],
+  conversation: {
+    title: 'Incident call',
+    context: 'Llamada rápida entre el responsable de seguridad y un ingeniero tras un ataque.',
+    lines: [
+      { speaker: 'Lead', en: 'Okay, what do we know so far?', es: 'Vale, ¿qué sabemos hasta ahora?' },
+      { speaker: 'Omar', en: 'An admin account was compromised last night through a phishing link.', es: 'Anoche se comprometió una cuenta de administrador por un enlace de phishing.' },
+      { speaker: 'Lead', en: 'Has it been contained?', es: '¿Está contenido?' },
+      { speaker: 'Omar', en: 'Yes. The account was locked and all admin passwords were reset.', es: 'Sí. Se bloqueó la cuenta y se restablecieron todas las contraseñas de admin.' },
+      { speaker: 'Lead', en: 'Was any data stolen?', es: '¿Se robaron datos?' },
+      { speaker: 'Omar', en: 'Doesn’t look like it. The firewall blocked the outbound traffic.', es: 'No lo parece. El cortafuegos bloqueó el tráfico de salida.' },
+      { speaker: 'Lead', en: 'Good. Honestly, if we’d enforced MFA, this wouldn’t have happened.', es: 'Bien. Sinceramente, si hubiéramos exigido MFA, esto no habría pasado.' },
+      { speaker: 'Omar', en: 'Agreed. I’ll roll out MFA for all admins today.', es: 'De acuerdo. Hoy activo MFA para todos los admins.' },
+    ],
+    usefulPhrases: [
+      { en: 'What do we know so far?', es: '¿Qué sabemos hasta ahora?' },
+      { en: 'Doesn’t look like it.', es: 'No lo parece.' },
+      { en: 'It’s under control.', es: 'Está bajo control.' },
+      { en: 'This wouldn’t have happened.', es: 'Esto no habría pasado.' },
+    ],
+  },
+  reading: {
+    title: 'Anatomy of a ransomware attack',
+    paragraphs: [
+      'Most ransomware attacks follow the same pattern. First, an employee is tricked into opening a malicious attachment.',
+      'Then the malware spreads across the network, looking for unpatched servers. Finally, files are encrypted and a ransom is demanded.',
+      'In many cases the damage could have been limited. If backups had been kept offline and systems had been patched, recovery would have taken hours instead of weeks.',
+    ],
+    translation: [
+      'La mayoría de los ataques de ransomware siguen el mismo patrón. Primero, se engaña a un empleado para que abra un adjunto malicioso.',
+      'Después, el malware se extiende por la red buscando servidores sin parchear. Por último, se cifran los archivos y se exige un rescate.',
+      'En muchos casos el daño se podría haber limitado. Si las copias se hubieran guardado sin conexión y los sistemas se hubieran parcheado, la recuperación habría llevado horas en lugar de semanas.',
+    ],
+    glossary: {
+      pattern: 'patrón',
+      'is tricked into': 'es engañado para',
+      spreads: 'se extiende',
+      unpatched: 'sin parchear',
+      ransom: 'rescate',
+      'is demanded': 'se exige',
+      'could have been': 'podría haber sido',
+    },
+    questions: [
+      q('How does a typical attack start?', ['A server breaks', 'An employee opens a malicious attachment', 'The firewall fails', 'A patch is installed'], 1),
+      q('What does the malware look for?', ['New users', 'Unpatched servers', 'Backups', 'Printers'], 1),
+      q('What would have made recovery faster?', ['More emails', 'Offline backups and patched systems', 'Paying faster', 'A new logo'], 1),
+    ],
+  },
+  quiz: [
+    q('The account ___ last night.', ['compromised', 'was compromised', 'has compromise', 'is compromising'], 1),
+    q('If we ___ the library, they wouldn’t have got in.', ['patched', 'had patched', 'would patch', 'have patched'], 1),
+    q('If MFA had been enabled, the attack ___.', ['would fail', 'would have failed', 'had failed', 'will fail'], 1),
+    q('“Parche” (de software) es:', ['patch', 'path', 'pitch', 'batch'], 0),
+    q('“Has it been contained?” significa:', ['¿Se ha contenido?', '¿Está contento?', '¿Lo has guardado?', '¿Se ha contado?'], 0),
+    q('Ransomware normalmente…', ['acelera el servidor', 'cifra archivos y pide dinero', 'instala parches', 'borra el firewall'], 1),
+  ],
+  dictation: ['An admin account was compromised.', 'All passwords were reset.', 'The firewall blocked the traffic.', 'If we had enforced MFA, this wouldn’t have happened.'],
+};

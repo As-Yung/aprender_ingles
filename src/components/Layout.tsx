@@ -48,7 +48,7 @@ export function Layout() {
       <main className="content">
         <Outlet />
       </main>
-      <footer className="footer muted">Aprender Inglés · Inglés hablado y casual para ingeniería de sistemas e IoT · Niveles A1–C2</footer>
+      <footer className="footer muted">Aprender Inglés · Inglés hablado y casual para sistemas, IoT, ciberseguridad, IA, datos y servidores · Niveles A1–C2</footer>
     </div>
   );
 }
