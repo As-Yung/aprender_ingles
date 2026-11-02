@@ -1,4 +1,5 @@
 import type { SrsCard } from '../srs/leitner';
+import { sanitizeMisses, type MissMap } from './misses';
 
 export interface SectionProgress {
   completed: boolean;
@@ -14,6 +15,8 @@ export interface ProgressData {
   /** clave: `${levelId}/${topicId}/${term}` */
   srs: Record<string, SrsCard>;
   streak: { lastDay: string; count: number };
+  /** clave: `${levelId}/${topicId}/${term}` → palabras falladas para repasar. */
+  misses: MissMap;
 }
 
 export const emptyProgress = (): ProgressData => ({
@@ -21,6 +24,7 @@ export const emptyProgress = (): ProgressData => ({
   topics: {},
   srs: {},
   streak: { lastDay: '', count: 0 },
+  misses: {},
 });
 
 export interface ProgressRepository {
@@ -36,5 +40,6 @@ export function sanitizeProgress(raw: unknown): ProgressData {
   if (r.topics && typeof r.topics === 'object') base.topics = r.topics;
   if (r.srs && typeof r.srs === 'object') base.srs = r.srs;
   if (r.streak && typeof r.streak.count === 'number' && typeof r.streak.lastDay === 'string') base.streak = r.streak;
+  base.misses = sanitizeMisses(r.misses);
   return base;
 }

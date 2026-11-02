@@ -1,13 +1,16 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { config } from '../config/env';
 import { useAuth } from '../core/auth/AuthContext';
+import { isMastered } from '../core/progress/misses';
 import { useProgress } from '../core/progress/ProgressContext';
+import '../styles/game-banner.css';
 import { ThemeToggle } from './ThemeToggle';
 
 export function Layout() {
   const { service, session } = useAuth();
   const { data } = useProgress();
   const navigate = useNavigate();
+  const bugs = Object.values(data.misses).filter((r) => !isMastered(r)).length;
   return (
     <div className="app">
       <header className="topbar">
@@ -20,6 +23,9 @@ export function Layout() {
         <nav className="topbar__nav" aria-label="Principal">
           <NavLink to="/">Inicio</NavLink>
           <NavLink to="/juego">⚔️ Juego</NavLink>
+          <NavLink to="/repaso">
+            🐛 Repaso{bugs > 0 && <span className="nav-badge">{bugs}</span>}
+          </NavLink>
           <NavLink to="/voz">🔊 Voz</NavLink>
           {session?.user.role === 'admin' && <NavLink to="/admin">Administración</NavLink>}
         </nav>
