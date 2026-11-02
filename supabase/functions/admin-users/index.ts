@@ -13,7 +13,7 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const USERNAME_EMAIL_DOMAIN = Deno.env.get('USERNAME_EMAIL_DOMAIN') ?? 'usuarios.aprender-ingles.app';
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
   .split(',')
-  .map((s) => s.trim())
+  .map((s) => s.trim().toLowerCase().replace(/\/$/, ''))
   .filter(Boolean);
 
 const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._-]{1,30}[a-z0-9])$/;
@@ -132,7 +132,8 @@ async function authenticate(req: Request): Promise<{ user: User; aal: string }> 
 }
 
 Deno.serve(async (req) => {
-  const origin = req.headers.get('Origin');
+  // Los navegadores envían el origen en minúsculas (https://as-yung.github.io)
+  const origin = req.headers.get('Origin')?.toLowerCase() ?? null;
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(origin) });
   if (origin && ALLOWED_ORIGINS.length && !ALLOWED_ORIGINS.includes(origin)) {
     return json({ error: 'Origen no permitido.' }, 403, origin);

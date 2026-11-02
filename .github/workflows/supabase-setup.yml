@@ -54,8 +54,9 @@ jobs:
 
       - name: Configurar secretos de la Edge Function
         run: |
+          OWNER="${{ github.repository_owner }}"
           supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
-            ALLOWED_ORIGINS="https://${{ github.repository_owner }}.github.io,http://localhost:5173" \
+            ALLOWED_ORIGINS="https://${OWNER,,}.github.io,http://localhost:5173" \
             USERNAME_EMAIL_DOMAIN="${USERNAME_EMAIL_DOMAIN:-usuarios.aprender-ingles.app}"
         env:
           USERNAME_EMAIL_DOMAIN: ${{ vars.VITE_USERNAME_EMAIL_DOMAIN }}
