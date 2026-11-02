@@ -128,8 +128,23 @@ export class SupabaseAuthService implements AuthService {
       if (!error.status || error.name === 'AuthRetryableFetchError') {
         throw new AuthError('No se pudo conectar con el servidor. Revisa tu conexión.', 'network');
       }
-      if (/banned/i.test(error.message)) throw new AuthError('Esta cuenta está desactivada.', 'disabled');
-      throw new AuthError('Usuario o contraseña incorrectos.', 'invalid_credentials');
+      const code = (error as { code?: string }).code ?? '';
+      if (code === 'user_banned' || /banned/i.test(error.message)) {
+        throw new AuthError('Esta cuenta está desactivada.', 'disabled');
+      }
+      if (code === 'invalid_credentials') throw new AuthError('Usuario o contraseña incorrectos.', 'invalid_credentials');
+      if (code === 'email_provider_disabled' || /logins are disabled/i.test(error.message)) {
+        throw new AuthError(
+          'El inicio de sesión con contraseña está desactivado en Supabase (Authentication → Sign In / Providers → Email).',
+          'config',
+        );
+      }
+      if (code === 'email_not_confirmed') throw new AuthError('La cuenta no está confirmada en Supabase.', 'config');
+      if (error.status === 401 || /api key/i.test(error.message)) {
+        throw new AuthError('La clave pública de Supabase no es válida. Revisa VITE_SUPABASE_ANON_KEY.', 'config');
+      }
+      // Error inesperado: se muestra el código para poder diagnosticarlo (no revela si el usuario existe)
+      throw new AuthError(`No se pudo iniciar sesión (${code || error.status || 'desconocido'}).`, 'unknown');
     }
     const { data: factors } = await this.client.auth.mfa.listFactors();
     return (factors?.totp ?? []).some((f) => f.status === 'verified') ? 'mfa-verify' : 'mfa-enroll';
