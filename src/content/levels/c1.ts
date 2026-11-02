@@ -1,17 +1,19 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
+import { techC1 } from './tech/c1';
 
 const c1: Level = {
   id: 'c1',
   name: 'C1',
   label: 'Avanzado',
-  description: 'Argumentar con matices, énfasis y registro formal.',
+  description: 'Argumentar con matices en revisiones de diseño, énfasis y registro formal.',
   color: '#a855f7',
   canDo: [
     'Expresarte con fluidez y espontaneidad sin buscar palabras de forma evidente.',
     'Argumentar, matizar y suavizar opiniones (hedging).',
     'Usar estructuras de énfasis como la inversión y las oraciones hendidas.',
     'Comprender textos largos y exigentes, captando significados implícitos.',
+    'Debatir decisiones de arquitectura y compromisos técnicos con tacto.',
   ],
   topics: [
     {
@@ -227,6 +229,7 @@ const c1: Level = {
         q('Under no circumstances ___ leave the door open.', ['you should', 'should you', 'you must to', 'must you to'], 1),
       ],
     },
+    techC1,
   ],
 };
 

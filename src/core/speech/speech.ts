@@ -1,38 +1,186 @@
 /**
  * Voz con la Web Speech API del navegador.
- * - Síntesis (TTS): local en el dispositivo, sin enviar datos.
+ * - Síntesis (TTS): usa las voces del navegador/sistema. Se eligen automáticamente las más
+ *   naturales (neuronales). Las voces "Online/Natural" de Edge y las de Google envían el
+ *   texto (frases del curso, nunca datos personales) a los servidores del navegador.
  * - Reconocimiento: en Chrome el audio se procesa en servidores del navegador; se pide
  *   permiso de micrófono y solo se usa cuando el usuario pulsa "Hablar".
  */
+import { readJson, writeJson } from '../security/storage';
+
 export function canSpeak(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
 
-function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
-  const voices = window.speechSynthesis.getVoices();
-  return (
-    voices.find((v) => v.lang === lang && /google|natural|samantha|daniel/i.test(v.name)) ??
-    voices.find((v) => v.lang === lang) ??
-    voices.find((v) => v.lang.startsWith(lang.slice(0, 2)))
-  );
+/* ------------------------------------------------------------------ */
+/* Elección de voz: se prefieren las voces neuronales/naturales.       */
+/* ------------------------------------------------------------------ */
+
+const PREF_KEY = 'aprender-ingles.voice';
+
+export interface VoicePrefs {
+  /** voiceURI elegida por el usuario (vacío = automática). */
+  voiceURI: string;
+  /** voiceURI de la segunda voz para diálogos (vacío = automática). */
+  partnerURI: string;
+  /** Velocidad base (1 = natural). */
+  rate: number;
 }
 
-export function speak(text: string, opts: { rate?: number; lang?: string } = {}): Promise<void> {
-  return new Promise((resolve) => {
-    if (!canSpeak()) return resolve();
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = opts.lang ?? 'en-US';
-    u.rate = opts.rate ?? 0.95;
-    const voice = pickVoice(u.lang);
-    if (voice) u.voice = voice;
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-    window.speechSynthesis.speak(u);
-  });
+export function getVoicePrefs(): VoicePrefs {
+  const p = readJson<Partial<VoicePrefs>>('local', PREF_KEY, {});
+  const rate = typeof p.rate === 'number' && p.rate >= 0.5 && p.rate <= 1.5 ? p.rate : 1;
+  return {
+    voiceURI: typeof p.voiceURI === 'string' ? p.voiceURI : '',
+    partnerURI: typeof p.partnerURI === 'string' ? p.partnerURI : '',
+    rate,
+  };
+}
+
+export function setVoicePrefs(p: Partial<VoicePrefs>): VoicePrefs {
+  const next = { ...getVoicePrefs(), ...p };
+  writeJson('local', PREF_KEY, next);
+  return next;
+}
+
+/** Voces de "efectos" o muy robóticas que nunca se eligen automáticamente. */
+const NOVELTY =
+  /espeak|compact|albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|superstar|trinoids|whisper|wobble|zarvox|pipe organ|fred|junior|ralph|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley/i;
+
+/**
+ * Puntúa una voz según lo natural que suele sonar. Las voces "Natural"/"Online" de
+ * Microsoft Edge, las "Premium/Enhanced" de Apple y las de Google son neuronales.
+ */
+export function scoreVoice(v: Pick<SpeechSynthesisVoice, 'name' | 'lang' | 'localService'>): number {
+  const lang = v.lang.replace('_', '-').toLowerCase();
+  if (!lang.startsWith('en')) return -1000;
+  let s = 0;
+  if (lang === 'en-us') s += 20;
+  else if (lang === 'en-gb' || lang === 'en-ca' || lang === 'en-au') s += 12;
+  else s += 5;
+  const n = v.name.toLowerCase();
+  if (/natural|neural/.test(n)) s += 60;
+  if (/online/.test(n)) s += 15;
+  if (/premium|enhanced|mejorad|siri/.test(n)) s += 50;
+  if (/google/.test(n)) s += 35;
+  if (/\b(aria|jenny|guy|ava|andrew|emma|brian|michelle|christopher|eric|steffan|samantha|alex|allison|zoe|evan|nathan|tom|susan|daniel|serena|libby|sonia|ryan)\b/.test(n)) s += 10;
+  if (NOVELTY.test(n)) s -= 200;
+  return s;
+}
+
+let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null;
+
+/** Las voces se cargan de forma asíncrona (sobre todo en Chrome): esperamos a que estén. */
+export function loadVoices(): Promise<SpeechSynthesisVoice[]> {
+  if (!canSpeak()) return Promise.resolve([]);
+  const now = window.speechSynthesis.getVoices();
+  if (now.length) return Promise.resolve(now);
+  let pending = voicesPromise;
+  if (!pending) {
+    pending = new Promise<SpeechSynthesisVoice[]>((resolve) => {
+      const done = () => {
+        const list = window.speechSynthesis.getVoices();
+        if (list.length) {
+          window.speechSynthesis.removeEventListener('voiceschanged', done);
+          resolve(list);
+        }
+      };
+      window.speechSynthesis.addEventListener('voiceschanged', done);
+      // Algunos navegadores nunca disparan el evento: no bloqueamos más de 1,5 s.
+      setTimeout(() => {
+        window.speechSynthesis.removeEventListener('voiceschanged', done);
+        resolve(window.speechSynthesis.getVoices());
+      }, 1500);
+    }).then((list) => {
+      if (!list.length) voicesPromise = null;
+      return list;
+    });
+    voicesPromise = pending;
+  }
+  return pending;
+}
+
+/** Voces en inglés ordenadas de más a menos natural. */
+export async function englishVoices(): Promise<SpeechSynthesisVoice[]> {
+  const list = await loadVoices();
+  return list
+    .filter((v) => scoreVoice(v) > -1000)
+    .sort((a, b) => scoreVoice(b) - scoreVoice(a) || a.name.localeCompare(b.name));
+}
+
+export function isNaturalVoice(v: Pick<SpeechSynthesisVoice, 'name' | 'lang' | 'localService'>): boolean {
+  return scoreVoice(v) >= 50;
+}
+
+/** Devuelve la voz principal (0) o la del segundo interlocutor (1). */
+async function pickVoice(speaker: 0 | 1): Promise<SpeechSynthesisVoice | undefined> {
+  const voices = await englishVoices();
+  if (!voices.length) return undefined;
+  const prefs = getVoicePrefs();
+  const main = voices.find((v) => v.voiceURI === prefs.voiceURI) ?? voices[0];
+  if (speaker === 0) return main;
+  const partner = voices.find((v) => v.voiceURI === prefs.partnerURI && v !== main);
+  if (partner) return partner;
+  // Segunda mejor voz distinta, preferiblemente del mismo "tipo" (natural) y acento.
+  return voices.find((v) => v !== main && v.lang === main?.lang) ?? voices.find((v) => v !== main) ?? main;
+}
+
+/**
+ * Trocea textos largos por frases: algunas voces de Chrome se cortan a los ~15 s y,
+ * además, las pausas entre frases suenan más naturales.
+ */
+export function splitForSpeech(text: string): string[] {
+  const parts = text.match(/[^.!?…]+[.!?…]+["”’)]*\s*|[^.!?…]+$/g) ?? [text];
+  const out: string[] = [];
+  let buf = '';
+  for (const p of parts) {
+    if ((buf + p).length > 180 && buf) {
+      out.push(buf.trim());
+      buf = '';
+    }
+    buf += p;
+  }
+  if (buf.trim()) out.push(buf.trim());
+  return out.length ? out : [text];
+}
+
+let speakToken = 0;
+
+export interface SpeakOptions {
+  /** Multiplicador sobre la velocidad elegida por el usuario (p. ej. 0.75 = despacio). */
+  rate?: number;
+  /** 0 = voz principal, 1 = segunda voz (para el otro personaje de un diálogo). */
+  speaker?: 0 | 1;
+  /** Fuerza una voz concreta (para probar voces en Ajustes). */
+  voiceURI?: string;
+}
+
+export async function speak(text: string, opts: SpeakOptions = {}): Promise<void> {
+  if (!canSpeak() || !text.trim()) return;
+  const token = ++speakToken;
+  window.speechSynthesis.cancel();
+  const voices = opts.voiceURI ? await englishVoices() : [];
+  const voice = voices.find((v) => v.voiceURI === opts.voiceURI) ?? (await pickVoice(opts.speaker ?? 0));
+  if (token !== speakToken) return; // otra llamada más reciente tomó el control
+  const prefs = getVoicePrefs();
+  const rate = Math.min(1.5, Math.max(0.5, prefs.rate * (opts.rate ?? 1)));
+  for (const chunk of splitForSpeech(text)) {
+    if (token !== speakToken) return;
+    await new Promise<void>((resolve) => {
+      const u = new SpeechSynthesisUtterance(chunk);
+      u.lang = voice?.lang ?? 'en-US';
+      if (voice) u.voice = voice;
+      u.rate = rate;
+      u.pitch = 1;
+      u.onend = () => resolve();
+      u.onerror = () => resolve();
+      window.speechSynthesis.speak(u);
+    });
+  }
 }
 
 export function stopSpeaking(): void {
+  speakToken++;
   if (canSpeak()) window.speechSynthesis.cancel();
 }
 

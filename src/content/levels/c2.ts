@@ -1,17 +1,19 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
+import { techC2 } from './tech/c2';
 
 const c2: Level = {
   id: 'c2',
   name: 'C2',
   label: 'Maestría',
-  description: 'Modismos, matices finos y escritura académica.',
+  description: 'Jerga real de equipos de ingeniería, modismos, matices finos y escritura académica.',
   color: '#ec4899',
   canDo: [
     'Comprender prácticamente todo lo que oyes o lees, incluidos matices implícitos.',
     'Usar modismos y expresiones idiomáticas con naturalidad y precisión.',
     'Adaptar el registro (coloquial, neutro, académico) con total control.',
     'Escribir textos académicos claros, cohesionados y bien estructurados.',
+    'Hablar como un ingeniero nativo: jerga, ironía y phrasal verbs técnicos.',
   ],
   topics: [
     {
@@ -229,6 +231,7 @@ const c2: Level = {
         q('___ these limitations, the study offers valuable insights.', ['Notwithstanding', 'Hence', 'Whereas', 'Moreover'], 0),
       ],
     },
+    techC2,
   ],
 };
 

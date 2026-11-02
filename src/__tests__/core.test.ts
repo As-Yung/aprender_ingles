@@ -3,7 +3,7 @@ import { buildTotp, createTotpSecret, validateTotp } from '../core/auth/totp';
 import { checkPassword, generateTemporaryPassword, validateUsername } from '../core/auth/validation';
 import { hashPassword, verifyPassword } from '../core/security/crypto';
 import { review } from '../core/srs/leitner';
-import { similarity } from '../core/speech/speech';
+import { scoreVoice, similarity, splitForSpeech } from '../core/speech/speech';
 import { tokenize } from '../modules/reading/ReadingSection';
 
 describe('política de contraseñas', () => {
@@ -74,5 +74,26 @@ describe('lectura asistida', () => {
     const gloss = new Map([['brother and sister', 'hermanos']]);
     const tokens = tokenize('They are brother and sister.', gloss);
     expect(tokens.some((t) => t.key === 'brother and sister')).toBe(true);
+  });
+});
+
+describe('elección de voz', () => {
+  const voice = (name: string, lang = 'en-US') => ({ name, lang, localService: true });
+  it('prefiere voces neuronales/naturales sobre las robóticas', () => {
+    const natural = scoreVoice(voice('Microsoft Aria Online (Natural) - English (United States)'));
+    const google = scoreVoice(voice('Google US English'));
+    const basic = scoreVoice(voice('Microsoft David - English (United States)'));
+    const robot = scoreVoice(voice('eSpeak English'));
+    expect(natural).toBeGreaterThan(google);
+    expect(google).toBeGreaterThan(basic);
+    expect(basic).toBeGreaterThan(robot);
+    expect(scoreVoice(voice('Paulina', 'es-MX'))).toBeLessThan(robot);
+  });
+  it('trocea textos largos por frases', () => {
+    const long = 'First sentence here. '.repeat(20);
+    const parts = splitForSpeech(long);
+    expect(parts.length).toBeGreaterThan(1);
+    parts.forEach((p) => expect(p.length).toBeLessThanOrEqual(200));
+    expect(splitForSpeech('Hello there')).toEqual(['Hello there']);
   });
 });

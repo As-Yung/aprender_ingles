@@ -1,17 +1,19 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
+import { techB1 } from './tech/b1';
 
 const b1: Level = {
   id: 'b1',
   name: 'B1',
   label: 'Intermedio',
-  description: 'Planes de viaje, experiencias de vida y opiniones sencillas.',
+  description: 'Planes de proyecto y de viaje, dailies con tu equipo, experiencias y opiniones sencillas.',
   color: '#3b82f6',
   canDo: [
     'Desenvolverte en la mayoría de situaciones de un viaje.',
     'Hablar de planes, intenciones y predicciones.',
     'Contar experiencias de vida y relacionarlas con el presente.',
     'Dar tu opinión y justificarla brevemente.',
+    'Participar en una daily: qué hiciste, qué harás y qué te bloquea.',
   ],
   topics: [
     {
@@ -225,6 +227,7 @@ const b1: Level = {
         q('— Is lunch ready? — Yes, I’ve ___ made it.', ['yet', 'just', 'ever', 'for'], 1),
       ],
     },
+    techB1,
   ],
 };
 

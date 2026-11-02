@@ -1,0 +1,118 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** C1 · Tecnología: debatir decisiones de arquitectura con matices. */
+export const techC1: Topic = {
+  id: 'design-review',
+  title: 'Design review: trade-offs',
+  titleEs: '🛠️ Revisión de diseño: debatir compromisos',
+  emoji: '🏗️',
+  grammarFocus: 'Matizar, discrepar con tacto y proponer alternativas',
+  summary: 'Participa en una revisión de arquitectura: defiende tu propuesta, cuestiona otras sin sonar brusco y llega a acuerdos.',
+  keyPoints: [
+    'Proponer sin imponer: I’d suggest… / It might be worth… / What if we…?',
+    'Discrepar con tacto: I see your point, but… / I’m not sure that holds if…',
+    'Hablar de compromisos: The trade-off is… / It comes down to…',
+    'Comprobar entendimiento: Just to make sure we’re on the same page…',
+    'Cerrar: Let’s go with… for now and revisit it later.',
+  ],
+  vocabulary: [
+    v('trade-off', 'compromiso, equilibrio entre ventajas y costes', '⚖️', 'Debate', 'The trade-off is cost versus latency.', 'El compromiso es coste frente a latencia.', '/ˈtreɪd ɔːf/'),
+    v('bottleneck', 'cuello de botella', '🍾', 'Rendimiento', 'The database is the real bottleneck.', 'La base de datos es el verdadero cuello de botella.', '/ˈbɑːtlnek/'),
+    v('single point of failure', 'punto único de fallo', '🎯', 'Fiabilidad', 'One broker is a single point of failure.', 'Un solo broker es un punto único de fallo.'),
+    v('overkill', 'excesivo, matar moscas a cañonazos', '💣', 'Debate', 'Kubernetes feels like overkill for ten devices.', 'Kubernetes parece excesivo para diez dispositivos.', '/ˈoʊvərkɪl/'),
+    v('tech debt', 'deuda técnica', '💳', 'Calidad', 'This shortcut will add tech debt.', 'Este atajo añadirá deuda técnica.'),
+    v('push back', 'oponerse, cuestionar', '✋', 'Debate', 'I’d push back on that a little.', 'Yo cuestionaría eso un poco.'),
+    v('sanity check', 'comprobación rápida de sentido común', '🧐', 'Debate', 'Can you sanity-check my numbers?', '¿Puedes revisar rápido mis números?'),
+    v('ballpark', 'estimación aproximada', '⚾', 'Estimar', 'Can you give me a ballpark figure?', '¿Me das una cifra aproximada?', '/ˈbɔːlpɑːrk/'),
+    v('scale out', 'escalar horizontalmente', '↔️', 'Rendimiento', 'It’s easier to scale out than scale up.', 'Es más fácil escalar en horizontal que en vertical.'),
+    v('rule of thumb', 'regla general práctica', '👍', 'Estimar', 'As a rule of thumb, keep messages under 1 KB.', 'Como regla general, mantén los mensajes por debajo de 1 KB.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Proponer con suavidad (hedging)' },
+    { kind: 'table', headers: ['Directo (brusco)', 'Matizado (natural en equipos)'], rows: [
+      ['Use Kafka.', 'I’d suggest we look at Kafka.'],
+      ['That’s wrong.', 'I’m not sure that holds at scale.'],
+      ['It’s too expensive.', 'It might be a bit pricey for what we need.'],
+      ['Do it my way.', 'What if we tried a simpler approach first?'],
+    ] },
+    { kind: 'heading', text: '2. Discrepar sin crear tensión' },
+    { kind: 'examples', items: [
+      { en: 'I see where you’re coming from, but I’d push back a little on the cost.', es: 'Entiendo tu punto de vista, pero cuestionaría un poco el coste.' },
+      { en: 'That makes sense in theory. In practice, though, the broker becomes a bottleneck.', es: 'Tiene sentido en teoría. En la práctica, sin embargo, el broker se vuelve un cuello de botella.' },
+      { en: 'Fair point. Let’s park that and come back to it.', es: 'Buen punto. Dejémoslo aparcado y volvamos luego.' },
+    ] },
+    { kind: 'formula', label: 'Argumento equilibrado', parts: ['Option A gives us…', 'but', 'the trade-off is…', 'so it comes down to…'] },
+    { kind: 'tip', text: 'Los nativos usan mucho “I’d” (I would) para suavizar: “I’d argue…”, “I’d go with…”, “I’d be careful with…”. Pronúncialo corto: “aid”.' },
+    { kind: 'heading', text: '3. Cerrar la discusión' },
+    { kind: 'list', items: [
+      'Let’s go with option B for now and revisit it next quarter.',
+      'Can we agree on a ballpark before we commit?',
+      'Just to make sure we’re on the same page: we keep one broker, but add a failover.',
+    ] },
+    { kind: 'warning', text: '“Actually” no significa “actualmente” sino “en realidad”. Para “actualmente” usa “currently”.' },
+  ],
+  conversation: {
+    title: 'Choosing a message broker',
+    context: 'Dos ingenieros debaten en una revisión de diseño cómo escalar la plataforma IoT.',
+    lines: [
+      { speaker: 'Priya', en: 'So I’d suggest we move to Kafka. We’re going to have ten times more devices next year.', es: 'Yo propondría pasar a Kafka. El año que viene tendremos diez veces más dispositivos.' },
+      { speaker: 'Tom', en: 'I see where you’re coming from, but honestly, isn’t that a bit of an overkill right now?', es: 'Entiendo tu punto, pero sinceramente, ¿no es un poco excesivo ahora mismo?' },
+      { speaker: 'Priya', en: 'Fair point. But our single MQTT broker is already a bottleneck, and it’s a single point of failure.', es: 'Buen punto. Pero nuestro único broker MQTT ya es un cuello de botella y un punto único de fallo.' },
+      { speaker: 'Tom', en: 'True. What if we just clustered the broker first? It’s way less tech debt to manage.', es: 'Cierto. ¿Y si primero ponemos el broker en clúster? Es mucha menos deuda técnica que gestionar.' },
+      { speaker: 'Priya', en: 'That could work. The trade-off is we might hit the same wall in a year.', es: 'Podría funcionar. El compromiso es que podríamos chocar con el mismo muro en un año.' },
+      { speaker: 'Tom', en: 'Maybe. Can you give me a ballpark of the message volume?', es: 'Puede. ¿Me das una cifra aproximada del volumen de mensajes?' },
+      { speaker: 'Priya', en: 'Roughly fifty thousand messages per second at peak.', es: 'Unos cincuenta mil mensajes por segundo en el pico.' },
+      { speaker: 'Tom', en: 'Okay, let’s go with the cluster for now and revisit Kafka next quarter. Sound good?', es: 'Vale, vamos con el clúster por ahora y revisamos Kafka el próximo trimestre. ¿Te parece?' },
+      { speaker: 'Priya', en: 'Sounds good. I’ll write it up so we’re all on the same page.', es: 'Me parece bien. Lo dejo por escrito para que todos estemos alineados.' },
+    ],
+    usefulPhrases: [
+      { en: 'I see where you’re coming from, but…', es: 'Entiendo tu punto de vista, pero…' },
+      { en: 'Fair point.', es: 'Buen punto / Es justo.' },
+      { en: 'We might hit the same wall.', es: 'Podríamos chocar con el mismo problema.' },
+      { en: 'Sound good?', es: '¿Te parece?' },
+    ],
+  },
+  reading: {
+    title: 'Boring technology is a feature',
+    paragraphs: [
+      'Engineers love new tools, but in IoT, where devices may run unattended for years, choosing proven technology is often the smarter move.',
+      'That is not to say innovation should be avoided altogether. Rather, each new component ought to justify the operational cost it adds: monitoring, upgrades and on-call stress.',
+      'A useful rule of thumb is to spend your “innovation budget” only where it gives you a clear competitive edge, and keep everything else as boring as possible.',
+    ],
+    translation: [
+      'A los ingenieros les encantan las herramientas nuevas, pero en IoT, donde los dispositivos pueden funcionar sin supervisión durante años, elegir tecnología probada suele ser la jugada más inteligente.',
+      'Eso no quiere decir que haya que evitar la innovación por completo. Más bien, cada componente nuevo debería justificar el coste operativo que añade: monitorización, actualizaciones y el estrés de las guardias.',
+      'Una regla práctica útil es gastar tu “presupuesto de innovación” solo donde te dé una ventaja competitiva clara, y mantener todo lo demás lo más aburrido posible.',
+    ],
+    glossary: {
+      unattended: 'sin supervisión',
+      proven: 'probada',
+      'smarter move': 'jugada más inteligente',
+      altogether: 'por completo',
+      'ought to': 'debería',
+      'on-call': 'de guardia',
+      'competitive edge': 'ventaja competitiva',
+    },
+    questions: [
+      q('Why is proven technology often better in IoT?', ['It is cheaper to buy', 'Devices may run unattended for years', 'Engineers hate new tools', 'It is faster'], 1),
+      q('According to the text, innovation should be…', ['avoided completely', 'justified by its operational cost', 'used everywhere', 'left to managers'], 1),
+      q('Where should you spend your “innovation budget”?', ['On monitoring', 'Where it gives a clear competitive edge', 'On every component', 'Nowhere'], 1),
+    ],
+  },
+  quiz: [
+    q('La forma más diplomática de discrepar es:', ['You’re wrong.', 'I see your point, but I’d push back a little.', 'No way.', 'That’s stupid.'], 1),
+    q('“Single point of failure” significa:', ['Un error de una sola línea', 'Un componente cuya caída lo tumba todo', 'Un fallo muy pequeño', 'Un punto de venta'], 1),
+    q('“Can you give me a ___ figure?” (estimación aproximada)', ['ballpark', 'baseline', 'backlog', 'benchmark'], 0),
+    q('“Actually” significa:', ['actualmente', 'en realidad', 'activamente', 'actualizado'], 1),
+    q('Using Kubernetes for ten devices feels like ___.', ['overkill', 'overflow', 'overtime', 'overview'], 0),
+    q('¿Qué frase cierra bien una discusión?', ['Let’s go with B for now and revisit it later.', 'Finish.', 'I win.', 'We will see never.'], 0),
+  ],
+  dictation: [
+    'I see where you’re coming from, but I’d push back a little.',
+    'The trade-off is cost versus latency.',
+    'Our broker is a single point of failure.',
+    'Can you give me a ballpark figure?',
+    'Let’s go with the cluster for now and revisit it later.',
+  ],
+};

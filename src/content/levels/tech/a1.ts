@@ -1,0 +1,118 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** A1 · Tecnología: presentarte en un equipo de ingeniería (to be + presente simple). */
+export const techA1: Topic = {
+  id: 'tech-team-intro',
+  title: 'Meet the tech team',
+  titleEs: '🛠️ Tu equipo de tecnología',
+  emoji: '👩‍💻',
+  grammarFocus: 'To be + presente simple para hablar de tu trabajo',
+  summary: 'Preséntate en un equipo de ingeniería de sistemas: quién eres, qué haces y con qué tecnología trabajas, de forma casual.',
+  keyPoints: [
+    'I’m a + profesión → I’m a systems engineer.',
+    'I work on/with + tecnología → I work with sensors and the cloud.',
+    'Usa contracciones al hablar: I’m, you’re, it’s, what’s.',
+    'Saludo casual entre compañeros: Hey! / Hi there! / What’s up?',
+    'Para preguntar el trabajo: What do you do? / What are you working on?',
+  ],
+  vocabulary: [
+    v('engineer', 'ingeniero/a', '👷', 'Personas', 'I’m a systems engineer.', 'Soy ingeniero de sistemas.', '/ˌendʒɪˈnɪr/'),
+    v('developer', 'desarrollador/a', '👩‍💻', 'Personas', 'She’s a backend developer.', 'Ella es desarrolladora backend.', '/dɪˈveləpər/'),
+    v('team', 'equipo', '🤝', 'Personas', 'Our team is small but awesome.', 'Nuestro equipo es pequeño pero genial.', '/tiːm/'),
+    v('device', 'dispositivo', '📟', 'Cosas', 'This device is a smart thermostat.', 'Este dispositivo es un termostato inteligente.', '/dɪˈvaɪs/'),
+    v('sensor', 'sensor', '🌡️', 'Cosas', 'The sensor measures temperature.', 'El sensor mide la temperatura.', '/ˈsensər/'),
+    v('laptop', 'portátil', '💻', 'Cosas', 'My laptop is really slow today.', 'Mi portátil va muy lento hoy.', '/ˈlæptɑːp/'),
+    v('the cloud', 'la nube', '☁️', 'Conceptos', 'Our data is in the cloud.', 'Nuestros datos están en la nube.', '/ðə klaʊd/'),
+    v('data', 'datos', '📊', 'Conceptos', 'The sensors send data every minute.', 'Los sensores envían datos cada minuto.', '/ˈdeɪtə/'),
+    v('network', 'red', '🌐', 'Conceptos', 'The network is down.', 'La red está caída.', '/ˈnetwɜːrk/'),
+    v('meeting', 'reunión', '📅', 'En la oficina', 'We have a quick meeting at ten.', 'Tenemos una reunión rápida a las diez.', '/ˈmiːtɪŋ/'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Preséntate como en la vida real' },
+    { kind: 'formula', label: 'Tu rol', parts: ['I’m', 'a / an', 'profesión'] },
+    { kind: 'formula', label: 'Tu trabajo', parts: ['I', 'work on / with', 'tecnología o proyecto'] },
+    { kind: 'examples', items: [
+      { en: 'Hey, I’m Ana. I’m a systems engineer.', es: 'Hola, soy Ana. Soy ingeniera de sistemas.' },
+      { en: 'I work on IoT devices for smart farms.', es: 'Trabajo en dispositivos IoT para granjas inteligentes.' },
+      { en: 'I work with sensors, networks and the cloud.', es: 'Trabajo con sensores, redes y la nube.' },
+    ] },
+    { kind: 'tip', text: 'Al hablar, los nativos SIEMPRE contraen: “I am a developer” suena a robot; “I’m a developer” suena natural.' },
+    { kind: 'heading', text: '2. Preguntas casuales entre compañeros' },
+    { kind: 'table', headers: ['Pregunta', 'Significado', 'Respuesta típica'], rows: [
+      ['What do you do?', '¿A qué te dedicas?', 'I’m a developer.'],
+      ['What are you working on?', '¿En qué estás trabajando?', 'A new sensor app.'],
+      ['Where are you from?', '¿De dónde eres?', 'I’m from Colombia.'],
+      ['How’s it going?', '¿Qué tal?', 'Pretty good, thanks!'],
+    ] },
+    { kind: 'heading', text: '3. Pronunciación clave' },
+    { kind: 'list', items: [
+      'data → /ˈdeɪtə/ (EE. UU.): “déita”.',
+      'device → acento al final: de-VICE.',
+      'engineer → acento al final: en-gi-NEER.',
+      'IoT se dice letra a letra: “ai-ou-ti”.',
+    ] },
+    { kind: 'warning', text: 'No digas “I am engineer”: falta el artículo. Correcto: “I’m an engineer” (an porque engineer empieza con sonido vocal).' },
+  ],
+  conversation: {
+    title: 'First day on the team',
+    context: 'Es tu primer día en una empresa de IoT. Una compañera te saluda en la cocina.',
+    lines: [
+      { speaker: 'Maya', en: 'Hey! You’re the new engineer, right?', es: '¡Hola! Eres el nuevo ingeniero, ¿verdad?' },
+      { speaker: 'Leo', en: 'Yeah, that’s me. I’m Leo. Nice to meet you!', es: 'Sí, soy yo. Soy Leo. ¡Encantado!' },
+      { speaker: 'Maya', en: 'Nice to meet you too. I’m Maya, I’m a backend developer.', es: 'Igualmente. Soy Maya, desarrolladora backend.' },
+      { speaker: 'Leo', en: 'Cool. What are you working on?', es: 'Genial. ¿En qué estás trabajando?' },
+      { speaker: 'Maya', en: 'The cloud platform. It gets data from all the sensors.', es: 'La plataforma en la nube. Recibe los datos de todos los sensores.' },
+      { speaker: 'Leo', en: 'Nice! I work with the devices, so we’re a team.', es: '¡Bien! Yo trabajo con los dispositivos, así que somos un equipo.' },
+      { speaker: 'Maya', en: 'Awesome. We have a quick meeting at ten. See you there?', es: 'Genial. Tenemos una reunión rápida a las diez. ¿Nos vemos allí?' },
+      { speaker: 'Leo', en: 'Sure, see you there!', es: '¡Claro, nos vemos allí!' },
+    ],
+    usefulPhrases: [
+      { en: 'You’re the new…, right?', es: 'Eres el/la nuevo/a…, ¿verdad?' },
+      { en: 'That’s me.', es: 'Ese/a soy yo.' },
+      { en: 'What are you working on?', es: '¿En qué estás trabajando?' },
+      { en: 'See you there!', es: '¡Nos vemos allí!' },
+    ],
+  },
+  reading: {
+    title: 'My job in IoT',
+    paragraphs: [
+      'Hi, I’m Sam. I’m a systems engineer at a small IoT company. We make smart sensors for farms.',
+      'The sensors measure water and temperature. They send data to the cloud every five minutes.',
+      'I work with the devices and the network. My team is great, and every morning we have a quick meeting.',
+    ],
+    translation: [
+      'Hola, soy Sam. Soy ingeniero de sistemas en una pequeña empresa de IoT. Hacemos sensores inteligentes para granjas.',
+      'Los sensores miden el agua y la temperatura. Envían datos a la nube cada cinco minutos.',
+      'Trabajo con los dispositivos y la red. Mi equipo es genial y cada mañana tenemos una reunión rápida.',
+    ],
+    glossary: {
+      'smart sensors': 'sensores inteligentes',
+      farms: 'granjas',
+      measure: 'miden',
+      'every five minutes': 'cada cinco minutos',
+      'every morning': 'cada mañana',
+      quick: 'rápida',
+    },
+    questions: [
+      q('What does Sam’s company make?', ['Laptops', 'Smart sensors for farms', 'Mobile games', 'Cars'], 1),
+      q('How often do the sensors send data?', ['Every hour', 'Every day', 'Every five minutes', 'Every second'], 2),
+      q('What does Sam work with?', ['The devices and the network', 'Only the website', 'Animals', 'Sales'], 0),
+    ],
+  },
+  quiz: [
+    q('Elige la presentación correcta:', ['I engineer.', 'I’m an engineer.', 'I’m engineer.', 'I is an engineer.'], 1, 'Necesitas “to be” + artículo: I’m an engineer.'),
+    q('“Trabajo con sensores” es:', ['I work with sensors.', 'I works with sensors.', 'I working sensors.', 'I am work with sensors.'], 0),
+    q('The sensors ___ data to the cloud.', ['sends', 'send', 'sending', 'is send'], 1, 'They → verbo sin -s.'),
+    q('¿Qué pregunta es la más casual para “¿Qué tal?”?', ['How do you do?', 'How’s it going?', 'How are you doing it?', 'What is it?'], 1),
+    q('“La red está caída” es:', ['The network is down.', 'The network is fall.', 'The net is under.', 'The network is low.'], 0),
+    q('She ___ a backend developer.', ['are', 'am', 'is', 'be'], 2),
+  ],
+  dictation: [
+    'I’m a systems engineer.',
+    'I work with sensors and the cloud.',
+    'What are you working on?',
+    'The network is down.',
+    'We have a quick meeting at ten.',
+  ],
+};

@@ -1,17 +1,19 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
+import { techA1 } from './tech/a1';
 
 const a1: Level = {
   id: 'a1',
   name: 'A1',
   label: 'Principiante',
-  description: 'Frases básicas, presentarte y hablar de tu día a día.',
+  description: 'Frases básicas, presentarte en tu equipo de tecnología y hablar de tu día a día.',
   color: '#10b981',
   canDo: [
     'Saludar, presentarte y presentar a otras personas.',
     'Dar y pedir datos personales básicos (nombre, origen, trabajo).',
     'Describir tu rutina diaria con frases sencillas.',
     'Entender textos muy cortos sobre temas cotidianos.',
+    'Presentarte en un equipo de ingeniería y decir con qué tecnología trabajas.',
   ],
   topics: [
     {
@@ -254,6 +256,7 @@ const a1: Level = {
         q('He ___ late.', ['never is', 'is never', 'never be', 'nevers is'], 1, 'Con “to be” el adverbio va después.'),
       ],
     },
+    techA1,
   ],
 };
 

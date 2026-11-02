@@ -14,10 +14,11 @@ export function Layout() {
           <span className="brand__logo" aria-hidden="true">
             EN
           </span>
-          <span>Aprender Inglés</span>
+          <span>Aprender Inglés · Tech Talk</span>
         </NavLink>
         <nav className="topbar__nav" aria-label="Principal">
           <NavLink to="/">Inicio</NavLink>
+          <NavLink to="/voz">🔊 Voz</NavLink>
           {session?.user.role === 'admin' && <NavLink to="/admin">Administración</NavLink>}
         </nav>
         <div className="topbar__user">
@@ -47,7 +48,7 @@ export function Layout() {
       <main className="content">
         <Outlet />
       </main>
-      <footer className="footer muted">Aprender Inglés · Niveles A1–C2 del MCER</footer>
+      <footer className="footer muted">Aprender Inglés · Inglés hablado y casual para ingeniería de sistemas e IoT · Niveles A1–C2</footer>
     </div>
   );
 }

@@ -1,0 +1,116 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** B2 · Tecnología: explicar cómo funciona un sistema IoT (condicionales + pasiva). */
+export const techB2: Topic = {
+  id: 'how-iot-works',
+  title: 'Explaining how the system works',
+  titleEs: '🛠️ Explicar cómo funciona un sistema IoT',
+  emoji: '🛰️',
+  grammarFocus: 'Condicionales 0/1 y voz pasiva para describir sistemas',
+  summary: 'Explica con soltura la arquitectura de un sistema IoT: qué pasa si algo falla, cómo se procesan y protegen los datos.',
+  keyPoints: [
+    'Condicional 0 → reglas del sistema: If the battery drops below 10%, the device sends an alert.',
+    'Condicional 1 → consecuencias probables: If we add more sensors, we’ll need another gateway.',
+    'Pasiva → describir procesos: Data is encrypted, stored and analyzed in the cloud.',
+    'unless = if… not: The device sleeps unless motion is detected.',
+    'Para sonar natural: “Basically…”, “So what happens is…”, “The idea is that…”.',
+  ],
+  vocabulary: [
+    v('edge computing', 'computación en el borde (cerca del dispositivo)', '🧠', 'Arquitectura', 'With edge computing, data is processed on site.', 'Con edge computing, los datos se procesan en el sitio.'),
+    v('latency', 'latencia (retardo)', '⏱️', 'Arquitectura', 'Low latency is critical for alarms.', 'Una latencia baja es crítica para las alarmas.', '/ˈleɪtənsi/'),
+    v('bandwidth', 'ancho de banda', '📶', 'Arquitectura', 'We don’t have much bandwidth out there.', 'No tenemos mucho ancho de banda allí.', '/ˈbændwɪdθ/'),
+    v('scalable', 'escalable', '📈', 'Arquitectura', 'The platform has to be scalable.', 'La plataforma tiene que ser escalable.', '/ˈskeɪləbl/'),
+    v('threshold', 'umbral', '🎚️', 'Lógica', 'If the temperature goes over the threshold, we get an alert.', 'Si la temperatura supera el umbral, recibimos una alerta.', '/ˈθreʃhoʊld/'),
+    v('buffer', 'almacenar temporalmente', '📥', 'Lógica', 'Readings are buffered if the connection drops.', 'Las lecturas se guardan temporalmente si se cae la conexión.', '/ˈbʌfər/'),
+    v('over-the-air update', 'actualización remota (OTA)', '📲', 'Mantenimiento', 'Firmware is updated over the air.', 'El firmware se actualiza de forma remota.'),
+    v('downtime', 'tiempo de inactividad', '⛔', 'Mantenimiento', 'We can’t afford any downtime.', 'No nos podemos permitir caídas.', '/ˈdaʊntaɪm/'),
+    v('encrypted', 'cifrado', '🔐', 'Seguridad', 'All traffic is encrypted with TLS.', 'Todo el tráfico va cifrado con TLS.', '/ɪnˈkrɪptɪd/'),
+    v('credentials', 'credenciales', '🔑', 'Seguridad', 'Credentials are never stored on the device.', 'Las credenciales nunca se guardan en el dispositivo.', '/krəˈdenʃlz/'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Reglas del sistema (condicional 0)' },
+    { kind: 'formula', label: 'Condicional 0', parts: ['If', 'presente', ',', 'presente'] },
+    { kind: 'examples', items: [
+      { en: 'If the connection drops, the gateway buffers the readings.', es: 'Si se cae la conexión, el gateway guarda las lecturas.' },
+      { en: 'The device goes to sleep unless it detects motion.', es: 'El dispositivo se duerme a menos que detecte movimiento.' },
+    ] },
+    { kind: 'heading', text: '2. Consecuencias probables (condicional 1)' },
+    { kind: 'formula', label: 'Condicional 1', parts: ['If', 'presente', ',', 'will + verbo'] },
+    { kind: 'examples', items: [
+      { en: 'If we process data at the edge, we’ll save a lot of bandwidth.', es: 'Si procesamos los datos en el borde, ahorraremos mucho ancho de banda.' },
+      { en: 'If we don’t encrypt it, someone will sniff the traffic.', es: 'Si no lo ciframos, alguien interceptará el tráfico.' },
+    ] },
+    { kind: 'heading', text: '3. Describir el flujo de datos (pasiva)' },
+    { kind: 'table', headers: ['Paso', 'Pasiva', 'Significado'], rows: [
+      ['1', 'Data is collected by the sensors.', 'Los sensores recogen los datos.'],
+      ['2', 'It’s sent to the gateway over LoRa.', 'Se envía al gateway por LoRa.'],
+      ['3', 'It’s encrypted and pushed to the cloud.', 'Se cifra y se sube a la nube.'],
+      ['4', 'It’s stored and shown on a dashboard.', 'Se guarda y se muestra en un panel.'],
+    ] },
+    { kind: 'tip', text: 'Explicar en voz alta suena más natural con muletillas cortas: “So basically…”, “What happens is…”, “and then…”. Úsalas, no son errores.' },
+    { kind: 'warning', text: '“If it will rain…” ✗. Tras “if” en el condicional 1 va presente: “If it rains, the sensor will…” ✓' },
+  ],
+  conversation: {
+    title: 'Walking a client through the architecture',
+    context: 'Una ingeniera explica a un cliente cómo funciona el sistema de monitorización de su fábrica.',
+    lines: [
+      { speaker: 'Client', en: 'So how does it actually work? Where does the data go?', es: 'Entonces, ¿cómo funciona en realidad? ¿A dónde van los datos?' },
+      { speaker: 'Engineer', en: 'Basically, data is collected by the sensors and sent to a gateway on site.', es: 'Básicamente, los sensores recogen los datos y los envían a un gateway en la planta.' },
+      { speaker: 'Client', en: 'And what happens if the internet goes down?', es: '¿Y qué pasa si se cae internet?' },
+      { speaker: 'Engineer', en: 'Good question. If the connection drops, the gateway buffers everything and syncs later.', es: 'Buena pregunta. Si se cae la conexión, el gateway lo guarda todo y sincroniza después.' },
+      { speaker: 'Client', en: 'Nice. Is the data secure?', es: 'Bien. ¿Los datos son seguros?' },
+      { speaker: 'Engineer', en: 'Yeah, it’s encrypted end to end, and credentials are never stored on the devices.', es: 'Sí, va cifrado de extremo a extremo y las credenciales nunca se guardan en los dispositivos.' },
+      { speaker: 'Client', en: 'What if we add another production line next year?', es: '¿Y si añadimos otra línea de producción el año que viene?' },
+      { speaker: 'Engineer', en: 'No problem. If you add more sensors, we’ll just plug in another gateway. It’s fully scalable.', es: 'Sin problema. Si añaden más sensores, solo conectaremos otro gateway. Es totalmente escalable.' },
+    ],
+    usefulPhrases: [
+      { en: 'So how does it actually work?', es: 'Entonces, ¿cómo funciona en realidad?' },
+      { en: 'Good question.', es: 'Buena pregunta. (para ganar tiempo)' },
+      { en: 'end to end', es: 'de extremo a extremo' },
+      { en: 'What if…?', es: '¿Y si…?' },
+    ],
+  },
+  reading: {
+    title: 'Why edge computing matters',
+    paragraphs: [
+      'In a traditional IoT system, every reading is sent to the cloud. That works fine until you have thousands of sensors and a slow connection.',
+      'With edge computing, data is filtered and processed close to the devices. If a value is normal, it is simply summarized; if it crosses a threshold, an alert is sent immediately.',
+      'This approach reduces latency and bandwidth costs. However, edge devices must be updated over the air, or they will quickly become a security risk.',
+    ],
+    translation: [
+      'En un sistema IoT tradicional, cada lectura se envía a la nube. Eso funciona bien hasta que tienes miles de sensores y una conexión lenta.',
+      'Con edge computing, los datos se filtran y procesan cerca de los dispositivos. Si un valor es normal, simplemente se resume; si cruza un umbral, se envía una alerta de inmediato.',
+      'Este enfoque reduce la latencia y los costes de ancho de banda. Sin embargo, los dispositivos del borde deben actualizarse de forma remota, o se convertirán rápidamente en un riesgo de seguridad.',
+    ],
+    glossary: {
+      'works fine': 'funciona bien',
+      thousands: 'miles',
+      'close to': 'cerca de',
+      summarized: 'resumido',
+      'crosses a threshold': 'cruza un umbral',
+      approach: 'enfoque',
+      'security risk': 'riesgo de seguridad',
+    },
+    questions: [
+      q('Where is data processed with edge computing?', ['Only in the cloud', 'Close to the devices', 'On the client’s phone', 'Nowhere'], 1),
+      q('What happens when a value crosses a threshold?', ['It is deleted', 'An alert is sent immediately', 'The sensor turns off', 'It is summarized'], 1),
+      q('What is the risk if edge devices aren’t updated?', ['Higher latency', 'They become a security risk', 'They use less bandwidth', 'None'], 1),
+    ],
+  },
+  quiz: [
+    q('If the battery ___ below 10%, the device sends an alert.', ['drops', 'will drop', 'dropped', 'would drop'], 0, 'Regla general → condicional 0.'),
+    q('If we add more sensors, we ___ another gateway.', ['need', 'will need', 'needed', 'would needed'], 1),
+    q('All the traffic ___ with TLS.', ['encrypts', 'is encrypted', 'encrypted', 'is encrypting'], 1, 'Pasiva: be + participio.'),
+    q('The device sleeps ___ it detects motion.', ['if', 'unless', 'when not', 'because'], 1),
+    q('“Latency” es:', ['ancho de banda', 'retardo', 'batería', 'umbral'], 1),
+    q('¿Qué frase suena más natural al explicar?', ['Basically, the gateway buffers the data.', 'In a basic form the gateway is buffering data it.', 'Basic the gateway buffers.', 'The gateway basically is buffer.'], 0),
+  ],
+  dictation: [
+    'If the connection drops, the gateway buffers the data.',
+    'All the traffic is encrypted end to end.',
+    'If we add more sensors, we’ll need another gateway.',
+    'Firmware is updated over the air.',
+    'We can’t afford any downtime.',
+  ],
+};

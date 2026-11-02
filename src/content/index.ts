@@ -2,12 +2,12 @@ import type { Level, LevelId, LevelMeta, Topic } from './types';
 
 /** Metadatos ligeros (siempre cargados). El contenido de cada nivel se carga bajo demanda. */
 export const LEVELS: LevelMeta[] = [
-  { id: 'a1', name: 'A1', label: 'Principiante', description: 'Frases básicas, presentarte y hablar de tu día a día.', color: '#10b981' },
-  { id: 'a2', name: 'A2', label: 'Elemental', description: 'Contar experiencias pasadas, comprar y pedir comida.', color: '#22c55e' },
-  { id: 'b1', name: 'B1', label: 'Intermedio', description: 'Planes de viaje, experiencias de vida y opiniones sencillas.', color: '#3b82f6' },
-  { id: 'b2', name: 'B2', label: 'Intermedio alto', description: 'Hipótesis, tecnología y textos de actualidad.', color: '#6366f1' },
-  { id: 'c1', name: 'C1', label: 'Avanzado', description: 'Argumentar con matices, énfasis y registro formal.', color: '#a855f7' },
-  { id: 'c2', name: 'C2', label: 'Maestría', description: 'Modismos, matices finos y escritura académica.', color: '#ec4899' },
+  { id: 'a1', name: 'A1', label: 'Principiante', description: 'Frases básicas, presentarte en tu equipo de tecnología y hablar de tu día a día.', color: '#10b981' },
+  { id: 'a2', name: 'A2', label: 'Elemental', description: 'Contar experiencias pasadas, explicar qué falló en un sistema, comprar y pedir comida.', color: '#22c55e' },
+  { id: 'b1', name: 'B1', label: 'Intermedio', description: 'Planes de proyecto y de viaje, dailies con tu equipo, experiencias y opiniones sencillas.', color: '#3b82f6' },
+  { id: 'b2', name: 'B2', label: 'Intermedio alto', description: 'Hipótesis, explicar arquitecturas IoT y textos de tecnología y actualidad.', color: '#6366f1' },
+  { id: 'c1', name: 'C1', label: 'Avanzado', description: 'Argumentar con matices en revisiones de diseño, énfasis y registro formal.', color: '#a855f7' },
+  { id: 'c2', name: 'C2', label: 'Maestría', description: 'Jerga real de equipos de ingeniería, modismos, matices finos y escritura académica.', color: '#ec4899' },
 ];
 
 const loaders: Record<LevelId, () => Promise<{ default: Level }>> = {
