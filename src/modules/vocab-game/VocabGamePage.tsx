@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { LEVELS, loadLevel } from '../../content';
 import type { LevelId } from '../../content/types';
 import { useProgress } from '../../core/progress/ProgressContext';
@@ -537,6 +538,18 @@ export default function VocabGamePage() {
             </form>
           </section>
 
+          <section className="bloque" aria-labelledby="vbg-duelo">
+            <h2 id="vbg-duelo" className="subtitulo">
+              ⚔️ Duelo contra otros jugadores
+            </h2>
+            <p className="nota">Desafía a alguien que esté en línea en tu mismo nivel. Gana quien deje sin vida al otro respondiendo bien.</p>
+            <div>
+              <Link to="/duelo" className="boton" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                Ir a la sala de duelos
+              </Link>
+            </div>
+          </section>
+
           <details className="bloque instrucciones">
             <summary className="subtitulo">Cómo se juega</summary>
             <ul>
@@ -803,7 +816,7 @@ export default function VocabGamePage() {
   );
 }
 
-function Barra({ clase, etiqueta, actual, maximo }: { clase: string; etiqueta: string; actual: number; maximo: number }) {
+export function Barra({ clase, etiqueta, actual, maximo }: { clase: string; etiqueta: string; actual: number; maximo: number }) {
   const pct = maximo > 0 ? Math.max(0, Math.min(1, actual / maximo)) : 0;
   return (
     <div className={`barra ${clase}`} role="meter" aria-label={etiqueta} aria-valuemin={0} aria-valuemax={maximo} aria-valuenow={Math.max(0, actual)}>
@@ -812,7 +825,7 @@ function Barra({ clase, etiqueta, actual, maximo }: { clase: string; etiqueta: s
   );
 }
 
-function Enunciado({ pregunta, revelada }: { pregunta: Pregunta; revelada: boolean }) {
+export function Enunciado({ pregunta, revelada }: { pregunta: Pregunta; revelada: boolean }) {
   const { item } = pregunta.palabra;
   const oir = (texto: string, grande = false) => (
     <button type="button" className={`boton-oir ${grande ? 'grande' : ''}`} onClick={() => void speak(texto)} aria-label={`Escuchar: ${texto}`}>
