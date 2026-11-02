@@ -1,0 +1,23 @@
+{
+  "name": "Aprender Inglés",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-24-bookworm",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": { "label": "App (Vite)", "onAutoForward": "openBrowser" }
+  },
+  "secrets": {
+    "ADMIN_INITIAL_PASSWORD": {
+      "description": "Contraseña inicial del usuario admin para el modo local de pruebas (no se guarda en el repositorio)."
+    }
+  },
+  "postCreateCommand": "npm ci --ignore-scripts && node scripts/setup-local-env.mjs",
+  "postAttachCommand": "npm run dev",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "denoland.vscode-deno"],
+      "settings": {
+        "deno.enablePaths": ["supabase/functions"]
+      }
+    }
+  }
+}

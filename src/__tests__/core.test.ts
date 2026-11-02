@@ -1,0 +1,78 @@
+import { describe, expect, it } from 'vitest';
+import { buildTotp, createTotpSecret, validateTotp } from '../core/auth/totp';
+import { checkPassword, generateTemporaryPassword, validateUsername } from '../core/auth/validation';
+import { hashPassword, verifyPassword } from '../core/security/crypto';
+import { review } from '../core/srs/leitner';
+import { similarity } from '../core/speech/speech';
+import { tokenize } from '../modules/reading/ReadingSection';
+
+describe('política de contraseñas', () => {
+  it('acepta una contraseña robusta', () => {
+    expect(checkPassword('Vocab-Cards-2026!').ok).toBe(true);
+  });
+  it('rechaza contraseñas débiles', () => {
+    expect(checkPassword('password').ok).toBe(false);
+    expect(checkPassword('Short1-').ok).toBe(false);
+    expect(checkPassword('NoSymbols12345').ok).toBe(false);
+  });
+  it('rechaza contraseñas que contienen el usuario', () => {
+    expect(checkPassword('Maria.lopez-2025', 'maria.lopez').ok).toBe(false);
+  });
+  it('las contraseñas temporales cumplen la política', () => {
+    for (let i = 0; i < 50; i++) expect(checkPassword(generateTemporaryPassword()).ok).toBe(true);
+  });
+});
+
+describe('nombres de usuario', () => {
+  it('valida el formato', () => {
+    expect(validateUsername('admin')).toBeNull();
+    expect(validateUsername('maria.lopez')).toBeNull();
+    expect(validateUsername('a')).not.toBeNull();
+    expect(validateUsername('<script>')).not.toBeNull();
+    expect(validateUsername('user@mail.com')).not.toBeNull();
+  });
+});
+
+describe('hash PBKDF2', () => {
+  it('verifica la contraseña correcta y rechaza la incorrecta', async () => {
+    const h = await hashPassword('Correct-Horse-9', undefined, 1000);
+    expect(await verifyPassword('Correct-Horse-9', h)).toBe(true);
+    expect(await verifyPassword('wrong', h)).toBe(false);
+  });
+});
+
+describe('TOTP', () => {
+  it('valida el código actual y rechaza su reutilización', () => {
+    const secret = createTotpSecret();
+    const code = buildTotp(secret, 'test').generate();
+    const counter = validateTotp(secret, code);
+    expect(counter).not.toBeNull();
+    expect(validateTotp(secret, code, counter!)).toBeNull();
+    expect(validateTotp(secret, '000000'.replace(/./g, (_, i) => String((Number(code[i]) + 1) % 10)))).toBeNull();
+  });
+});
+
+describe('repetición espaciada', () => {
+  it('sube de caja al acertar y vuelve a la 1 al fallar', () => {
+    const c1 = review(undefined, true, 0);
+    expect(c1.box).toBe(2);
+    const c2 = review(c1, true, 0);
+    expect(c2.box).toBe(3);
+    expect(review(c2, false, 0).box).toBe(1);
+  });
+});
+
+describe('similitud de frases', () => {
+  it('ignora mayúsculas y puntuación', () => {
+    expect(similarity('Hello, my name is Ana.', 'hello my name is ana')).toBe(1);
+    expect(similarity('I am from Colombia', 'I from Colombia')).toBeGreaterThan(0.7);
+  });
+});
+
+describe('lectura asistida', () => {
+  it('agrupa expresiones de varias palabras del glosario', () => {
+    const gloss = new Map([['brother and sister', 'hermanos']]);
+    const tokens = tokenize('They are brother and sister.', gloss);
+    expect(tokens.some((t) => t.key === 'brother and sister')).toBe(true);
+  });
+});

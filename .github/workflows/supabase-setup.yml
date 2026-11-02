@@ -1,0 +1,72 @@
+name: Configurar backend Supabase
+
+# Ejecución MANUAL (Actions → "Configurar backend Supabase" → Run workflow).
+# Aplica migraciones (tablas + RLS), despliega la Edge Function y crea el administrador único.
+on:
+  workflow_dispatch:
+    inputs:
+      admin_recovery:
+        description: 'Restablecer contraseña y 2FA del admin (usar solo si perdiste el acceso)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-setup
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
+        with:
+          version: latest
+
+      - name: Comprobar secretos
+        run: |
+          for v in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_REF; do
+            if [ -z "${!v}" ]; then echo "::error::Falta el secreto $v"; exit 1; fi
+          done
+
+      - name: Vincular proyecto
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Aplicar migraciones (tablas + RLS)
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Configurar secretos de la Edge Function
+        run: |
+          supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+            ALLOWED_ORIGINS="https://${{ github.repository_owner }}.github.io,http://localhost:5173" \
+            USERNAME_EMAIL_DOMAIN="${USERNAME_EMAIL_DOMAIN:-usuarios.aprender-ingles.app}"
+        env:
+          USERNAME_EMAIL_DOMAIN: ${{ vars.VITE_USERNAME_EMAIL_DOMAIN }}
+
+      - name: Desplegar Edge Function admin-users
+        run: supabase functions deploy admin-users --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+
+      - name: Crear (o restablecer) el administrador único
+        run: node scripts/seed-admin.mjs
+        env:
+          SUPABASE_URL: https://${{ secrets.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ADMIN_INITIAL_PASSWORD: ${{ secrets.ADMIN_INITIAL_PASSWORD }}
+          USERNAME_EMAIL_DOMAIN: ${{ vars.VITE_USERNAME_EMAIL_DOMAIN || 'usuarios.aprender-ingles.app' }}
+          ADMIN_RECOVERY: ${{ inputs.admin_recovery }}
