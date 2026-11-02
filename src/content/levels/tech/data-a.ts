@@ -1,0 +1,197 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** A1 · Servidores y datos: describir una sala de servidores (there is/are + números). */
+export const dataA1: Topic = {
+  id: 'server-room',
+  title: 'In the server room',
+  titleEs: '🖥️ En la sala de servidores',
+  emoji: '🗄️',
+  grammarFocus: 'There is / There are + números y preposiciones de lugar',
+  summary: 'Describe una sala de servidores y un panel de datos sencillo: qué hay, cuántos y dónde están.',
+  keyPoints: [
+    'There is + singular → There is a big rack.',
+    'There are + plural → There are twenty servers.',
+    'How many…? → How many servers are there?',
+    'Lugar: in, on, next to, behind, under.',
+  ],
+  vocabulary: [
+    v('server', 'servidor', '🖥️', 'Hardware', 'There are twenty servers in this room.', 'Hay veinte servidores en esta sala.', '/ˈsɜːrvər/'),
+    v('rack', 'rack, armario de servidores', '🗄️', 'Hardware', 'The rack is next to the door.', 'El rack está al lado de la puerta.'),
+    v('cable', 'cable', '🔌', 'Hardware', 'There is a cable on the floor.', 'Hay un cable en el suelo.', '/ˈkeɪbl/'),
+    v('fan', 'ventilador', '🌀', 'Hardware', 'The fan is very loud.', 'El ventilador hace mucho ruido.'),
+    v('hot', 'caliente', '🔥', 'Estado', 'The room is too hot.', 'La sala está demasiado caliente.'),
+    v('cold', 'frío', '❄️', 'Estado', 'Servers like cold air.', 'A los servidores les gusta el aire frío.'),
+    v('file', 'archivo', '📄', 'Datos', 'There is a file on the desktop.', 'Hay un archivo en el escritorio.'),
+    v('chart', 'gráfico', '📊', 'Datos', 'This chart shows the temperature.', 'Este gráfico muestra la temperatura.'),
+    v('number', 'número', '🔢', 'Datos', 'The number is in the table.', 'El número está en la tabla.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. There is / There are' },
+    { kind: 'table', headers: ['Forma', 'Ejemplo'], rows: [
+      ['There is (There’s) + singular', 'There’s a cable under the desk.'],
+      ['There are + plural', 'There are four racks.'],
+      ['Is there…?', 'Is there a backup server?'],
+      ['How many… are there?', 'How many servers are there?'],
+    ] },
+    { kind: 'heading', text: '2. ¿Dónde está?' },
+    { kind: 'examples', items: [
+      { en: 'The switch is on top of the rack.', es: 'El switch está encima del rack.' },
+      { en: 'The cables are behind the servers.', es: 'Los cables están detrás de los servidores.' },
+      { en: 'The air conditioner is next to the door.', es: 'El aire acondicionado está al lado de la puerta.' },
+    ] },
+    { kind: 'heading', text: '3. Números útiles' },
+    { kind: 'list', items: ['13 thirteen vs. 30 thirty (acento distinto: thir-TEEN / THIR-ty).', '100 a hundred · 1,000 a thousand.', '25 °C → twenty-five degrees.'] },
+    { kind: 'warning', text: '“There have twenty servers” ✗ → “There are twenty servers” ✓.' },
+  ],
+  conversation: {
+    title: 'Server room tour',
+    context: 'Un técnico enseña la sala de servidores a una ingeniera nueva.',
+    lines: [
+      { speaker: 'Tech', en: 'Welcome to the server room. It’s a bit loud!', es: 'Bienvenida a la sala de servidores. ¡Hay un poco de ruido!' },
+      { speaker: 'Mia', en: 'Wow. How many servers are there?', es: 'Guau. ¿Cuántos servidores hay?' },
+      { speaker: 'Tech', en: 'There are forty servers in four racks.', es: 'Hay cuarenta servidores en cuatro racks.' },
+      { speaker: 'Mia', en: 'And what’s that screen next to the door?', es: '¿Y qué es esa pantalla al lado de la puerta?' },
+      { speaker: 'Tech', en: 'That’s the dashboard. There’s a chart with the temperature.', es: 'Es el panel. Hay un gráfico con la temperatura.' },
+      { speaker: 'Mia', en: 'It says twenty degrees. Is that okay?', es: 'Dice veinte grados. ¿Está bien?' },
+      { speaker: 'Tech', en: 'Yep, perfect. Servers like cold air.', es: 'Sí, perfecto. A los servidores les gusta el aire frío.' },
+    ],
+    usefulPhrases: [
+      { en: 'How many… are there?', es: '¿Cuántos… hay?' },
+      { en: 'What’s that?', es: '¿Qué es eso?' },
+      { en: 'It says…', es: 'Dice… / Pone…' },
+      { en: 'Yep.', es: 'Sí. (casual)' },
+    ],
+  },
+  reading: {
+    title: 'Our small data center',
+    paragraphs: [
+      'Our office has a small data center. There are two racks and twelve servers.',
+      'There is a big air conditioner on the wall, because the servers are hot. There is also a screen with charts.',
+      'One chart shows the temperature and one chart shows the number of users. Today there are three hundred users online.',
+    ],
+    translation: [
+      'Nuestra oficina tiene un pequeño centro de datos. Hay dos racks y doce servidores.',
+      'Hay un aire acondicionado grande en la pared, porque los servidores se calientan. También hay una pantalla con gráficos.',
+      'Un gráfico muestra la temperatura y otro el número de usuarios. Hoy hay trescientos usuarios conectados.',
+    ],
+    glossary: {
+      'data center': 'centro de datos',
+      'air conditioner': 'aire acondicionado',
+      wall: 'pared',
+      shows: 'muestra',
+      online: 'conectados, en línea',
+    },
+    questions: [
+      q('How many servers are there?', ['Two', 'Twelve', 'Twenty', 'Three hundred'], 1),
+      q('Why is there an air conditioner?', ['The servers are hot', 'It is summer', 'For the users', 'For the charts'], 0),
+      q('How many users are online today?', ['30', '300', '3,000', '12'], 1),
+    ],
+  },
+  quiz: [
+    q('___ twenty servers in the room.', ['There is', 'There are', 'It has', 'Have'], 1),
+    q('___ a cable on the floor.', ['There’s', 'There are', 'Is', 'Has'], 0),
+    q('How many racks ___?', ['there are', 'are there', 'is there', 'there is'], 1),
+    q('“Gráfico” es:', ['graph paper', 'chart', 'card', 'chat'], 1),
+    q('“Next to” significa:', ['al lado de', 'debajo de', 'detrás de', 'dentro de'], 0),
+  ],
+  dictation: ['There are twenty servers in this room.', 'The rack is next to the door.', 'This chart shows the temperature.', 'Servers like cold air.'],
+};
+
+/** A2 · Ciencia de datos: comentar un informe semanal (pasado + comparativos). */
+export const dataA2: Topic = {
+  id: 'weekly-data-report',
+  title: 'Last week’s numbers',
+  titleEs: '📊 Los números de la semana',
+  emoji: '📈',
+  grammarFocus: 'Pasado simple + comparativos (higher, lower, more, less, than)',
+  summary: 'Comenta un informe de datos: qué subió, qué bajó y cómo se compara con la semana anterior.',
+  keyPoints: [
+    'Subir/bajar: went up / went down, increased / decreased.',
+    'Comparativo corto: high → higher than, low → lower than.',
+    'Comparativo largo: more expensive than, less popular than.',
+    'Cantidades: by 10% (en un 10 %), from 200 to 250 (de 200 a 250).',
+  ],
+  vocabulary: [
+    v('spreadsheet', 'hoja de cálculo', '🧮', 'Herramientas', 'I put the numbers in a spreadsheet.', 'Puse los números en una hoja de cálculo.'),
+    v('database', 'base de datos', '🗃️', 'Herramientas', 'The database has all the orders.', 'La base de datos tiene todos los pedidos.'),
+    v('row', 'fila', '➡️', 'Herramientas', 'Each row is one customer.', 'Cada fila es un cliente.'),
+    v('column', 'columna', '⬇️', 'Herramientas', 'This column shows the date.', 'Esta columna muestra la fecha.'),
+    v('average', 'media, promedio', '➗', 'Estadística', 'The average was higher than last week.', 'La media fue más alta que la semana pasada.', '/ˈævərɪdʒ/'),
+    v('increase', 'aumento / aumentar', '📈', 'Cambios', 'Users increased by 20%.', 'Los usuarios aumentaron un 20 %.'),
+    v('decrease', 'disminución / disminuir', '📉', 'Cambios', 'Errors decreased a lot.', 'Los errores disminuyeron mucho.'),
+    v('went up', 'subió', '⬆️', 'Cambios', 'Traffic went up on Friday.', 'El tráfico subió el viernes.'),
+    v('went down', 'bajó', '⬇️', 'Cambios', 'Response time went down.', 'El tiempo de respuesta bajó.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Describir cambios' },
+    { kind: 'table', headers: ['Verbo', 'Pasado', 'Ejemplo'], rows: [
+      ['go up', 'went up', 'Sales went up by 5%.'],
+      ['go down', 'went down', 'Errors went down from 40 to 12.'],
+      ['increase', 'increased', 'Traffic increased a lot.'],
+      ['stay the same', 'stayed the same', 'Costs stayed the same.'],
+    ] },
+    { kind: 'heading', text: '2. Comparar' },
+    { kind: 'formula', label: 'Corto', parts: ['adjetivo + -er', 'than'] },
+    { kind: 'formula', label: 'Largo', parts: ['more / less', 'adjetivo', 'than'] },
+    { kind: 'examples', items: [
+      { en: 'This week was busier than last week.', es: 'Esta semana fue más ajetreada que la pasada.' },
+      { en: 'The new server is more expensive than the old one.', es: 'El nuevo servidor es más caro que el viejo.' },
+    ] },
+    { kind: 'tip', text: '“by” = la diferencia: “It went up by 10%” (subió un 10 %). “to” = el valor final: “It went up to 500” (subió hasta 500).' },
+    { kind: 'warning', text: '“more higher” ✗ → “higher” ✓. No combines more con -er.' },
+  ],
+  conversation: {
+    title: 'Monday report',
+    context: 'Una analista comenta el informe semanal con su jefe.',
+    lines: [
+      { speaker: 'Boss', en: 'So, how did last week go?', es: 'Entonces, ¿qué tal fue la semana pasada?' },
+      { speaker: 'Lucy', en: 'Pretty good! Users went up by 15%.', es: '¡Bastante bien! Los usuarios subieron un 15 %.' },
+      { speaker: 'Boss', en: 'Nice. And errors?', es: 'Bien. ¿Y los errores?' },
+      { speaker: 'Lucy', en: 'They went down from 50 to 20. The new release was much better.', es: 'Bajaron de 50 a 20. La nueva versión fue mucho mejor.' },
+      { speaker: 'Boss', en: 'Great. Was the average response time lower too?', es: 'Genial. ¿El tiempo medio de respuesta también fue menor?' },
+      { speaker: 'Lucy', en: 'Yeah, a bit lower than the week before. It’s all in the spreadsheet.', es: 'Sí, un poco menor que la semana anterior. Está todo en la hoja de cálculo.' },
+      { speaker: 'Boss', en: 'Perfect, thanks. Send it to the team.', es: 'Perfecto, gracias. Envíala al equipo.' },
+    ],
+    usefulPhrases: [
+      { en: 'How did… go?', es: '¿Qué tal fue…?' },
+      { en: 'Pretty good!', es: '¡Bastante bien!' },
+      { en: 'a bit lower', es: 'un poco más bajo' },
+      { en: 'It’s all in the…', es: 'Está todo en…' },
+    ],
+  },
+  reading: {
+    title: 'A busy week for the app',
+    paragraphs: [
+      'Last week was the busiest week of the year. We had 12,000 users, 3,000 more than the week before.',
+      'The servers were slower on Friday, when traffic went up to 900 requests per second. The average response time increased from 200 to 350 milliseconds.',
+      'On Saturday we added two more servers, and response time went down again. Now the app is faster than before.',
+    ],
+    translation: [
+      'La semana pasada fue la más ajetreada del año. Tuvimos 12.000 usuarios, 3.000 más que la semana anterior.',
+      'Los servidores fueron más lentos el viernes, cuando el tráfico subió hasta 900 peticiones por segundo. El tiempo medio de respuesta aumentó de 200 a 350 milisegundos.',
+      'El sábado añadimos dos servidores más y el tiempo de respuesta volvió a bajar. Ahora la app es más rápida que antes.',
+    ],
+    glossary: {
+      busiest: 'más ajetreada',
+      'the week before': 'la semana anterior',
+      slower: 'más lentos',
+      'requests per second': 'peticiones por segundo',
+      added: 'añadimos',
+      faster: 'más rápida',
+    },
+    questions: [
+      q('How many users did they have?', ['3,000', '9,000', '12,000', '900'], 2),
+      q('What happened on Friday?', ['Traffic went down', 'The servers were slower', 'They added servers', 'Nothing'], 1),
+      q('Why did response time go down?', ['Fewer users', 'They added two servers', 'It was Sunday', 'They deleted data'], 1),
+    ],
+  },
+  quiz: [
+    q('Users ___ by 15% last week.', ['go up', 'went up', 'gone up', 'goes up'], 1),
+    q('This week was ___ than last week.', ['busier', 'more busy', 'more busier', 'busiest'], 0),
+    q('The new server is ___ the old one.', ['expensiver than', 'more expensive than', 'most expensive', 'more expensive that'], 1),
+    q('“Fila” en una hoja de cálculo es:', ['row', 'column', 'line up', 'raw'], 0),
+    q('“It went up ___ 10%” (subió un 10 %).', ['to', 'by', 'in', 'of'], 1),
+  ],
+  dictation: ['Users went up by fifteen percent.', 'Errors went down from fifty to twenty.', 'This week was busier than last week.', 'It’s all in the spreadsheet.'],
+};

@@ -30,12 +30,12 @@ export default function DashboardPage() {
       <section className="hero">
         <h1>¡Hola, {session?.user.username}! 👋</h1>
         <p>
-          🎯 <strong>Tu objetivo:</strong> hablar inglés con fluidez y naturalidad, de forma casual, sobre ingeniería de sistemas e IoT:
-          dailies con tu equipo, explicar un bug, hablar de sensores, la nube y despliegues, o charlar con colegas de cualquier país.
+          🎯 <strong>Tu objetivo:</strong> hablar inglés con fluidez y naturalidad, de forma casual, sobre ingeniería de sistemas, IoT, ciberseguridad, inteligencia artificial, ciencia de datos y servidores:
+          dailies con tu equipo, explicar un bug o un incidente, presentar datos, debatir sobre IA o charlar con colegas de cualquier país.
         </p>
         <p className="muted">
-          Elige tu nivel. Cada tema tiene tarjetas visuales, apuntes, vocabulario, conversación, lectura asistida, dictado y
-          autoevaluación. Los temas 🛠️ son de tecnología. Escucha con la <Link to="/voz">voz más natural de tu dispositivo</Link> y repite en voz alta.
+          Elige tu nivel. Cada tema tiene tarjetas visuales, apuntes, vocabulario, 🎮 práctica visual con mini‑juegos, conversación, lectura asistida, dictado y
+          autoevaluación. En cada nivel hay temas de tecnología: 🛠️ sistemas e IoT, 🔐 ciberseguridad e IA y 📊 datos y servidores. Escucha con la <Link to="/voz">voz más natural de tu dispositivo</Link> y repite en voz alta.
         </p>
         <div className="stats">
           <div className="stat">

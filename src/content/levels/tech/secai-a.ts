@@ -1,0 +1,197 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** A1 · Ciberseguridad e IA: contraseñas seguras y asistentes inteligentes (imperativo + can). */
+export const secAiA1: Topic = {
+  id: 'safe-online-ai',
+  title: 'Stay safe online & meet AI',
+  titleEs: '🔐 Seguridad básica e IA',
+  emoji: '🔐',
+  grammarFocus: 'Imperativo (Use…, Don’t…) y can / can’t',
+  summary: 'Da consejos sencillos de seguridad (contraseñas, cuentas) y di qué puede y qué no puede hacer una IA.',
+  keyPoints: [
+    'Imperativo para consejos: Use a strong password. / Don’t share it.',
+    'can + verbo → capacidad: AI can write code.',
+    'can’t + verbo → no puede: AI can’t feel emotions.',
+    'Pregunta: Can AI help me? → Yes, it can. / No, it can’t.',
+  ],
+  vocabulary: [
+    v('password', 'contraseña', '🔑', 'Seguridad', 'Use a long password.', 'Usa una contraseña larga.', '/ˈpæswɜːrd/'),
+    v('account', 'cuenta', '👤', 'Seguridad', 'Lock your account if you see something weird.', 'Bloquea tu cuenta si ves algo raro.'),
+    v('hacker', 'hacker, pirata informático', '🕵️', 'Seguridad', 'A hacker can steal your data.', 'Un hacker puede robar tus datos.'),
+    v('safe', 'seguro/a', '🛡️', 'Seguridad', 'Is this website safe?', '¿Esta web es segura?'),
+    v('share', 'compartir', '📤', 'Seguridad', 'Don’t share your password.', 'No compartas tu contraseña.'),
+    v('AI', 'IA (inteligencia artificial)', '🤖', 'Inteligencia artificial', 'AI can write simple code.', 'La IA puede escribir código sencillo.', '/ˌeɪ ˈaɪ/'),
+    v('chatbot', 'chatbot, asistente conversacional', '💬', 'Inteligencia artificial', 'I ask the chatbot a question.', 'Le hago una pregunta al chatbot.'),
+    v('answer', 'respuesta / responder', '💡', 'Inteligencia artificial', 'The answer is not always right.', 'La respuesta no siempre es correcta.'),
+    v('check', 'comprobar', '✅', 'Inteligencia artificial', 'Always check the answer.', 'Comprueba siempre la respuesta.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Consejos con imperativo' },
+    { kind: 'formula', label: 'Consejo', parts: ['Verbo base', 'complemento'] },
+    { kind: 'formula', label: 'Prohibición', parts: ['Don’t', 'verbo base', 'complemento'] },
+    { kind: 'examples', items: [
+      { en: 'Use a different password for every account.', es: 'Usa una contraseña distinta para cada cuenta.' },
+      { en: 'Don’t click strange links.', es: 'No hagas clic en enlaces raros.' },
+      { en: 'Turn on two-step login.', es: 'Activa el inicio de sesión en dos pasos.' },
+    ] },
+    { kind: 'heading', text: '2. ¿Qué puede hacer la IA? (can / can’t)' },
+    { kind: 'table', headers: ['AI can… ✅', 'AI can’t… ❌'], rows: [
+      ['write code', 'feel emotions'],
+      ['translate text', 'always be right'],
+      ['answer questions', 'keep a secret for you'],
+    ] },
+    { kind: 'tip', text: '“can” casi no se oye en frases afirmativas: “AI c’n write code” (/kən/). En negativa se oye fuerte: “can’t” (/kænt/).' },
+    { kind: 'warning', text: 'No digas “AI can to write”. Después de can va el verbo sin “to”: AI can write.' },
+  ],
+  conversation: {
+    title: 'A quick security tip',
+    context: 'Un compañero ve a otra persona escribir su contraseña en un post-it.',
+    lines: [
+      { speaker: 'Ben', en: 'Hey, is that your password on a sticky note?', es: 'Oye, ¿esa es tu contraseña en un post-it?' },
+      { speaker: 'Sara', en: 'Yeah… it’s really long. I can’t remember it!', es: 'Sí… es muy larga. ¡No me la puedo acordar!' },
+      { speaker: 'Ben', en: 'Use a password manager. It’s easy and safe.', es: 'Usa un gestor de contraseñas. Es fácil y seguro.' },
+      { speaker: 'Sara', en: 'Can AI remember it for me?', es: '¿La IA me la puede recordar?' },
+      { speaker: 'Ben', en: 'No! Don’t share passwords with a chatbot.', es: '¡No! No compartas contraseñas con un chatbot.' },
+      { speaker: 'Sara', en: 'Okay, okay. Can you help me set up a manager?', es: 'Vale, vale. ¿Me ayudas a configurar un gestor?' },
+      { speaker: 'Ben', en: 'Sure, no problem!', es: '¡Claro, sin problema!' },
+    ],
+    usefulPhrases: [
+      { en: 'Is that your…?', es: '¿Eso es tu…?' },
+      { en: 'I can’t remember it.', es: 'No me acuerdo.' },
+      { en: 'Can you help me…?', es: '¿Me ayudas a…?' },
+      { en: 'No problem!', es: '¡Sin problema!' },
+    ],
+  },
+  reading: {
+    title: 'Three simple rules',
+    paragraphs: [
+      'Hackers love easy passwords like “123456”. Use long passwords and use a different one for every account.',
+      'AI chatbots are great. They can answer questions and write code, but they can’t always give the right answer.',
+      'So, two rules for AI: check the answer, and don’t share private data with a chatbot.',
+    ],
+    translation: [
+      'A los hackers les encantan las contraseñas fáciles como “123456”. Usa contraseñas largas y una distinta para cada cuenta.',
+      'Los chatbots de IA son geniales. Pueden responder preguntas y escribir código, pero no siempre dan la respuesta correcta.',
+      'Así que, dos reglas para la IA: comprueba la respuesta y no compartas datos privados con un chatbot.',
+    ],
+    glossary: {
+      love: 'adoran, aman',
+      'a different one': 'una distinta',
+      great: 'geniales',
+      'the right answer': 'la respuesta correcta',
+      'private data': 'datos privados',
+    },
+    questions: [
+      q('What kind of passwords do hackers love?', ['Long ones', 'Easy ones', 'Secret ones', 'New ones'], 1),
+      q('Can chatbots always give the right answer?', ['Yes, always', 'No, not always', 'Only in English', 'Only at night'], 1),
+      q('What should you NOT share with a chatbot?', ['Questions', 'Code', 'Private data', 'Jokes'], 2),
+    ],
+  },
+  quiz: [
+    q('“No compartas tu contraseña” es:', ['Don’t share your password.', 'No share your password.', 'Not share password.', 'Doesn’t share your password.'], 0),
+    q('AI ___ write code.', ['can to', 'can', 'cans', 'is can'], 1),
+    q('AI ___ feel emotions.', ['can’t', 'don’t can', 'not can', 'isn’t'], 0),
+    q('___ AI help me? — Yes, it can.', ['Do', 'Is', 'Can', 'Does'], 2),
+    q('“Cuenta” (de usuario) es:', ['count', 'account', 'acount', 'counter'], 1),
+  ],
+  dictation: ['Use a long password.', 'Don’t share your password.', 'AI can write simple code.', 'Always check the answer.'],
+};
+
+/** A2 · Ciberseguridad e IA: contar un intento de phishing (pasado simple + pasado continuo). */
+export const secAiA2: Topic = {
+  id: 'phishing-story',
+  title: 'The phishing email',
+  titleEs: '🎣 El correo de phishing',
+  emoji: '🎣',
+  grammarFocus: 'Pasado simple y pasado continuo (I was reading when…)',
+  summary: 'Cuenta cómo casi caes en un correo falso y cómo una IA o un compañero te ayudó a detectarlo.',
+  keyPoints: [
+    'Pasado continuo (was/were + -ing) → acción en curso: I was checking my email…',
+    'Pasado simple → acción que interrumpe: …when a strange message arrived.',
+    'Señales de phishing: urgent tone, weird links, spelling mistakes, fake sender.',
+    'Para avisar: I reported it to IT. / I didn’t click the link.',
+  ],
+  vocabulary: [
+    v('phishing', 'phishing, suplantación por correo', '🎣', 'Ataques', 'It was a phishing email.', 'Era un correo de phishing.', '/ˈfɪʃɪŋ/'),
+    v('link', 'enlace', '🔗', 'Ataques', 'I didn’t click the link.', 'No hice clic en el enlace.'),
+    v('fake', 'falso', '🎭', 'Ataques', 'The sender was fake.', 'El remitente era falso.'),
+    v('urgent', 'urgente', '⏰', 'Ataques', 'The message said it was urgent.', 'El mensaje decía que era urgente.'),
+    v('sender', 'remitente', '📧', 'Correo', 'Check the sender before you reply.', 'Revisa el remitente antes de responder.'),
+    v('attachment', 'archivo adjunto', '📎', 'Correo', 'Never open an attachment you don’t expect.', 'Nunca abras un adjunto que no esperas.'),
+    v('report', 'reportar, avisar', '🚩', 'Reaccionar', 'I reported it to IT.', 'Lo reporté a IT.'),
+    v('delete', 'borrar', '🗑️', 'Reaccionar', 'Then I deleted the email.', 'Luego borré el correo.'),
+    v('scan', 'escanear, analizar', '🔍', 'Reaccionar', 'The AI tool scanned the message.', 'La herramienta de IA analizó el mensaje.'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. Contar una historia: fondo + interrupción' },
+    { kind: 'formula', label: 'Fondo', parts: ['I / He / She', 'was', 'verbo-ing'] },
+    { kind: 'formula', label: 'Interrupción', parts: ['when', 'sujeto', 'verbo en pasado'] },
+    { kind: 'examples', items: [
+      { en: 'I was checking my email when a weird message arrived.', es: 'Estaba revisando mi correo cuando llegó un mensaje raro.' },
+      { en: 'We were working late when the alert popped up.', es: 'Estábamos trabajando tarde cuando saltó la alerta.' },
+    ] },
+    { kind: 'heading', text: '2. Señales de phishing' },
+    { kind: 'table', headers: ['Señal', 'En inglés'], rows: [
+      ['Tono urgente', '“Act now or lose your account!”'],
+      ['Remitente raro', 'support@paypa1-security.com'],
+      ['Errores de ortografía', '“Your acount is blocked”'],
+      ['Adjunto inesperado', 'invoice_final.zip'],
+    ] },
+    { kind: 'tip', text: 'Al hablar, “was” suena débil: /wəz/. “I was checking” → “ai-wəz-CHEK-ing”.' },
+    { kind: 'warning', text: 'No uses pasado continuo con “know, want, like”: “I was knowing” ✗ → “I knew” ✓.' },
+  ],
+  conversation: {
+    title: 'Almost got me!',
+    context: 'Una compañera cuenta en la cocina que casi cae en un phishing.',
+    lines: [
+      { speaker: 'Kim', en: 'You won’t believe what happened this morning.', es: 'No te vas a creer lo que pasó esta mañana.' },
+      { speaker: 'Dev', en: 'What happened?', es: '¿Qué pasó?' },
+      { speaker: 'Kim', en: 'I was checking my email when I got a message from “the CEO”.', es: 'Estaba revisando el correo cuando me llegó un mensaje del “CEO”.' },
+      { speaker: 'Dev', en: 'Let me guess. It was urgent and it had a link.', es: 'Déjame adivinar. Era urgente y tenía un enlace.' },
+      { speaker: 'Kim', en: 'Exactly! I almost clicked it, but the sender looked weird.', es: '¡Exacto! Casi hago clic, pero el remitente se veía raro.' },
+      { speaker: 'Dev', en: 'Good catch. Did you report it?', es: 'Bien visto. ¿Lo reportaste?' },
+      { speaker: 'Kim', en: 'Yeah, I reported it to IT and deleted it.', es: 'Sí, lo reporté a IT y lo borré.' },
+    ],
+    usefulPhrases: [
+      { en: 'You won’t believe what happened.', es: 'No te vas a creer lo que pasó.' },
+      { en: 'Let me guess.', es: 'Déjame adivinar.' },
+      { en: 'Good catch!', es: '¡Bien visto!' },
+      { en: 'I almost clicked it.', es: 'Casi hago clic.' },
+    ],
+  },
+  reading: {
+    title: 'How AI stopped an attack',
+    paragraphs: [
+      'Last month, our team was preparing a big release when hundreds of fake emails arrived.',
+      'The emails looked real, but our AI filter scanned every message. It found strange links and a fake sender.',
+      'The filter moved the emails to quarantine and sent an alert to IT. Nobody clicked anything, and we finished the release on time.',
+    ],
+    translation: [
+      'El mes pasado, nuestro equipo estaba preparando una gran versión cuando llegaron cientos de correos falsos.',
+      'Los correos parecían reales, pero nuestro filtro de IA analizó cada mensaje. Encontró enlaces raros y un remitente falso.',
+      'El filtro movió los correos a cuarentena y envió una alerta a IT. Nadie hizo clic en nada y terminamos la versión a tiempo.',
+    ],
+    glossary: {
+      release: 'versión, lanzamiento',
+      hundreds: 'cientos',
+      'looked real': 'parecían reales',
+      quarantine: 'cuarentena',
+      nobody: 'nadie',
+      'on time': 'a tiempo',
+    },
+    questions: [
+      q('What was the team doing when the emails arrived?', ['Having lunch', 'Preparing a release', 'Sleeping', 'In a meeting'], 1),
+      q('What did the AI filter find?', ['Viruses in laptops', 'Strange links and a fake sender', 'A new password', 'Nothing'], 1),
+      q('Where did the filter move the emails?', ['To the trash', 'To quarantine', 'To the CEO', 'To the cloud'], 1),
+    ],
+  },
+  quiz: [
+    q('I ___ my email when the message arrived.', ['checked', 'was checking', 'am checking', 'check'], 1),
+    q('We were working when the alert ___.', ['was popping', 'popped up', 'pops up', 'pop'], 1),
+    q('“Remitente” es:', ['sender', 'sendee', 'sent', 'sending'], 0),
+    q('¿Cuál es una señal típica de phishing?', ['Tono urgente', 'Un saludo normal', 'Tu jefe en persona', 'Una reunión'], 0),
+    q('“Good catch!” significa:', ['¡Buena pesca!', '¡Bien visto!', '¡Atrápalo!', '¡Qué mala suerte!'], 1),
+  ],
+  dictation: ['It was a phishing email.', 'I didn’t click the link.', 'I reported it to IT.', 'I was checking my email when it arrived.'],
+};

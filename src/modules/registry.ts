@@ -29,6 +29,14 @@ export const MODULES: LearningModule[] = [
     component: lazy(() => import('./vocabulary/VocabularySection')),
   },
   {
+    id: 'practica',
+    label: 'Práctica visual',
+    emoji: '🎮',
+    description: 'Mini‑juegos: emparejar, escuchar y elegir, completar, ordenar frases y clasificar.',
+    component: lazy(() => import('./practice/PracticeSection')),
+    isAvailable: (t) => t.vocabulary.length >= 4,
+  },
+  {
     id: 'conversacion',
     label: 'Conversación',
     emoji: '💬',
