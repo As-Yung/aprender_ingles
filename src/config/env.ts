@@ -13,6 +13,8 @@ export interface AppConfig {
   isDev: boolean;
 }
 
+export const DEFAULT_EMAIL_DOMAIN = 'usuarios.aprender-ingles.app';
+
 function readConfig(): AppConfig {
   const env = import.meta.env;
   const isDev = Boolean(env.DEV);
@@ -36,7 +38,8 @@ function readConfig(): AppConfig {
     authMode,
     supabaseUrl: supabaseUrl.replace(/\/$/, ''),
     supabaseAnonKey,
-    usernameEmailDomain: (env.VITE_USERNAME_EMAIL_DOMAIN ?? 'usuarios.aprender-ingles.app').trim(),
+    // `||` y no `??`: en GitHub Actions una variable sin definir llega como cadena vacía
+    usernameEmailDomain: (env.VITE_USERNAME_EMAIL_DOMAIN ?? '').trim() || DEFAULT_EMAIL_DOMAIN,
     localAdminPassword: isDev ? (env.VITE_LOCAL_ADMIN_PASSWORD ?? '') : '',
     isDev,
   };
