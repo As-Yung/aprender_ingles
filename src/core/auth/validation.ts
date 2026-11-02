@@ -42,24 +42,27 @@ export function isValidTotpCode(code: string): boolean {
 }
 
 /** Genera una contraseña temporal aleatoria que cumple la política. */
+/** Entero aleatorio uniforme en [0, n) sin sesgo de módulo (muestreo por rechazo). */
+export function randomInt(n: number): number {
+  const limit = Math.floor(0x100000000 / n) * n;
+  const buf = new Uint32Array(1);
+  do crypto.getRandomValues(buf);
+  while (buf[0]! >= limit);
+  return buf[0]! % n;
+}
+
 export function generateTemporaryPassword(length = 16): string {
   const lower = 'abcdefghijkmnopqrstuvwxyz';
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const digits = '23456789';
   const symbols = '-_!@#%*+=?';
   const all = lower + upper + digits + symbols;
-  const pick = (set: string) => {
-    const buf = new Uint32Array(1);
-    crypto.getRandomValues(buf);
-    return set[buf[0]! % set.length]!;
-  };
+  const pick = (set: string) => set[randomInt(set.length)]!;
   const chars = [pick(lower), pick(upper), pick(digits), pick(symbols)];
   while (chars.length < length) chars.push(pick(all));
   // Mezcla Fisher–Yates con aleatoriedad criptográfica
   for (let i = chars.length - 1; i > 0; i--) {
-    const buf = new Uint32Array(1);
-    crypto.getRandomValues(buf);
-    const j = buf[0]! % (i + 1);
+    const j = randomInt(i + 1);
     [chars[i], chars[j]] = [chars[j]!, chars[i]!];
   }
   return chars.join('');
