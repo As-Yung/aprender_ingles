@@ -64,10 +64,19 @@ function checkPassword(pw: unknown, username?: string): string {
   return pw;
 }
 
+/** Entero aleatorio uniforme en [0, n) sin sesgo de módulo (muestreo por rechazo). */
+function randomInt(n: number): number {
+  const limit = Math.floor(0x100000000 / n) * n;
+  const buf = new Uint32Array(1);
+  do crypto.getRandomValues(buf);
+  while (buf[0]! >= limit);
+  return buf[0]! % n;
+}
+
 function generateTemporaryPassword(length = 16): string {
   const sets = ['abcdefghijkmnopqrstuvwxyz', 'ABCDEFGHJKLMNPQRSTUVWXYZ', '23456789', '-_!@#%*+=?'];
   const all = sets.join('');
-  const rnd = (n: number) => crypto.getRandomValues(new Uint32Array(1))[0]! % n;
+  const rnd = randomInt;
   const chars = sets.map((s) => s[rnd(s.length)]!);
   while (chars.length < length) chars.push(all[rnd(all.length)]!);
   for (let i = chars.length - 1; i > 0; i--) {

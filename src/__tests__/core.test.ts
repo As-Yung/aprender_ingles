@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildTotp, createTotpSecret, validateTotp } from '../core/auth/totp';
-import { checkPassword, generateTemporaryPassword, validateUsername } from '../core/auth/validation';
+import { checkPassword, generateTemporaryPassword, randomInt, validateUsername } from '../core/auth/validation';
 import { hashPassword, verifyPassword } from '../core/security/crypto';
 import { review } from '../core/srs/leitner';
 import { scoreVoice, similarity, splitForSpeech } from '../core/speech/speech';
@@ -95,5 +95,18 @@ describe('elección de voz', () => {
     expect(parts.length).toBeGreaterThan(1);
     parts.forEach((p) => expect(p.length).toBeLessThanOrEqual(200));
     expect(splitForSpeech('Hello there')).toEqual(['Hello there']);
+  });
+});
+
+describe('randomInt', () => {
+  it('devuelve valores en rango y cubre todos', () => {
+    const seen = new Set<number>();
+    for (let i = 0; i < 2000; i++) {
+      const r = randomInt(7);
+      expect(r).toBeGreaterThanOrEqual(0);
+      expect(r).toBeLessThan(7);
+      seen.add(r);
+    }
+    expect(seen.size).toBe(7);
   });
 });
