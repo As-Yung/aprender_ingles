@@ -1,17 +1,19 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
+import { techB2 } from './tech/b2';
 
 const b2: Level = {
   id: 'b2',
   name: 'B2',
   label: 'Intermedio alto',
-  description: 'Hipótesis, tecnología y textos de actualidad.',
+  description: 'Hipótesis, explicar arquitecturas IoT y textos de tecnología y actualidad.',
   color: '#6366f1',
   canDo: [
     'Expresar hipótesis, deseos y arrepentimientos.',
     'Entender las ideas principales de textos complejos y noticias.',
     'Describir procesos y cambios con la voz pasiva.',
     'Participar en debates con fluidez razonable.',
+    'Explicar a un cliente cómo funciona un sistema IoT: flujo de datos, fallos y seguridad.',
   ],
   topics: [
     {
@@ -230,6 +232,7 @@ const b2: Level = {
         q('¿Cuál NO puede pasarse a pasiva?', ['They sent the email.', 'She arrived late.', 'He wrote the code.', 'We fixed the bug.'], 1, '“arrive” es intransitivo: no tiene objeto.'),
       ],
     },
+    techB2,
   ],
 };
 

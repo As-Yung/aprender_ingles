@@ -1,17 +1,19 @@
 import { q, v } from '../helpers';
 import type { Level } from '../types';
+import { techA2 } from './tech/a2';
 
 const a2: Level = {
   id: 'a2',
   name: 'A2',
   label: 'Elemental',
-  description: 'Contar experiencias pasadas, comprar y pedir comida.',
+  description: 'Contar experiencias pasadas, explicar qué falló en un sistema, comprar y pedir comida.',
   color: '#22c55e',
   canDo: [
     'Contar lo que hiciste el fin de semana o en tus vacaciones.',
     'Comprar en tiendas y pedir comida en un restaurante.',
     'Usar cantidades: some, any, much, many, a lot of.',
     'Entender anuncios, menús y mensajes cortos.',
+    'Contar de forma sencilla un fallo técnico y cómo lo arreglaste.',
   ],
   topics: [
     {
@@ -224,6 +226,7 @@ const a2: Level = {
         q('Pides la cuenta:', ['Give me the count.', 'Could we have the bill, please?', 'I want the account.', 'The check me, please.'], 1),
       ],
     },
+    techA2,
   ],
 };
 

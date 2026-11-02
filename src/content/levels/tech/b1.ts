@@ -1,0 +1,117 @@
+import { q, v } from '../../helpers';
+import type { Topic } from '../../types';
+
+/** B1 · Tecnología: planificar un proyecto IoT (futuro + presente perfecto). */
+export const techB1: Topic = {
+  id: 'iot-project-plan',
+  title: 'Planning an IoT project',
+  titleEs: '🛠️ Planear un proyecto IoT',
+  emoji: '📡',
+  grammarFocus: 'going to / will / presente perfecto en reuniones de proyecto',
+  summary: 'Habla de planes de despliegue, plazos y experiencia previa con hardware y protocolos IoT, como en una daily real.',
+  keyPoints: [
+    'going to → el plan ya decidido: We’re going to deploy 200 sensors.',
+    'will → decisión en el momento u oferta: I’ll set up the dashboard.',
+    'Presente perfecto → experiencia: Have you ever worked with MQTT?',
+    'already / yet → estado de tareas: I’ve already flashed the firmware. / Not yet.',
+    'En la daily: Yesterday I…, Today I’m going to…, I’m blocked by…',
+  ],
+  vocabulary: [
+    v('deploy', 'desplegar, instalar en producción', '🚀', 'Proyecto', 'We’re going to deploy the sensors next week.', 'Vamos a desplegar los sensores la semana que viene.', '/dɪˈplɔɪ/'),
+    v('deadline', 'fecha límite', '⏰', 'Proyecto', 'The deadline is next Friday.', 'La fecha límite es el viernes que viene.', '/ˈdedlaɪn/'),
+    v('prototype', 'prototipo', '🧪', 'Proyecto', 'Have you tested the prototype yet?', '¿Ya has probado el prototipo?', '/ˈproʊtətaɪp/'),
+    v('blocked', 'bloqueado (no puedes avanzar)', '🚧', 'Proyecto', 'I’m blocked by the network team.', 'Estoy bloqueado por el equipo de redes.'),
+    v('gateway', 'gateway, puerta de enlace', '📶', 'Hardware', 'Each gateway connects fifty sensors.', 'Cada gateway conecta cincuenta sensores.', '/ˈɡeɪtweɪ/'),
+    v('microcontroller', 'microcontrolador', '🔌', 'Hardware', 'We’re using an ESP32 microcontroller.', 'Usamos un microcontrolador ESP32.', '/ˌmaɪkroʊkənˈtroʊlər/'),
+    v('battery life', 'duración de la batería', '🔋', 'Hardware', 'Battery life is our biggest problem.', 'La duración de la batería es nuestro mayor problema.'),
+    v('firmware', 'firmware', '💾', 'Software', 'I’ve already flashed the new firmware.', 'Ya he cargado el nuevo firmware.', '/ˈfɜːrmwer/'),
+    v('MQTT', 'protocolo MQTT (mensajería IoT)', '✉️', 'Software', 'Have you ever worked with MQTT?', '¿Alguna vez has trabajado con MQTT?', '/em kjuː tiː tiː/'),
+    v('dashboard', 'panel de control', '📈', 'Software', 'I’ll set up a dashboard for the client.', 'Montaré un panel para el cliente.', '/ˈdæʃbɔːrd/'),
+  ],
+  notes: [
+    { kind: 'heading', text: '1. La daily (stand-up) en tres frases' },
+    { kind: 'examples', items: [
+      { en: 'Yesterday I finished the MQTT client.', es: 'Ayer terminé el cliente MQTT. (pasado simple)' },
+      { en: 'Today I’m going to test battery life.', es: 'Hoy voy a probar la duración de la batería. (plan)' },
+      { en: 'I’m blocked by the gateway config, can anyone help?', es: 'Estoy bloqueado con la config del gateway, ¿alguien puede ayudar?' },
+    ] },
+    { kind: 'heading', text: '2. Planes, ofertas y experiencia' },
+    { kind: 'table', headers: ['Quieres…', 'Usa', 'Ejemplo'], rows: [
+      ['Contar un plan decidido', 'be going to', 'We’re going to launch in May.'],
+      ['Ofrecerte en el momento', 'will (’ll)', 'I’ll take that ticket.'],
+      ['Preguntar experiencia', 'Have you ever + participio', 'Have you ever used LoRaWAN?'],
+      ['Estado de una tarea', 'already / yet', 'I haven’t tested it yet.'],
+    ] },
+    { kind: 'formula', label: 'Presente perfecto', parts: ['I / We', 'have (’ve)', 'participio', 'already / yet'] },
+    { kind: 'tip', text: 'Casual y natural: “gonna” = going to (solo al hablar). “We’re gonna ship it on Friday.”' },
+    { kind: 'heading', text: '3. Siglas: cómo se pronuncian' },
+    { kind: 'list', items: [
+      'MQTT → letra a letra: “em-kiu-ti-ti”.',
+      'API → “ei-pi-ai”.',
+      'ESP32 → “i-es-pi thirty-two”.',
+      'Wi-Fi → “wai-fai”.',
+    ] },
+    { kind: 'warning', text: 'No digas “I have finished it yesterday”: con un momento terminado (yesterday) se usa pasado simple → “I finished it yesterday”.' },
+  ],
+  conversation: {
+    title: 'Daily stand-up',
+    context: 'Reunión diaria rápida del equipo antes de instalar sensores en un almacén.',
+    lines: [
+      { speaker: 'Lead', en: 'Okay, quick stand-up. Ravi, you go first.', es: 'Vale, daily rápida. Ravi, empiezas tú.' },
+      { speaker: 'Ravi', en: 'Sure. Yesterday I flashed the new firmware on the prototype.', es: 'Claro. Ayer cargué el nuevo firmware en el prototipo.' },
+      { speaker: 'Lead', en: 'Nice. Have you tested the battery life yet?', es: 'Bien. ¿Ya has probado la duración de la batería?' },
+      { speaker: 'Ravi', en: 'Not yet. I’m going to run that test today.', es: 'Todavía no. Voy a hacer esa prueba hoy.' },
+      { speaker: 'Lead', en: 'Great. Any blockers?', es: 'Genial. ¿Algún bloqueo?' },
+      { speaker: 'Ravi', en: 'Yeah, the gateway keeps dropping MQTT messages.', es: 'Sí, el gateway sigue perdiendo mensajes MQTT.' },
+      { speaker: 'Lead', en: 'Hmm, I’ve seen that before. I’ll pair with you after this.', es: 'Mmm, ya he visto eso antes. Lo vemos juntos después de esto.' },
+      { speaker: 'Ravi', en: 'Perfect, thanks. We’re still on track for Friday.', es: 'Perfecto, gracias. Seguimos en plazo para el viernes.' },
+    ],
+    usefulPhrases: [
+      { en: 'Any blockers?', es: '¿Algún bloqueo?' },
+      { en: 'I’ll pair with you.', es: 'Lo hago contigo (programar en pareja).' },
+      { en: 'We’re on track.', es: 'Vamos en plazo.' },
+      { en: 'Not yet.', es: 'Todavía no.' },
+    ],
+  },
+  reading: {
+    title: 'Smart warehouse rollout',
+    paragraphs: [
+      'Our team is going to install 300 temperature sensors in a food warehouse. The client wants real-time alerts on their phones.',
+      'We have already built a prototype with an ESP32 microcontroller and tested it for two weeks. The results have been really good.',
+      'The biggest challenge is battery life. The sensors will need to last at least two years, so we are going to send data every ten minutes instead of every minute.',
+    ],
+    translation: [
+      'Nuestro equipo va a instalar 300 sensores de temperatura en un almacén de alimentos. El cliente quiere alertas en tiempo real en sus móviles.',
+      'Ya hemos construido un prototipo con un microcontrolador ESP32 y lo hemos probado durante dos semanas. Los resultados han sido muy buenos.',
+      'El mayor reto es la batería. Los sensores tendrán que durar al menos dos años, así que vamos a enviar datos cada diez minutos en lugar de cada minuto.',
+    ],
+    glossary: {
+      warehouse: 'almacén',
+      'real-time alerts': 'alertas en tiempo real',
+      'have already built': 'ya hemos construido',
+      challenge: 'reto',
+      'last at least': 'durar al menos',
+      'instead of': 'en lugar de',
+    },
+    questions: [
+      q('How many sensors are they going to install?', ['30', '300', '3,000', '10'], 1),
+      q('What is the biggest challenge?', ['The price', 'Battery life', 'The client', 'Wi-Fi passwords'], 1),
+      q('Why will they send data every ten minutes?', ['To save battery', 'Because the client asked', 'The network is slow', 'It is cheaper to build'], 0),
+    ],
+  },
+  quiz: [
+    q('— Who can fix the dashboard? — I ___ do it!', ['’ll', '’m going to', 'have', 'did'], 0, 'Oferta espontánea → will.'),
+    q('___ you ever worked with MQTT?', ['Did', 'Have', 'Are', 'Do'], 1),
+    q('I haven’t tested it ___.', ['already', 'yet', 'ever', 'just'], 1, '“yet” en negativas y preguntas.'),
+    q('We ___ deploy next week. It’s all planned.', ['will to', 'are going to', 'have', 'going'], 1),
+    q('“Fecha límite” es:', ['deadline', 'timeline', 'endpoint', 'lastday'], 0),
+    q('“I’m blocked” en una daily significa:', ['Estoy cansado', 'No puedo avanzar por algo', 'Estoy de vacaciones', 'Terminé'], 1),
+  ],
+  dictation: [
+    'We’re going to deploy the sensors next week.',
+    'Have you ever worked with MQTT?',
+    'I haven’t tested the battery life yet.',
+    'I’ll set up the dashboard.',
+    'We’re still on track for Friday.',
+  ],
+};

@@ -39,7 +39,7 @@ export default function DictationSection({ topic, onComplete }: SectionProps) {
         <button className="btn" type="button" onClick={() => void speak(sentence)}>
           🔊 Escuchar
         </button>
-        <button className="btn btn--ghost" type="button" onClick={() => void speak(sentence, { rate: 0.6 })}>
+        <button className="btn btn--ghost" type="button" onClick={() => void speak(sentence, { rate: 0.7 })}>
           🐢 Despacio
         </button>
       </div>

@@ -2,7 +2,7 @@
   "name": "aprender-ingles",
   "private": true,
   "version": "1.0.0",
-  "description": "Aplicación web para aprender inglés de forma visual y didáctica, del nivel A1 al C2.",
+  "description": "Aplicación web para aprender a hablar inglés con fluidez y de forma casual para ingeniería de sistemas e IoT, del nivel A1 al C2.",
   "type": "module",
   "engines": {
     "node": ">=22"

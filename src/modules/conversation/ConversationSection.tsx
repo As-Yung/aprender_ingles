@@ -12,13 +12,15 @@ export default function ConversationSection({ topic, onComplete }: SectionProps)
   const [showEs, setShowEs] = useState(false);
   const [playing, setPlaying] = useState<number | null>(null);
   const stopRef = useRef(false);
+  const voiceOf = (name: string): 0 | 1 => (speakers.indexOf(name) % 2 ? 1 : 0);
 
   const playAll = async () => {
     stopRef.current = false;
     for (let i = 0; i < conv.lines.length; i++) {
       if (stopRef.current) break;
       setPlaying(i);
-      await speak(conv.lines[i]!.en, { rate: 0.92 });
+      const line = conv.lines[i]!;
+      await speak(line.en, { speaker: voiceOf(line.speaker) });
     }
     setPlaying(null);
   };
@@ -67,7 +69,7 @@ export default function ConversationSection({ topic, onComplete }: SectionProps)
               <li key={i} className={`chat__line ${speakers.indexOf(l.speaker) % 2 ? 'chat__line--right' : ''} ${playing === i ? 'is-playing' : ''}`}>
                 <span className="chat__speaker">{l.speaker}</span>
                 <span className="chat__bubble">
-                  {l.en} <SpeakButton text={l.en} small />
+                  {l.en} <SpeakButton text={l.en} small speaker={voiceOf(l.speaker)} />
                   {showEs && <small className="chat__es">{l.es}</small>}
                 </span>
               </li>
@@ -109,6 +111,7 @@ function RolePlay({
   const [error, setError] = useState('');
   const [scores, setScores] = useState<number[]>([]);
   const listen = canListen();
+  const voiceOf = (name: string): 0 | 1 => (speakers.indexOf(name) % 2 ? 1 : 0);
 
   if (!role) {
     return (
@@ -123,7 +126,7 @@ function RolePlay({
               onClick={() => {
                 setRole(s);
                 setStep(0);
-                if (lines[0] && lines[0].speaker !== s) void speak(lines[0].en);
+                if (lines[0] && lines[0].speaker !== s) void speak(lines[0].en, { speaker: voiceOf(lines[0].speaker) });
               }}
             >
               Soy {s}
@@ -156,7 +159,7 @@ function RolePlay({
     const nextStep = step + 1;
     setStep(nextStep);
     const next = lines[nextStep];
-    if (next && next.speaker !== role) void speak(next.en);
+    if (next && next.speaker !== role) void speak(next.en, { speaker: voiceOf(next.speaker) });
     if (!next) onComplete(scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100) : undefined);
   };
 
@@ -214,7 +217,7 @@ function RolePlay({
         <>
           <p className="chat__speaker">{line.speaker} dice:</p>
           <p className="roleplay__answer">
-            {line.en} <SpeakButton text={line.en} small />
+            {line.en} <SpeakButton text={line.en} small speaker={voiceOf(line.speaker)} />
           </p>
           <small className="muted">{line.es}</small>
           <div className="row">
