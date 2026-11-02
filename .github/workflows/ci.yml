@@ -2,8 +2,6 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches-ignore: [main]
 
 permissions:
   contents: read
@@ -37,7 +35,8 @@ jobs:
           BASE_PATH: /${{ github.event.repository.name }}/
 
   dependency-review:
-    if: github.event_name == 'pull_request'
+    # Requiere Dependency graph / Advanced Security (gratis en repos públicos)
+    if: github.event_name == 'pull_request' && !github.event.repository.private
     runs-on: ubuntu-latest
     permissions:
       contents: read
