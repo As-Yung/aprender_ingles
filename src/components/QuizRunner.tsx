@@ -23,8 +23,8 @@ export function QuizRunner({ questions, onFinish, title }: Props) {
       <div className="card quiz-result">
         <div className="quiz-result__score">{score}%</div>
         <p>
-          Acertaste {correct} de {questions.length}.{' '}
-          {score >= 80 ? '¡Excelente trabajo! 🎉' : score >= 50 ? 'Vas bien, repasa los apuntes. 💪' : 'Repasa el tema y vuelve a intentarlo. 📒'}
+          You got {correct} of {questions.length} right.{' '}
+          {score >= 80 ? 'Excellent work! 🎉' : score >= 50 ? 'Good progress, review the notes. 💪' : 'Review the topic and try again. 📒'}
         </p>
         <button
           className="btn"
@@ -36,7 +36,7 @@ export function QuizRunner({ questions, onFinish, title }: Props) {
             setFinished(false);
           }}
         >
-          Repetir
+          Try again
         </button>
       </div>
     );
@@ -49,7 +49,7 @@ export function QuizRunner({ questions, onFinish, title }: Props) {
     <div className="card quiz">
       {title && <h3>{title}</h3>}
       <div className="quiz__meta">
-        Pregunta {index + 1} de {questions.length}
+        Question {index + 1} of {questions.length}
         <div className="progress-bar" aria-hidden="true">
           <span style={{ width: `${(index / questions.length) * 100}%` }} />
         </div>
@@ -80,7 +80,7 @@ export function QuizRunner({ questions, onFinish, title }: Props) {
       </div>
       {answered && (
         <div className={selected === q.answer ? 'feedback feedback--ok' : 'feedback feedback--bad'} role="status">
-          <strong>{selected === q.answer ? '¡Correcto!' : `Respuesta correcta: ${q.options[q.answer]}`}</strong>
+          <strong>{selected === q.answer ? 'Correct!' : `Correct answer: ${q.options[q.answer]}`}</strong>
           {q.explanation && <p>{q.explanation}</p>}
           <button
             className="btn"
@@ -95,7 +95,7 @@ export function QuizRunner({ questions, onFinish, title }: Props) {
               }
             }}
           >
-            {index + 1 >= questions.length ? 'Ver resultado' : 'Siguiente'}
+            {index + 1 >= questions.length ? 'See results' : 'Next'}
           </button>
         </div>
       )}

@@ -8,11 +8,11 @@ import { buildGaps, buildListen, buildMatch, buildOrder, buildSort, shuffle } fr
 
 type GameId = 'emparejar' | 'ordenar' | 'completar' | 'escuchar' | 'clasificar';
 const GAMES: { id: GameId; emoji: string; label: string; help: string }[] = [
-  { id: 'emparejar', emoji: '🧩', label: 'Emparejar', help: 'Toca una tarjeta y luego su palabra en inglés.' },
-  { id: 'escuchar', emoji: '👂', label: 'Escucha y elige', help: 'Escucha la palabra y toca la imagen correcta.' },
-  { id: 'completar', emoji: '✏️', label: 'Completa', help: 'Elige la palabra que falta en la frase.' },
-  { id: 'ordenar', emoji: '🔤', label: 'Ordena la frase', help: 'Toca las fichas en orden para construir la frase.' },
-  { id: 'clasificar', emoji: '🗂️', label: 'Clasifica', help: 'Toca cada palabra y luego la caja a la que pertenece.' },
+  { id: 'emparejar', emoji: '🧩', label: 'Match', help: 'Tap a card, then its English word.' },
+  { id: 'escuchar', emoji: '👂', label: 'Listen & pick', help: 'Listen to the word and tap the right picture.' },
+  { id: 'completar', emoji: '✏️', label: 'Fill the gap', help: 'Pick the word missing from the sentence.' },
+  { id: 'ordenar', emoji: '🔤', label: 'Build the sentence', help: 'Tap the tiles in order to build the sentence.' },
+  { id: 'clasificar', emoji: '🗂️', label: 'Sort it', help: 'Tap each word, then the box it belongs to.' },
 ];
 
 type GameProps = {
@@ -45,10 +45,10 @@ export default function PracticeSection({ topic, topicKey, onComplete }: Section
   return (
     <div className="practice">
       <div className="card">
-        <h3>🎮 Práctica visual</h3>
+        <h3>🎮 Visual practice</h3>
         <p className="muted">
-          Cinco mini‑juegos con el vocabulario y las frases de este tema. Completa todos para terminar la sección. Cada vez que
-          repites, las preguntas cambian.
+          Five mini-games with this topic's vocabulary and phrases. Finish them all to complete the section. Questions change every
+          time you replay.
         </p>
         <div className="practice__games" role="tablist">
           {games.map((g) => (
@@ -97,11 +97,11 @@ function Finished({ score, onAgain }: { score: number; onAgain?: () => void }) {
     <div className="practice__finished">
       <p className="big">{stars}</p>
       <p>
-        <strong>{score}%</strong> {score >= 90 ? '¡Excelente!' : score >= 60 ? '¡Bien hecho!' : 'Sigue practicando, ¡vas bien!'}
+        <strong>{score}%</strong> {score >= 90 ? 'Excellent!' : score >= 60 ? 'Well done!' : 'Keep practicing, you are doing fine!'}
       </p>
       {onAgain && (
         <button className="btn" type="button" onClick={onAgain}>
-          Otra vez
+          Play again
         </button>
       )}
     </div>
@@ -219,9 +219,9 @@ function ListenGame({ topic, onDone, onAnswer }: GameProps) {
       </div>
       {picked && (
         <div className={picked === task.item.term ? 'feedback feedback--ok' : 'feedback feedback--bad'}>
-          {picked === task.item.term ? '✅ ¡Correcto!' : `❌ Era “${task.item.term}” (${task.item.es}).`}{' '}
+          {picked === task.item.term ? '✅ Correct!' : `❌ It was “${task.item.term}” (${task.item.es}).`}{' '}
           <button className="btn btn--small" type="button" onClick={() => { setI(i + 1); setPicked(null); }}>
-            Siguiente ➜
+            Next ➜
           </button>
         </div>
       )}
@@ -236,7 +236,7 @@ function GapGame({ topic, onDone, onAnswer }: GameProps) {
   const [picked, setPicked] = useState<string | null>(null);
   const [ok, setOk] = useState(0);
   const task = tasks[i];
-  if (!tasks.length) return <p className="muted">Este tema no tiene frases para completar.</p>;
+  if (!tasks.length) return <p className="muted">This topic has no sentences to complete.</p>;
   if (!task) return <Finished score={pct(ok, tasks.length)} />;
   const correct = task.item.example.slice(task.before.length, task.item.example.length - task.after.length);
   const answer = (o: string) => {
@@ -278,9 +278,9 @@ function GapGame({ topic, onDone, onAnswer }: GameProps) {
       </div>
       {picked && (
         <div className={picked === correct ? 'feedback feedback--ok' : 'feedback feedback--bad'}>
-          {picked === correct ? '✅ ¡Correcto!' : `❌ La respuesta es “${correct}”.`} <SpeakButton text={task.item.example} small />{' '}
+          {picked === correct ? '✅ Correct!' : `❌ The answer is “${correct}”.`} <SpeakButton text={task.item.example} small />{' '}
           <button className="btn btn--small" type="button" onClick={() => { setI(i + 1); setPicked(null); }}>
-            Siguiente ➜
+            Next ➜
           </button>
         </div>
       )}
@@ -296,7 +296,7 @@ function OrderGame({ topic, onDone }: GameProps) {
   const [checked, setChecked] = useState<boolean | null>(null);
   const [ok, setOk] = useState(0);
   const task = tasks[i];
-  if (!tasks.length) return <p className="muted">Este tema no tiene frases para ordenar.</p>;
+  if (!tasks.length) return <p className="muted">This topic has no sentences to build.</p>;
   if (!task) return <Finished score={pct(ok, tasks.length)} />;
   const built = chosen.map((k) => task.words[k]).join(' ');
   const check = () => {
@@ -314,7 +314,7 @@ function OrderGame({ topic, onDone }: GameProps) {
       </div>
       <p className="muted">🇪🇸 {task.es}</p>
       <div className="order__answer" aria-live="polite">
-        {chosen.length === 0 && <span className="muted">Toca las fichas de abajo…</span>}
+        {chosen.length === 0 && <span className="muted">Tap the tiles below…</span>}
         {chosen.map((k, pos) => (
           <button
             key={`${k}-${pos}`}
@@ -337,17 +337,17 @@ function OrderGame({ topic, onDone }: GameProps) {
       {checked === null ? (
         <div className="row">
           <button className="btn" type="button" disabled={chosen.length !== task.words.length} onClick={check}>
-            Comprobar
+            Check
           </button>
           <button className="btn btn--ghost" type="button" onClick={() => setChosen([])}>
-            Borrar
+            Clear
           </button>
         </div>
       ) : (
         <div className={checked ? 'feedback feedback--ok' : 'feedback feedback--bad'}>
-          {checked ? '✅ ¡Perfecto!' : `❌ Correcto: “${task.sentence}”`}{' '}
+          {checked ? '✅ Perfect!' : `❌ Answer: “${task.sentence}”`}{' '}
           <button className="btn btn--small" type="button" onClick={() => { setI(i + 1); setChosen([]); setChecked(null); }}>
-            Siguiente ➜
+            Next ➜
           </button>
         </div>
       )}

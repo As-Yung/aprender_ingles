@@ -25,7 +25,7 @@ export default function MfaPage() {
         const QRCode = (await import('qrcode')).default;
         setQr(await QRCode.toDataURL(en.uri, { margin: 1, width: 220 }));
       })
-      .catch((e: unknown) => setError(e instanceof AuthError ? e.message : 'No se pudo iniciar el 2FA.'));
+      .catch((e: unknown) => setError(e instanceof AuthError ? e.message : 'Could not start two-factor setup.'));
     return () => {
       cancelled = true;
     };
@@ -45,7 +45,7 @@ export default function MfaPage() {
       await refresh();
       navigate('/');
     } catch (err) {
-      setError(err instanceof AuthError ? err.message : 'Código no válido.');
+      setError(err instanceof AuthError ? err.message : 'Invalid code.');
       setCode('');
     } finally {
       setBusy(false);
@@ -55,26 +55,26 @@ export default function MfaPage() {
   return (
     <main className="auth-page">
       <form className="auth-card" onSubmit={submit} noValidate>
-        <h1>🔐 Verificación en dos pasos</h1>
+        <h1>🔐 Two-step verification</h1>
         {needsEnroll ? (
           <>
             <p>
-              Configura tu doble autenticación (obligatoria). Escanea este código QR con una app autenticadora y escribe el código
-              de 6 dígitos que aparece.
+              Set up two-factor authentication (required). Scan this QR code with an authenticator app and type the 6-digit code it
+              shows.
             </p>
-            {qr ? <img className="qr" src={qr} alt="Código QR para la app autenticadora" width={220} height={220} /> : <Loading text="Generando QR…" />}
+            {qr ? <img className="qr" src={qr} alt="QR code for your authenticator app" width={220} height={220} /> : <Loading text="Generating QR code…" />}
             {enrollment && (
               <details className="small">
-                <summary>¿No puedes escanear? Introduce la clave manualmente</summary>
+                <summary>Can't scan it? Enter the key manually</summary>
                 <code className="secret">{enrollment.secret}</code>
               </details>
             )}
           </>
         ) : (
-          <p>Abre tu app autenticadora y escribe el código de 6 dígitos de “Aprender Ingles”.</p>
+          <p>Open your authenticator app and type the 6-digit code for “Aprender Ingles”.</p>
         )}
         <label className="field">
-          <span>Código</span>
+          <span>Code</span>
           <input
             className="input input--code"
             inputMode="numeric"
@@ -92,7 +92,7 @@ export default function MfaPage() {
           </div>
         )}
         <button className="btn btn--block" type="submit" disabled={busy || code.length !== 6}>
-          {busy ? 'Verificando…' : 'Verificar'}
+          {busy ? 'Checking…' : 'Verify'}
         </button>
         <button
           className="link-btn"
@@ -101,7 +101,7 @@ export default function MfaPage() {
             void service.signOut().then(() => navigate('/login'));
           }}
         >
-          Cancelar y volver al inicio de sesión
+          Cancel and go back to sign in
         </button>
       </form>
     </main>

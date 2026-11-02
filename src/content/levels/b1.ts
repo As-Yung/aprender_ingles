@@ -7,15 +7,15 @@ import { dataB1 } from './tech/data-b';
 const b1: Level = {
   id: 'b1',
   name: 'B1',
-  label: 'Intermedio',
-  description: 'Planes de proyecto y de viaje, dailies con tu equipo, experiencias y opiniones sencillas.',
+  label: 'Intermediate',
+  description: 'Project and travel plans, team stand-ups, experiences and simple opinions.',
   color: '#3b82f6',
   canDo: [
-    'Desenvolverte en la mayoría de situaciones de un viaje.',
-    'Hablar de planes, intenciones y predicciones.',
-    'Contar experiencias de vida y relacionarlas con el presente.',
-    'Dar tu opinión y justificarla brevemente.',
-    'Participar en una daily: qué hiciste, qué harás y qué te bloquea.',
+    'Handle most situations while traveling.',
+    'Talk about plans, intentions and predictions.',
+    'Share life experiences and connect them to the present.',
+    'Give your opinion and briefly justify it.',
+    'Join a stand-up: what you did, what you will do and what is blocking you.',
   ],
   topics: [
     {

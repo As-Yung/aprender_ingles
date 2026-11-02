@@ -4,9 +4,9 @@ export default function NotFoundPage() {
   return (
     <div className="card center">
       <p className="big">🧭</p>
-      <h2>Página no encontrada</h2>
+      <h2>Page not found</h2>
       <Link className="btn" to="/">
-        Volver al inicio
+        Back to home
       </Link>
     </div>
   );

@@ -57,7 +57,7 @@ export default function ReviewPage() {
     setRound((r) => r + 1);
   };
 
-  if (!levels) return <p className="muted">Cargando tus bugs…</p>;
+  if (!levels) return <p className="muted">Loading your bugs…</p>;
 
   if (session) {
     return <Hunt key={round} words={session} all={words} onExit={() => setSession(null)} onAgain={start} />;
@@ -67,25 +67,25 @@ export default function ReviewPage() {
     <div className="bugs">
       <section className="bugs-hero">
         <div className="bugs-hero__text">
-          <h1>🐛 Caza de bugs</h1>
+          <h1>🐛 Bug Hunt</h1>
           <p>
-            Cada palabra que fallas en la práctica visual, el vocabulario o el ⚔️ Vocab Boss Game se convierte en un <strong>bug</strong>. Acierta{' '}
-            {MASTER_AFTER} veces seguidas para <strong>aplastarlo 💥</strong>. Cada acierto lo pone más difícil: primero reconoces, luego escuchas y
-            completas, y al final la escribes tú.
+            Every word you miss in visual practice, vocabulary or the ⚔️ Vocab Boss Game becomes a <strong>bug</strong>. Get it right{' '}
+            {MASTER_AFTER} times in a row to <strong>squash it 💥</strong>. Each hit makes it harder: first you recognize it, then you listen and
+            fill the gap, and finally you spell it yourself.
           </p>
         </div>
         <div className="bugs-stats">
           <div className="bugs-stat">
             <strong>🐛 {pending.length}</strong>
-            <span>por cazar</span>
+            <span>to hunt</span>
           </div>
           <div className="bugs-stat">
             <strong>💥 {mastered.length}</strong>
-            <span>aplastados</span>
+            <span>squashed</span>
           </div>
           <div className="bugs-stat">
             <strong>❌ {totalMisses}</strong>
-            <span>fallos acumulados</span>
+            <span>total misses</span>
           </div>
         </div>
       </section>
@@ -93,15 +93,15 @@ export default function ReviewPage() {
       {pending.length === 0 ? (
         <div className="card center bugs-empty">
           <p className="big">{mastered.length ? '🏆' : '🌱'}</p>
-          <h2>{mastered.length ? '¡No queda ningún bug!' : 'Todavía no hay bugs'}</h2>
+          <h2>{mastered.length ? 'No bugs left!' : 'No bugs yet'}</h2>
           <p className="muted">
             {mastered.length
-              ? 'Aplastaste todas las palabras que habías fallado. ¡Sigue practicando!'
-              : 'Cuando falles una palabra en una práctica aparecerá aquí para que la repases jugando.'}
+              ? 'You squashed every word you had missed. Keep practicing!'
+              : 'When you miss a word in practice, it shows up here so you can review it by playing.'}
           </p>
           <div className="row" style={{ justifyContent: 'center' }}>
             <Link className="btn" to="/">
-              📚 Ir a los temas
+              📚 Go to topics
             </Link>
             <Link className="btn btn--ghost" to="/juego">
               ⚔️ Vocab Boss Game
@@ -112,12 +112,12 @@ export default function ReviewPage() {
         <>
           <div className="card bugs-play">
             <button className="btn btn--big bugs-play__btn" type="button" onClick={start}>
-              ▶️ ¡A cazar! <small>({Math.min(8, shown.length)} bugs)</small>
+              ▶️ Start hunting! <small>({Math.min(8, shown.length)} bugs)</small>
             </button>
             {levelIds.length > 1 && (
-              <div className="row bugs-filter" role="group" aria-label="Filtrar por nivel">
+              <div className="row bugs-filter" role="group" aria-label="Filter by level">
                 <button type="button" className={`chip ${filter === 'todos' ? 'is-selected' : ''}`} onClick={() => setFilter('todos')}>
-                  Todos
+                  All
                 </button>
                 {levelIds.map((l) => (
                   <button
@@ -134,8 +134,8 @@ export default function ReviewPage() {
             )}
           </div>
 
-          <h2 className="bugs-title">🪲 Tu nido de bugs</h2>
-          <p className="muted">Toca una tarjeta para darle la vuelta y ver su significado y un ejemplo.</p>
+          <h2 className="bugs-title">🪲 Your bug nest</h2>
+          <p className="muted">Tap a card to flip it and see its meaning and an example.</p>
           <div className="bugs-grid">
             {shown.map((w) => (
               <BugCard key={w.key} word={w} />
@@ -162,7 +162,7 @@ export default function ReviewPage() {
 
 function Pips({ ok }: { ok: number }) {
   return (
-    <span className="bugs-pips" aria-label={`${ok} de ${MASTER_AFTER} aciertos seguidos`}>
+    <span className="bugs-pips" aria-label={`${ok} of ${MASTER_AFTER} correct in a row`}>
       {Array.from({ length: MASTER_AFTER }, (_, i) => (
         <span key={i} className={i < ok ? 'is-on' : ''} />
       ))}
@@ -176,12 +176,12 @@ function BugCard({ word }: { word: ReviewWord }) {
   const level = LEVELS.find((l) => l.id === word.levelId);
   return (
     <div className={`bug-card ${flipped ? 'is-flipped' : ''} ${record.count >= 3 ? 'is-angry' : ''}`}>
-      <button type="button" className="bug-card__inner" onClick={() => setFlipped((f) => !f)} aria-label={`${item.term}. Pulsa para ver la traducción`}>
+      <button type="button" className="bug-card__inner" onClick={() => setFlipped((f) => !f)} aria-label={`${item.term}. Tap to see the translation`}>
         <span className="bug-card__front">
           <span className="bug-card__badge" style={{ background: level?.color }}>
             {word.levelName}
           </span>
-          <span className="bug-card__misses" title="Veces fallada">
+          <span className="bug-card__misses" title="Times missed">
             ❌×{record.count}
           </span>
           <span className="bug-card__emoji" aria-hidden="true">
@@ -273,24 +273,24 @@ function Hunt({ words, all, onExit, onAgain }: { words: ReviewWord[]; all: Revie
     return (
       <div className="card center bugs-end">
         <p className="big">{stars}</p>
-        <h2>¡Ronda terminada!</h2>
+        <h2>Round complete!</h2>
         <p>
-          <strong>{score}%</strong> de aciertos · 🔥 mejor combo: <strong>{bestCombo}</strong>
+          <strong>{score}%</strong> correct · 🔥 best combo: <strong>{bestCombo}</strong>
         </p>
         {squashed.length > 0 ? (
           <p>
-            💥 Aplastaste <strong>{squashed.length}</strong> {squashed.length === 1 ? 'bug' : 'bugs'}:{' '}
+            💥 You squashed <strong>{squashed.length}</strong> {squashed.length === 1 ? 'bug' : 'bugs'}:{' '}
             {squashed.map((k) => all.find((w) => w.key === k)?.item.term).join(', ')}
           </p>
         ) : (
-          <p className="muted">Cada acierto acerca a los bugs a ser aplastados. ¡Una ronda más!</p>
+          <p className="muted">Every hit brings the bugs closer to being squashed. One more round!</p>
         )}
         <div className="row" style={{ justifyContent: 'center' }}>
           <button className="btn" type="button" onClick={onAgain}>
-            🔁 Otra ronda
+            🔁 Another round
           </button>
           <button className="btn btn--ghost" type="button" onClick={onExit}>
-            🪲 Ver mi nido
+            🪲 See my nest
           </button>
         </div>
       </div>
@@ -303,16 +303,16 @@ function Hunt({ words, all, onExit, onAgain }: { words: ReviewWord[]; all: Revie
     <div className="bugs hunt">
       <div className="hunt__top">
         <button className="btn btn--ghost btn--small" type="button" onClick={onExit}>
-          ✕ Salir
+          ✕ Exit
         </button>
-        <div className="hunt__track" aria-label={`Pregunta ${i + 1} de ${queue.length}`}>
+        <div className="hunt__track" aria-label={`Question ${i + 1} of ${queue.length}`}>
           {queue.map((w, k) => (
             <span key={`${w.key}-${k}`} className={`hunt__dot ${k < i ? 'is-done' : ''} ${k === i ? 'is-now' : ''}`} aria-hidden="true">
               {squashed.includes(w.key) && k < i ? '💥' : k === i ? '🐛' : k < i ? '·' : '🐛'}
             </span>
           ))}
         </div>
-        <span className={`hunt__combo ${combo >= 3 ? 'is-hot' : ''}`} title="Aciertos seguidos">
+        <span className={`hunt__combo ${combo >= 3 ? 'is-hot' : ''}`} title="Correct in a row">
           🔥 {combo}
         </span>
       </div>
@@ -338,11 +338,11 @@ function Hunt({ words, all, onExit, onAgain }: { words: ReviewWord[]; all: Revie
               <SpeakButton text={question.word.item.term} small />
             </span>
             <span className="hunt__example">
-              “{question.word.item.example}” <SpeakButton text={question.word.item.example} small label="Escuchar ejemplo" />
+              “{question.word.item.example}” <SpeakButton text={question.word.item.example} small label="Listen to example" />
             </span>
-            <span>{result ? (boom ? '💥 ¡Bug aplastado!' : '✅ ¡Correcto! El bug se debilita.') : '❌ ¡Se escapó! Volverá al final de la ronda.'}</span>
+            <span>{result ? (boom ? '💥 Bug squashed!' : '✅ Correct! The bug is getting weaker.') : '❌ It got away! It will come back at the end of the round.'}</span>
             <button className="btn btn--small" type="button" onClick={next} autoFocus>
-              Siguiente ➜
+              Next ➜
             </button>
           </div>
         )}
@@ -353,7 +353,7 @@ function Hunt({ words, all, onExit, onAgain }: { words: ReviewWord[]; all: Revie
           <span className="bugs-boom__bang" aria-hidden="true">
             💥
           </span>
-          <strong>¡{boom} aplastado!</strong>
+          <strong>{boom} squashed!</strong>
         </div>
       )}
     </div>
@@ -393,10 +393,10 @@ function Choice({ q, result, onPick }: { q: ReviewQuestion; result: boolean | nu
       {q.kind === 'escucha' && (
         <div className="row hunt__listen">
           <button className="btn btn--big" type="button" onClick={() => void speak(item.term)}>
-            🔊 Escuchar
+            🔊 Listen
           </button>
           <button className="btn btn--ghost" type="button" onClick={() => void speak(item.term, { rate: 0.7 })}>
-            🐢 Despacio
+            🐢 Slow
           </button>
         </div>
       )}
@@ -512,7 +512,7 @@ function Spell({ q, done, onResult }: { q: ReviewQuestion; done: boolean; onResu
         <strong>{item.es}</strong>
         <SpeakButton text={item.term} />
       </div>
-      <div className="spell__slots" aria-live="polite" aria-label={`Escrito: ${used.map((t) => letters[t]).join('')}`}>
+      <div className="spell__slots" aria-live="polite" aria-label={`Typed: ${used.map((t) => letters[t]).join('')}`}>
         {words.map((wd, wi) => (
           <span key={wi} className="spell__word">
             {[...wd].map(() => {
@@ -543,15 +543,15 @@ function Spell({ q, done, onResult }: { q: ReviewQuestion; done: boolean; onResu
       {!done && (
         <div className="row spell__tools">
           <button className="btn btn--ghost btn--small" type="button" onClick={hint}>
-            💡 Pista
+            💡 Hint
           </button>
           <button className="btn btn--ghost btn--small" type="button" onClick={() => void speak(item.term, { rate: 0.7 })}>
-            🐢 Escuchar despacio
+            🐢 Listen slowly
           </button>
           <button className="btn btn--ghost btn--small" type="button" onClick={() => onResult(false)}>
-            🏳️ No la sé
+            🏳️ I don't know
           </button>
-          <span className="muted">Errores: {mistakes} (puedes tener 1)</span>
+          <span className="muted">Mistakes: {mistakes} (1 allowed)</span>
         </div>
       )}
     </div>

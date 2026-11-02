@@ -30,7 +30,7 @@ export function resolveWords(misses: MissMap, levels: Level[], keys: string[] = 
     const topic = level?.topics.find((t) => t.id === p.topicId);
     const item = topic?.vocabulary.find((v) => v.term === p.term);
     if (!level || !topic || !item) continue;
-    out.push({ key, item, levelId: level.id, levelName: level.name, topicTitle: topic.titleEs, topicVocab: topic.vocabulary, record });
+    out.push({ key, item, levelId: level.id, levelName: level.name, topicTitle: topic.title, topicVocab: topic.vocabulary, record });
   }
   return out;
 }
@@ -51,10 +51,10 @@ export function pickRound(misses: MissMap, words: ReviewWord[], size = 8, rng: R
 export type ReviewKind = 'significado' | 'escucha' | 'completa' | 'deletrea';
 
 export const KIND_INFO: Record<ReviewKind, { emoji: string; label: string; help: string }> = {
-  significado: { emoji: '🔎', label: '¿Qué significa?', help: 'Lee (y escucha) la palabra y toca su significado.' },
-  escucha: { emoji: '👂', label: 'Escucha y elige', help: 'Escucha la palabra y toca la tarjeta correcta.' },
-  completa: { emoji: '✏️', label: 'Completa la frase', help: 'Elige la palabra que falta.' },
-  deletrea: { emoji: '🔤', label: 'Escríbela', help: 'Toca las letras en orden para escribir la palabra en inglés.' },
+  significado: { emoji: '🔎', label: 'What does it mean?', help: 'Read (and listen to) the word, then tap its meaning.' },
+  escucha: { emoji: '👂', label: 'Listen & pick', help: 'Listen to the word and tap the right card.' },
+  completa: { emoji: '✏️', label: 'Fill the gap', help: 'Pick the missing word.' },
+  deletrea: { emoji: '🔤', label: 'Spell it', help: 'Tap the letters in order to spell the English word.' },
 };
 
 export interface ChoiceOption {
