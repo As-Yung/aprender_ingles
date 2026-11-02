@@ -18,6 +18,7 @@ export function Layout() {
         </NavLink>
         <nav className="topbar__nav" aria-label="Principal">
           <NavLink to="/">Inicio</NavLink>
+          <NavLink to="/juego">⚔️ Juego</NavLink>
           <NavLink to="/voz">🔊 Voz</NavLink>
           {session?.user.role === 'admin' && <NavLink to="/admin">Administración</NavLink>}
         </nav>

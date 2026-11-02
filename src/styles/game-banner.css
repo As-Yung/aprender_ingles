@@ -1,0 +1,30 @@
+/* Acceso al Vocab Boss Game desde el inicio (pizarra verde como el juego). */
+.game-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border: 4px solid #7a5434;
+  background: #1d2a25;
+  color: #efebdf;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease;
+}
+.game-banner:hover {
+  transform: translateY(-2px);
+}
+.game-banner__emoji {
+  font-size: 2rem;
+}
+.game-banner strong {
+  display: block;
+  font-size: 1.2rem;
+  color: #f4d47c;
+}
+.game-banner small {
+  display: block;
+  color: #a7b2aa;
+}
