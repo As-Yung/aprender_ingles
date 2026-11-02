@@ -17,6 +17,8 @@ export interface Duelo {
   challenger_name: string;
   opponent_name: string;
   level: LevelId;
+  /** Game being played ('boss' = Boss Battle, or an arcade game id). */
+  game: string;
   challenger_char: PersonajeDuelo;
   opponent_char: PersonajeDuelo | null;
   status: 'pending' | 'active' | 'finished' | 'declined' | 'cancelled' | 'expired';
@@ -59,17 +61,18 @@ export interface EnSala {
 }
 
 const MENSAJES: Record<string, string> = {
-  not_authenticated: 'Tu sesión caducó. Vuelve a iniciar sesión.',
-  invalid_opponent: 'Ese jugador no está disponible.',
-  invalid_character: 'En los duelos solo se pueden usar los personajes normales.',
-  invalid_level: 'Nivel no válido.',
-  rate_limited: 'Demasiados desafíos seguidos. Espera un minuto.',
-  not_found: 'Ese duelo ya no existe.',
-  not_pending: 'Ese desafío ya no está pendiente.',
-  not_active: 'El duelo ya terminó.',
-  out_of_order: 'Se desincronizó la partida. Recargando…',
-  too_fast: 'Más despacio 🙂',
-  not_abandoned: 'Tu rival sigue jugando.',
+  not_authenticated: 'Your session expired. Please sign in again.',
+  invalid_opponent: 'That player is not available.',
+  invalid_character: 'Only regular characters can be used in duels.',
+  invalid_level: 'Invalid level.',
+  invalid_game: 'Invalid game.',
+  rate_limited: 'Too many challenges in a row. Wait a minute.',
+  not_found: 'That duel no longer exists.',
+  not_pending: 'That challenge is no longer pending.',
+  not_active: 'The duel is already over.',
+  out_of_order: 'The game got out of sync. Reloading…',
+  too_fast: 'Slow down 🙂',
+  not_abandoned: 'Your rival is still playing.',
 };
 
 export class DueloError extends Error {
@@ -83,7 +86,7 @@ export class DueloError extends Error {
 
 function fallo(e: { message?: string } | null): never {
   const code = Object.keys(MENSAJES).find((k) => e?.message?.includes(k)) ?? 'unknown';
-  throw new DueloError(code, MENSAJES[code] ?? 'No se pudo conectar con el servidor. Inténtalo de nuevo.');
+  throw new DueloError(code, MENSAJES[code] ?? 'Could not reach the server. Please try again.');
 }
 
 async function rpc<T>(client: SupabaseClient, fn: string, args: Record<string, unknown>): Promise<T> {
@@ -92,8 +95,8 @@ async function rpc<T>(client: SupabaseClient, fn: string, args: Record<string, u
   return data as T;
 }
 
-export const desafiar = (c: SupabaseClient, rival: string, nivel: LevelId, personaje: PersonajeDuelo) =>
-  rpc<Duelo>(c, 'duel_challenge', { p_opponent: rival, p_level: nivel, p_char: personaje });
+export const desafiar = (c: SupabaseClient, rival: string, nivel: LevelId, personaje: PersonajeDuelo, juego = 'boss') =>
+  rpc<Duelo>(c, 'duel_challenge', { p_opponent: rival, p_level: nivel, p_char: personaje, p_game: juego });
 export const responderDesafio = (c: SupabaseClient, duelo: string, aceptar: boolean, personaje: PersonajeDuelo) =>
   rpc<Duelo>(c, 'duel_respond', { p_duel: duelo, p_accept: aceptar, p_char: personaje });
 export const cancelarDesafio = (c: SupabaseClient, duelo: string) => rpc<null>(c, 'duel_cancel', { p_duel: duelo });
