@@ -2,9 +2,11 @@
 
 Tiempo estimado: **15 minutos**. Todo es gratuito.
 
-## 1. Activar GitHub Pages
-*Settings → Pages → Build and deployment → Source:* **GitHub Actions**.
-La URL será `https://<tu-usuario>.github.io/aprender_ingles/`.
+## 1. GitHub Pages
+El repositorio debe ser **público** (Pages no está disponible en repos privados del plan gratuito).
+El workflow *Desplegar en GitHub Pages* publica en la rama `gh-pages`
+(*Settings → Pages → Source: Deploy from a branch → `gh-pages` / root*).
+La URL es `https://<tu-usuario>.github.io/aprender_ingles/`.
 
 ## 2. Crear el proyecto en Supabase
 1. Entra en <https://supabase.com> → **New project** (plan Free). Guarda la **contraseña de la base de datos**.
@@ -48,6 +50,7 @@ Aplica las migraciones (tablas + RLS), despliega la Edge Function `admin-users` 
 
 ## 6. Volver a publicar la web
 *Actions → “Desplegar en GitHub Pages” → Run workflow* (o haz cualquier merge a `main`).
+El build lee las variables `VITE_*`, así que este paso es necesario después de crearlas.
 
 ## 7. Primer acceso
 1. Abre la URL de Pages → usuario `admin` + tu contraseña.

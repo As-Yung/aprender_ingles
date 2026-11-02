@@ -37,6 +37,8 @@ jobs:
   dependency-review:
     # Requiere Dependency graph / Advanced Security (gratis en repos públicos)
     if: github.event_name == 'pull_request' && !github.event.repository.private
+    # No bloquea el PR si "Dependency graph" aún no está activado en Settings → Advanced Security.
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
