@@ -54,6 +54,9 @@ export default function TopicPage() {
           </p>
         </div>
       </header>
+      <div className="topic-progress" aria-label={`${available.filter((m) => progress[m.id]?.completed).length} of ${available.length} sections completed`}>
+        <span style={{ width: `${(available.filter((m) => progress[m.id]?.completed).length / available.length) * 100}%`, background: level.color }} />
+      </div>
       <nav className="section-nav" aria-label="Topic sections">
         {available.map((m) => (
           <NavLink key={m.id} to={`/nivel/${level.id}/${topic.id}/${m.id}`} className="section-nav__item" title={m.description}>
@@ -62,9 +65,6 @@ export default function TopicPage() {
           </NavLink>
         ))}
       </nav>
-      <div className="topic-progress" aria-label={`${available.filter((m) => progress[m.id]?.completed).length} of ${available.length} sections completed`}>
-        <span style={{ width: `${(available.filter((m) => progress[m.id]?.completed).length / available.length) * 100}%`, background: level.color }} />
-      </div>
       <p className="section-desc muted">{mod.description}</p>
       <Suspense fallback={<Loading />}>
         <Section key={`${topicKey}/${mod.id}`} level={level} topic={topic} topicKey={topicKey} onComplete={onComplete} />

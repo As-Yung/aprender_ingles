@@ -24,7 +24,7 @@ function FlipCard({ item }: { item: VocabItem }) {
       type="button"
       className={`flip ${flipped ? 'is-flipped' : ''}`}
       onClick={() => setFlipped((f) => !f)}
-      aria-label={`${item.term}. Pulsa para ver la traducción`}
+      aria-label={`${item.term}. Tap to see the translation`}
     >
       <span className="flip__inner">
         <span className="flip__front">
@@ -47,14 +47,14 @@ function FlipCard({ item }: { item: VocabItem }) {
 function Learn({ items }: { items: VocabItem[] }) {
   return (
     <>
-      <p className="muted">Toca cada tarjeta para darle la vuelta. Escucha la pronunciación y repite en voz alta.</p>
+      <p className="muted">Tap each card to flip it. Listen to the pronunciation and repeat out loud.</p>
       <div className="flip-grid">
         {items.map((v) => (
           <div key={v.term} className="flip-wrap">
             <FlipCard item={v} />
             <div className="flip-actions">
-              <SpeakButton text={v.term} small label="Palabra" />
-              <SpeakButton text={v.example} small label="Ejemplo" />
+              <SpeakButton text={v.term} small label="Word" />
+              <SpeakButton text={v.example} small label="Example" />
             </div>
           </div>
         ))}
@@ -75,7 +75,7 @@ function Review({ items, keyOf, onDone }: { items: VocabItem[]; keyOf: (v: Vocab
     return (
       <div className="card center">
         <p className="big">🎉</p>
-        <p>¡Repaso terminado! Las palabras que fallaste volverán pronto; las que sabías, en unos días.</p>
+        <p>Review done! Words you missed will come back soon; the ones you knew, in a few days.</p>
       </div>
     );
   }
@@ -90,7 +90,7 @@ function Review({ items, keyOf, onDone }: { items: VocabItem[]; keyOf: (v: Vocab
   return (
     <div className="card srs">
       <div className="srs__meta">
-        Tarjeta {i + 1}/{queue.length} · pendientes hoy: {dueCount} · caja {card?.box ?? 1}/5
+        Card {i + 1}/{queue.length} · due today: {dueCount} · box {card?.box ?? 1}/5
       </div>
       <div className="srs__front">
         <span className="flip__emoji" aria-hidden="true">
@@ -110,16 +110,16 @@ function Review({ items, keyOf, onDone }: { items: VocabItem[]; keyOf: (v: Vocab
           </div>
           <div className="row">
             <button className="btn btn--bad" type="button" onClick={() => answer(false)}>
-              😕 No lo sabía
+              😕 I didn't know it
             </button>
             <button className="btn btn--ok" type="button" onClick={() => answer(true)}>
-              😀 Lo sabía
+              😀 I knew it
             </button>
           </div>
         </>
       ) : (
         <button className="btn" type="button" onClick={() => setRevealed(true)}>
-          Mostrar significado
+          Show meaning
         </button>
       )}
     </div>
@@ -149,7 +149,7 @@ function Practice({ items, keyOf, onDone }: { items: VocabItem[]; keyOf: (v: Voc
       <div className="card center">
         <div className="quiz-result__score">{pct}%</div>
         <p>
-          {score} de {rounds.length} correctas.
+          {score} of {rounds.length} correct.
         </p>
       </div>
     );
@@ -170,10 +170,10 @@ function Practice({ items, keyOf, onDone }: { items: VocabItem[]; keyOf: (v: Voc
   return (
     <div className="card practice">
       <div className="srs__meta">
-        Ejercicio {i + 1}/{rounds.length}
+        Exercise {i + 1}/{rounds.length}
       </div>
       <p className="quiz__prompt">
-        <span aria-hidden="true">{round.item.emoji}</span> ¿Cómo se dice <strong>“{round.item.es}”</strong> en inglés?
+        <span aria-hidden="true">{round.item.emoji}</span> How do you say <strong lang="es">“{round.item.es}”</strong> in English?
       </p>
       {round.type === 'choice' ? (
         <div className="quiz__options">
@@ -201,27 +201,27 @@ function Practice({ items, keyOf, onDone }: { items: VocabItem[]; keyOf: (v: Voc
             className="input"
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
-            placeholder="Escribe la palabra en inglés"
+            placeholder="Type the word in English"
             autoComplete="off"
             autoCapitalize="off"
             spellCheck={false}
             maxLength={80}
             disabled={result !== null}
-            aria-label="Respuesta"
+            aria-label="Answer"
           />
           <button className="btn" type="submit" disabled={result !== null}>
-            Comprobar
+            Check
           </button>
         </form>
       )}
       {result !== null && (
         <div className={result ? 'feedback feedback--ok' : 'feedback feedback--bad'} role="status">
-          <strong>{result ? '¡Correcto!' : `Era: ${round.item.term}`}</strong> <SpeakButton text={round.item.term} small />
+          <strong>{result ? 'Correct!' : `It was: ${round.item.term}`}</strong> <SpeakButton text={round.item.term} small />
           <p>
             <em>{round.item.example}</em>
           </p>
           <button className="btn" type="button" onClick={next}>
-            Siguiente
+            Next
           </button>
         </div>
       )}
@@ -233,9 +233,9 @@ export default function VocabularySection({ topic, topicKey, onComplete }: Secti
   const [mode, setMode] = useState<Mode>('aprender');
   const keyOf = (v: VocabItem) => `${topicKey}/${v.term}`;
   const tabs: { id: Mode; label: string }[] = [
-    { id: 'aprender', label: '📚 Aprender' },
-    { id: 'repasar', label: '🔁 Repasar (SRS)' },
-    { id: 'practicar', label: '🎯 Practicar' },
+    { id: 'aprender', label: '📚 Learn' },
+    { id: 'repasar', label: '🔁 Review (SRS)' },
+    { id: 'practicar', label: '🎯 Practice' },
   ];
   return (
     <div>

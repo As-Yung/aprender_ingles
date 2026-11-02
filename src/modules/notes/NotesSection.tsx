@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
+import { Es } from '../../components/Es';
 import { SpeakButton } from '../../components/SpeakButton';
 import type { NoteBlock } from '../../content/types';
 import type { SectionProps } from '../types';
 
-function Block({ block }: { block: NoteBlock }) {
+function Block({ block, level }: { block: NoteBlock; level: string }) {
   switch (block.kind) {
     case 'heading':
       return <h3 className="notes__heading">{block.text}</h3>;
@@ -51,7 +52,7 @@ function Block({ block }: { block: NoteBlock }) {
           {block.items.map((e) => (
             <li key={e.en}>
               <span className="en">{e.en}</span> <SpeakButton text={e.en} small />
-              <span className="es">{e.es}</span>
+              <Es text={e.es} level={level} />
             </li>
           ))}
         </ul>
@@ -72,7 +73,7 @@ function Block({ block }: { block: NoteBlock }) {
 }
 
 /** Apuntes tipo cuaderno + resumen final con los puntos clave. */
-export default function NotesSection({ topic, onComplete }: SectionProps) {
+export default function NotesSection({ level, topic, onComplete }: SectionProps) {
   useEffect(() => {
     const t = window.setTimeout(() => onComplete(), 20_000); // leído ≥ 20 s
     return () => window.clearTimeout(t);
@@ -82,25 +83,28 @@ export default function NotesSection({ topic, onComplete }: SectionProps) {
     <div className="notebook">
       <div className="notebook__page">
         <h2 className="notebook__title">
-          {topic.emoji} {topic.title} <small>— {topic.titleEs}</small>
+          {topic.emoji} {topic.title}{' '}
+          <small>
+            — <Es text={topic.titleEs} level={level.id} />
+          </small>
         </h2>
         <p className="notebook__focus">
-          <span className="highlighter">Enfoque:</span> {topic.grammarFocus}
+          <span className="highlighter">Focus:</span> {topic.grammarFocus}
         </p>
         <p>{topic.summary}</p>
         {topic.notes.map((b, i) => (
-          <Block key={i} block={b} />
+          <Block key={i} block={b} level={level.id} />
         ))}
       </div>
       <aside className="notebook__summary">
-        <h3>📌 Resumen para repasar</h3>
+        <h3>📌 Key points to review</h3>
         <ol>
           {topic.keyPoints.map((p) => (
             <li key={p}>{p}</li>
           ))}
         </ol>
         <button className="btn btn--ghost" type="button" onClick={() => window.print()}>
-          🖨️ Imprimir apuntes
+          🖨️ Print notes
         </button>
       </aside>
     </div>
