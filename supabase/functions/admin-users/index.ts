@@ -209,7 +209,10 @@ Deno.serve(async (req) => {
         .eq('user_id', actor.id)
         .gt('expires_at', new Date().toISOString())
         .maybeSingle();
-      if (error) throw new HttpError(500, 'No se pudo comprobar el dispositivo.');
+      if (error) {
+        console.error('device.claim select', error.code, error.message);
+        throw new HttpError(500, 'No se pudo comprobar el dispositivo.');
+      }
       if (!device) throw new HttpError(401, 'Dispositivo no reconocido o caducado.');
       const { error: insErr } = await admin.from('trusted_sessions').upsert({
         session_id: sessionId,
@@ -217,7 +220,10 @@ Deno.serve(async (req) => {
         device_id: device.id,
         expires_at: device.expires_at,
       });
-      if (insErr) throw new HttpError(500, 'No se pudo registrar la sesión.');
+      if (insErr) {
+        console.error('device.claim upsert', insErr.code, insErr.message);
+        throw new HttpError(500, 'No se pudo registrar la sesión.');
+      }
       await admin.from('trusted_devices').update({ last_used_at: new Date().toISOString() }).eq('id', device.id);
       return json({ ok: true, expiresAt: device.expires_at }, 200, origin);
     }
@@ -243,7 +249,10 @@ Deno.serve(async (req) => {
       const { error } = await admin
         .from('trusted_devices')
         .insert({ user_id: actor.id, token_hash: await sha256Hex(token), expires_at: expiresAt });
-      if (error) throw new HttpError(500, 'No se pudo recordar el dispositivo.');
+      if (error) {
+        console.error('device.trust insert', error.code, error.message);
+        throw new HttpError(500, 'No se pudo recordar el dispositivo.');
+      }
       return json({ token, expiresAt }, 200, origin);
     }
 
