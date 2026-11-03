@@ -6,9 +6,10 @@
  * config/env.ts impide activarlo en un build de producción.
  */
 import { config } from '../../config/env';
-import { hashPassword, randomId, verifyPassword } from '../security/crypto';
+import { hashPassword, randomBytes, randomId, toBase64, verifyPassword } from '../security/crypto';
 import { readJson, removeKey, writeJson } from '../security/storage';
 import { buildTotp, createTotpSecret, validateTotp } from './totp';
+import { clearDeviceToken, getDeviceToken, saveDeviceToken, TRUSTED_DEVICE_DAYS } from './trustedDevice';
 import {
   AuthError,
   type AdminService,
@@ -43,6 +44,8 @@ interface StoredUser {
   totpSecret?: string;
   totpPending?: { factorId: string; secret: string };
   totpLastCounter?: number;
+  /** Hashes SHA-256 de los tokens de dispositivos de confianza (solo alumnos). */
+  trustedDevices?: { hash: string; expiresAt: number }[];
   failedAttempts: number;
   lockedUntil?: number;
   createdAt: string;
@@ -53,6 +56,12 @@ interface StoredSession {
   userId: string;
   aal: 'aal1' | 'aal2';
   expiresAt: number;
+  trustedDevice?: boolean;
+}
+
+async function sha256Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 function toAppUser(u: StoredUser): AppUser {
@@ -110,7 +119,7 @@ export class LocalAuthService implements AuthService {
       const check = checkPassword(pw, target.username);
       if (!check.ok) throw new AuthError(check.problems.join(' '), 'weak_password');
       const password = await hashPassword(pw);
-      this.update(userId, { password, mustChangePassword: true, failedAttempts: 0, lockedUntil: undefined });
+      this.update(userId, { password, mustChangePassword: true, failedAttempts: 0, lockedUntil: undefined, trustedDevices: [] });
       return pw;
     },
     requirePasswordChange: async (userId) => {
@@ -120,12 +129,12 @@ export class LocalAuthService implements AuthService {
     resetMfa: async (userId) => {
       const me = this.requireAdmin();
       if (me.id === userId) throw new AuthError('You cannot reset your own 2FA from here.', 'self_action');
-      this.update(userId, { totpSecret: undefined, totpPending: undefined, totpLastCounter: undefined });
+      this.update(userId, { totpSecret: undefined, totpPending: undefined, totpLastCounter: undefined, trustedDevices: [] });
     },
     setDisabled: async (userId, disabled) => {
       const me = this.requireAdmin();
       if (me.id === userId) throw new AuthError('You cannot disable your own account.', 'self_action');
-      this.update(userId, { disabled });
+      this.update(userId, disabled ? { disabled, trustedDevices: [] } : { disabled });
     },
   };
 
@@ -213,7 +222,7 @@ export class LocalAuthService implements AuthService {
     const s = this.rawSession();
     const u = this.currentUser();
     if (!s || !u) return null;
-    return { user: toAppUser(u), aal: s.aal, hasMfa: Boolean(u.totpSecret) };
+    return { user: toAppUser(u), aal: s.aal, hasMfa: Boolean(u.totpSecret), trustedDevice: Boolean(s.trustedDevice) };
   }
 
   subscribe(listener: (session: Session | null) => void): () => void {
@@ -246,6 +255,10 @@ export class LocalAuthService implements AuthService {
     }
     if (user.disabled) throw new AuthError('This account is disabled. Contact the administrator.', 'disabled');
     this.update(user.id, { failedAttempts: 0, lockedUntil: undefined });
+    if (user.totpSecret && user.role !== 'admin' && (await this.isTrustedDevice(user))) {
+      this.setSession({ userId: user.id, aal: 'aal2', expiresAt: Date.now() + SESSION_TTL_MS, trustedDevice: true });
+      return 'done';
+    }
     this.setSession({ userId: user.id, aal: 'aal1', expiresAt: Date.now() + SESSION_TTL_MS });
     return user.totpSecret ? 'mfa-verify' : 'mfa-enroll';
   }
@@ -309,6 +322,27 @@ export class LocalAuthService implements AuthService {
     }
     this.update(u.id, { password: await hashPassword(newPassword), mustChangePassword: false });
     void this.emit();
+  }
+
+  private async isTrustedDevice(user: StoredUser): Promise<boolean> {
+    const device = getDeviceToken(user.id);
+    if (!device) return false;
+    const hash = await sha256Hex(device.token);
+    const ok = (user.trustedDevices ?? []).some((d) => d.hash === hash && d.expiresAt > Date.now());
+    if (!ok) clearDeviceToken(user.id);
+    return ok;
+  }
+
+  async rememberDevice(): Promise<void> {
+    const u = this.currentUser();
+    const s = this.rawSession();
+    if (!u || !s || u.role === 'admin') return;
+    if (s.aal !== 'aal2' || s.trustedDevice) throw new AuthError('Verify the 2FA code first.', 'aal2_required');
+    const token = toBase64(randomBytes(32));
+    const expiresAt = Date.now() + TRUSTED_DEVICE_DAYS * 86_400_000;
+    const kept = (u.trustedDevices ?? []).filter((d) => d.expiresAt > Date.now()).slice(-9);
+    this.update(u.id, { trustedDevices: [...kept, { hash: await sha256Hex(token), expiresAt }] });
+    saveDeviceToken(u.id, { token, expiresAt: new Date(expiresAt).toISOString() });
   }
 
   async signOut(): Promise<void> {

@@ -595,6 +595,17 @@ summary:focus-visible {
   flex: 1;
   min-width: 200px;
 }
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+.field--check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary, currentColor);
+}
 .row {
   display: flex;
   flex-wrap: wrap;

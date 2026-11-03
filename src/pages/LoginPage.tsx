@@ -25,12 +25,13 @@ export default function LoginPage() {
     setError('');
     setBusy(true);
     try {
-      await service.signIn(username, password);
+      const next = await service.signIn(username, password);
       // Publica la sesión nueva en el contexto ANTES de navegar. Si no, la página del 2FA podía
       // montarse con la sesión aún vacía y devolver al login (había que escribir las credenciales dos veces).
       await refresh();
       setPassword('');
-      navigate('/mfa', { replace: true });
+      // 'done': dispositivo de confianza (alumno, < 7 días desde el último código) → sin 2FA
+      navigate(next === 'done' ? '/' : '/mfa', { replace: true });
     } catch (err) {
       setError(err instanceof AuthError ? err.message : 'Could not sign in. Please try again.');
     } finally {
@@ -82,7 +83,8 @@ export default function LoginPage() {
           {busy ? 'Checking…' : 'Sign in'}
         </button>
         <p className="muted small">
-          🔐 Next, we'll ask for a code from your authenticator app (Google Authenticator, Microsoft Authenticator, Authy…).
+          🔐 Next, we'll ask for a code from your authenticator app (Google Authenticator, Microsoft Authenticator, Authy…). Students
+          can skip it for 7 days on a remembered device.
         </p>
         {config.authMode === 'local' && <p className="dev-banner">🧪 Local development mode</p>}
       </form>

@@ -12,6 +12,9 @@ export default function MfaPage() {
   const [busy, setBusy] = useState(false);
   const [enrollment, setEnrollment] = useState<MfaEnrollment | null>(null);
   const [qr, setQr] = useState('');
+  // Solo alumnos: el administrador siempre escribe el código
+  const [remember, setRemember] = useState(true);
+  const canRemember = session?.user.role !== 'admin';
   const needsEnroll = Boolean(session && session.aal === 'aal1' && !session.hasMfa);
 
   useEffect(() => {
@@ -42,6 +45,10 @@ export default function MfaPage() {
     try {
       if (needsEnroll && enrollment) await service.confirmMfaEnrollment(enrollment.factorId, code);
       else await service.verifyMfa(code);
+      if (canRemember && remember) {
+        // Si falla, simplemente se pedirá el código la próxima vez
+        await service.rememberDevice().catch(() => undefined);
+      }
       await refresh();
       navigate('/');
     } catch (err) {
@@ -86,6 +93,12 @@ export default function MfaPage() {
             autoFocus
           />
         </label>
+        {canRemember && (
+          <label className="field field--check small">
+            <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+            <span>Remember this device for 7 days (don't use it on shared computers)</span>
+          </label>
+        )}
         {error && (
           <div className="feedback feedback--bad" role="alert">
             {error}
