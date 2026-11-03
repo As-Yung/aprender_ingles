@@ -13,6 +13,7 @@ Abre un *Security advisory* privado en GitHub (*Security → Report a vulnerabil
 | Fuga de secretos | Service role key solo en el servidor (secrets de Supabase/GitHub). La contraseña del admin **no** está en el repositorio. `.env*` en `.gitignore`. |
 | XSS | React escapa todo; el contenido es texto (sin `dangerouslySetInnerHTML`); **CSP estricta** (`script-src 'self'`, `object-src 'none'`, `base-uri 'self'`). Sesión en `sessionStorage` (se borra al cerrar la pestaña). |
 | Clickjacking | Bloqueo de ejecución dentro de iframes (GitHub Pages no permite `frame-ancestors`). |
+| Pedir el 2FA en cada acceso (fatiga) | **Dispositivo de confianza solo para alumnos**: tras verificar el código, el navegador puede recordarse **7 días** (caducidad fija, no se alarga con el uso). El servidor guarda solo el hash SHA-256 de un token aleatorio de 256 bits; la contraseña sigue siendo obligatoria. La sesión se marca como de confianza en `trusted_sessions` y `is_fully_authenticated()` la acepta igual que AAL2. **El administrador siempre debe escribir el código** (lo impiden cliente, Edge Function y SQL). Reiniciar el 2FA, asignar contraseña temporal o desactivar al usuario revoca sus dispositivos. |
 | Fuerza bruta de TOTP / reutilización | Supabase limita intentos; en modo local: bloqueo tras 5 fallos y rechazo de códigos ya usados. |
 | Sesiones abandonadas | Cierre automático tras 30 min de inactividad; tokens de refresco rotativos. |
 | Contraseñas filtradas a terceros | Contraseñas temporales aleatorias criptográficas, mostradas una sola vez; cambio obligatorio. |

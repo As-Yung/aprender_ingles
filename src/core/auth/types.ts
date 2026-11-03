@@ -19,6 +19,11 @@ export interface Session {
   aal: AssuranceLevel;
   /** true si el usuario ya tiene un factor TOTP verificado. */
   hasMfa: boolean;
+  /**
+   * true si el 2FA de esta sesión lo cubre un dispositivo de confianza (solo alumnos, máx. 7 días).
+   * En ese caso aal se expone como 'aal2' porque el servidor la trata como tal.
+   */
+  trustedDevice?: boolean;
 }
 
 export type SignInNext = 'mfa-enroll' | 'mfa-verify' | 'done';
@@ -54,6 +59,8 @@ export interface AuthService {
   confirmMfaEnrollment(factorId: string, code: string): Promise<void>;
   verifyMfa(code: string): Promise<void>;
   changeOwnPassword(newPassword: string): Promise<void>;
+  /** Recuerda este navegador 7 días para no pedir el 2FA (no disponible para el administrador). */
+  rememberDevice(): Promise<void>;
   signOut(): Promise<void>;
   readonly admin: AdminService;
 }

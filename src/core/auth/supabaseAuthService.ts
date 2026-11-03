@@ -19,6 +19,16 @@ import {
   type Session,
   type SignInNext,
 } from './types';
+import {
+  clearDeviceToken,
+  clearTrustedSessionMark,
+  getDeviceToken,
+  isMarkedTrustedSession,
+  jwtClaim,
+  markTrustedSession,
+  saveDeviceToken,
+  type DeviceToken,
+} from './trustedDevice';
 import { checkPassword, isValidTotpCode, normalizeUsername, validateUsername } from './validation';
 
 const FUNCTION_NAME = 'admin-users';
@@ -108,11 +118,11 @@ export class SupabaseAuthService implements AuthService {
       this.client.auth.mfa.listFactors(),
     ]);
     const hasMfa = (factors?.totp ?? []).some((f) => f.status === 'verified');
-    return {
-      user: { ...toAppUser(data.session.user), hasMfa },
-      aal: aal?.currentLevel === 'aal2' ? 'aal2' : 'aal1',
-      hasMfa,
-    };
+    const user = { ...toAppUser(data.session.user), hasMfa };
+    const realAal2 = aal?.currentLevel === 'aal2';
+    const trustedDevice =
+      !realAal2 && user.role !== 'admin' && isMarkedTrustedSession(jwtClaim(data.session.access_token, 'session_id'));
+    return { user, aal: realAal2 || trustedDevice ? 'aal2' : 'aal1', hasMfa, trustedDevice };
   }
 
   subscribe(listener: (session: Session | null) => void): () => void {
@@ -150,7 +160,35 @@ export class SupabaseAuthService implements AuthService {
       throw new AuthError(`Could not sign in (${code || error.status || 'unknown'}).`, 'unknown');
     }
     const { data: factors } = await this.client.auth.mfa.listFactors();
-    return (factors?.totp ?? []).some((f) => f.status === 'verified') ? 'mfa-verify' : 'mfa-enroll';
+    const hasMfa = (factors?.totp ?? []).some((f) => f.status === 'verified');
+    if (hasMfa && (await this.claimTrustedDevice())) return 'done';
+    return hasMfa ? 'mfa-verify' : 'mfa-enroll';
+  }
+
+  /** Si este navegador está recordado (alumno, < 7 días), el servidor marca la sesión como de confianza. */
+  private async claimTrustedDevice(): Promise<boolean> {
+    const { data } = await this.client.auth.getSession();
+    const s = data.session;
+    if (!s || toAppUser(s.user).role === 'admin') return false;
+    const device = getDeviceToken(s.user.id);
+    if (!device) return false;
+    try {
+      const res = await this.call<{ expiresAt: string }>('device.claim', { token: device.token });
+      markTrustedSession(jwtClaim(s.access_token, 'session_id'), res.expiresAt);
+      return true;
+    } catch (e) {
+      // Token revocado o caducado en el servidor: se olvida. Si es un fallo de red, se pide el código.
+      if (!(e instanceof AuthError && e.code === 'network')) clearDeviceToken(s.user.id);
+      return false;
+    }
+  }
+
+  async rememberDevice(): Promise<void> {
+    const { data } = await this.client.auth.getSession();
+    const s = data.session;
+    if (!s || toAppUser(s.user).role === 'admin') return;
+    const device = await this.call<DeviceToken>('device.trust');
+    saveDeviceToken(s.user.id, device);
   }
 
   async startMfaEnrollment(): Promise<MfaEnrollment> {
@@ -196,6 +234,7 @@ export class SupabaseAuthService implements AuthService {
   }
 
   async signOut(): Promise<void> {
+    clearTrustedSessionMark();
     await this.client.auth.signOut();
   }
 }

@@ -129,7 +129,46 @@ async function audit(actorId: string, action: string, targetId?: string) {
   await admin.from('admin_audit_log').insert({ actor_id: actorId, action, target_id: targetId ?? null });
 }
 
-async function authenticate(req: Request): Promise<{ user: User; aal: string }> {
+// ------------------------- dispositivos de confianza -------------------------
+const TRUSTED_DEVICE_DAYS = 7;
+const MAX_TRUSTED_DEVICES = 10;
+const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/; // 32 bytes en base64url sin relleno
+
+function base64url(bytes: Uint8Array): string {
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function sha256Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function isAdmin(u: User): boolean {
+  return u.app_metadata?.role === 'admin';
+}
+
+/** ¿Esta sesión concreta fue validada con un dispositivo de confianza vigente? (nunca para el admin) */
+async function isTrustedSession(user: User, sessionId: string): Promise<boolean> {
+  if (isAdmin(user) || !UUID_PATTERN.test(sessionId)) return false;
+  const { data, error } = await admin
+    .from('trusted_sessions')
+    .select('session_id')
+    .eq('session_id', sessionId)
+    .eq('user_id', user.id)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+  return !error && Boolean(data);
+}
+
+async function revokeTrustedDevices(userId: string) {
+  // trusted_sessions se borra en cascada
+  const { error } = await admin.from('trusted_devices').delete().eq('user_id', userId);
+  if (error) throw new HttpError(500, 'No se pudieron revocar los dispositivos de confianza.');
+}
+
+async function authenticate(req: Request): Promise<{ user: User; aal: string; sessionId: string }> {
   const header = req.headers.get('Authorization') ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) throw new HttpError(401, 'No autenticado.');
@@ -137,7 +176,7 @@ async function authenticate(req: Request): Promise<{ user: User; aal: string }> 
   const { data, error } = await admin.auth.getUser(token);
   if (error || !data.user) throw new HttpError(401, 'Sesión no válida o expirada.');
   const claims = decodeJwtPayload(token);
-  return { user: data.user, aal: String(claims.aal ?? 'aal1') };
+  return { user: data.user, aal: String(claims.aal ?? 'aal1'), sessionId: String(claims.session_id ?? '') };
 }
 
 Deno.serve(async (req) => {
@@ -155,8 +194,58 @@ Deno.serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     const action = typeof body.action === 'string' ? body.action : '';
 
-    const { user: actor, aal } = await authenticate(req);
-    if (aal !== 'aal2') throw new HttpError(403, 'Se requiere verificación en dos pasos.');
+    const { user: actor, aal, sessionId } = await authenticate(req);
+
+    // -------- presentar un dispositivo de confianza (sesión solo con contraseña) --------
+    if (action === 'device.claim') {
+      if (isAdmin(actor)) throw new HttpError(403, 'El administrador siempre debe usar el código 2FA.');
+      if (!UUID_PATTERN.test(sessionId)) throw new HttpError(401, 'Sesión no válida.');
+      const token = typeof body.token === 'string' ? body.token : '';
+      if (!TOKEN_PATTERN.test(token)) throw new HttpError(401, 'Dispositivo no reconocido.');
+      const { data: device, error } = await admin
+        .from('trusted_devices')
+        .select('id, expires_at')
+        .eq('token_hash', await sha256Hex(token))
+        .eq('user_id', actor.id)
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle();
+      if (error) throw new HttpError(500, 'No se pudo comprobar el dispositivo.');
+      if (!device) throw new HttpError(401, 'Dispositivo no reconocido o caducado.');
+      const { error: insErr } = await admin.from('trusted_sessions').upsert({
+        session_id: sessionId,
+        user_id: actor.id,
+        device_id: device.id,
+        expires_at: device.expires_at,
+      });
+      if (insErr) throw new HttpError(500, 'No se pudo registrar la sesión.');
+      await admin.from('trusted_devices').update({ last_used_at: new Date().toISOString() }).eq('id', device.id);
+      return json({ ok: true, expiresAt: device.expires_at }, 200, origin);
+    }
+
+    const fullyAuthenticated = aal === 'aal2' || (await isTrustedSession(actor, sessionId));
+    if (!fullyAuthenticated) throw new HttpError(403, 'Se requiere verificación en dos pasos.');
+
+    // -------- recordar este dispositivo 7 días (solo justo tras verificar el código) --------
+    if (action === 'device.trust') {
+      if (isAdmin(actor)) throw new HttpError(403, 'El administrador siempre debe usar el código 2FA.');
+      if (aal !== 'aal2') throw new HttpError(403, 'Verifica primero el código 2FA.');
+      const nowIso = new Date().toISOString();
+      await admin.from('trusted_devices').delete().eq('user_id', actor.id).lte('expires_at', nowIso);
+      const { data: existing } = await admin
+        .from('trusted_devices')
+        .select('id')
+        .eq('user_id', actor.id)
+        .order('created_at', { ascending: false });
+      const extra = (existing ?? []).slice(MAX_TRUSTED_DEVICES - 1).map((d) => d.id);
+      if (extra.length) await admin.from('trusted_devices').delete().in('id', extra);
+      const token = base64url(crypto.getRandomValues(new Uint8Array(32)));
+      const expiresAt = new Date(Date.now() + TRUSTED_DEVICE_DAYS * 86_400_000).toISOString();
+      const { error } = await admin
+        .from('trusted_devices')
+        .insert({ user_id: actor.id, token_hash: await sha256Hex(token), expires_at: expiresAt });
+      if (error) throw new HttpError(500, 'No se pudo recordar el dispositivo.');
+      return json({ token, expiresAt }, 200, origin);
+    }
 
     // --------------------------- acciones propias ---------------------------
     if (action === 'me.changePassword') {
@@ -219,6 +308,7 @@ Deno.serve(async (req) => {
           app_metadata: { ...target.app_metadata, must_change_password: true },
         });
         if (error) throw new HttpError(400, 'No se pudo asignar la contraseña temporal.');
+        await revokeTrustedDevices(target.id);
         await audit(actor.id, action, target.id);
         return json({ temporaryPassword }, 200, origin);
       }
@@ -242,6 +332,7 @@ Deno.serve(async (req) => {
         for (const f of data.factors) {
           await admin.auth.admin.mfa.deleteFactor({ userId: target.id, id: f.id });
         }
+        await revokeTrustedDevices(target.id);
         await audit(actor.id, action, target.id);
         return json({ ok: true }, 200, origin);
       }
@@ -254,6 +345,7 @@ Deno.serve(async (req) => {
           ban_duration: body.disabled ? BAN_FOREVER : 'none',
         });
         if (error) throw new HttpError(400, 'No se pudo actualizar el estado.');
+        if (body.disabled) await revokeTrustedDevices(target.id);
         await audit(actor.id, `${action}:${body.disabled}`, target.id);
         return json({ ok: true }, 200, origin);
       }

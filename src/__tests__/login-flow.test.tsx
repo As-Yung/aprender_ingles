@@ -34,6 +34,9 @@ class FakeAuth {
   getSessionDelay = 30;
   eventDelay = 120;
   signInCalls = 0;
+  role: 'admin' | 'student' = 'admin';
+  rememberCalls = 0;
+  trusted = false;
   private listeners = new Set<(s: Session | null) => void>();
   readonly admin = {} as AuthService['admin'];
 
@@ -52,13 +55,15 @@ class FakeAuth {
   async signIn(username: string, password: string) {
     this.signInCalls++;
     if (username !== 'admin' || password !== 'Correct-Horse-2026') throw new Error('bad');
+    const skip = this.trusted && this.role !== 'admin';
     this.state = {
-      user: { id: 'u1', username: 'admin', role: 'admin', mustChangePassword: false },
-      aal: 'aal1',
+      user: { id: 'u1', username: 'admin', role: this.role, mustChangePassword: false },
+      aal: skip ? 'aal2' : 'aal1',
       hasMfa: true,
+      trustedDevice: skip,
     };
     this.notifyLater();
-    return 'mfa-verify' as const;
+    return skip ? ('done' as const) : ('mfa-verify' as const);
   }
   async startMfaEnrollment() {
     return { factorId: 'f', uri: 'otpauth://totp/x?secret=ABC', secret: 'ABC' };
@@ -70,6 +75,10 @@ class FakeAuth {
     this.notifyLater();
   }
   async changeOwnPassword() {}
+  async rememberDevice() {
+    this.rememberCalls++;
+    if (this.role !== 'admin') this.trusted = true;
+  }
   async signOut() {
     this.state = null;
     this.notifyLater();
@@ -189,6 +198,54 @@ describe('flujo de login', () => {
     renderApp('/login');
     await settle(120);
     expect(onMfa()).toBe(true);
+  });
+
+  it('alumno: tras el 2FA recuerda el dispositivo y el siguiente login no pide el código', async () => {
+    auth.role = 'student';
+    renderApp();
+    await settle(80);
+    type(container.querySelector<HTMLInputElement>('input[name="username"]')!, 'admin');
+    type(container.querySelector<HTMLInputElement>('input[name="password"]')!, 'Correct-Horse-2026');
+    await submit();
+    await settle(60);
+    const remember = container.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    expect(remember?.checked).toBe(true);
+    type(container.querySelector<HTMLInputElement>('input[autocomplete="one-time-code"]')!, '123456');
+    await submit();
+    await settle(300);
+    expect(auth.rememberCalls).toBe(1);
+    expect(container.querySelector('[data-testid="home"]')).not.toBeNull();
+
+    // Cierra sesión y vuelve a entrar: directo al inicio, sin pantalla de código
+    await act(async () => {
+      await auth.signOut();
+    });
+    act(() => root.unmount());
+    root = createRoot(container);
+    renderApp();
+    await settle(200);
+    expect(onLogin()).toBe(true);
+    type(container.querySelector<HTMLInputElement>('input[name="username"]')!, 'admin');
+    type(container.querySelector<HTMLInputElement>('input[name="password"]')!, 'Correct-Horse-2026');
+    await submit();
+    await settle(60);
+    expect(onMfa()).toBe(false);
+    expect(container.querySelector('[data-testid="home"]')).not.toBeNull();
+  });
+
+  it('administrador: no se ofrece recordar el dispositivo', async () => {
+    renderApp();
+    await settle(80);
+    type(container.querySelector<HTMLInputElement>('input[name="username"]')!, 'admin');
+    type(container.querySelector<HTMLInputElement>('input[name="password"]')!, 'Correct-Horse-2026');
+    await submit();
+    await settle(60);
+    expect(onMfa()).toBe(true);
+    expect(container.querySelector('input[type="checkbox"]')).toBeNull();
+    type(container.querySelector<HTMLInputElement>('input[autocomplete="one-time-code"]')!, '123456');
+    await submit();
+    await settle(300);
+    expect(auth.rememberCalls).toBe(0);
   });
 
   it('credenciales incorrectas: se queda en el login con un error', async () => {
