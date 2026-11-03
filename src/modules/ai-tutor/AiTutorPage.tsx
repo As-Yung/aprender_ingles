@@ -7,8 +7,29 @@ import { keyLooksValid, PROVIDER_IDS, PROVIDERS, streamChat, type ProviderId } f
 import { connectAi, disconnectAi, getPreferredProvider, openAskAi, useAiConnection, type AiMode } from '../../core/ai/store';
 import './ai-tutor.css';
 
-/** Connect the learner's favourite AI (Claude, ChatGPT or Gemini) for live questions. */
+/** Full page (/ia): breadcrumb + intro + connection panel. */
 export default function AiTutorPage() {
+  return (
+    <div className="ai-page">
+      <nav className="breadcrumb">
+        <Link to="/">Home</Link> › AI tutor
+      </nav>
+      <section className="hero">
+        <p className="eyebrow">Live help</p>
+        <h1>🤖 Your AI tutor</h1>
+        <p className="hero__lead">
+          Connect <strong>Claude</strong>, <strong>ChatGPT</strong> or <strong>Gemini</strong>. Then press <strong>Ask AI</strong> on any page
+          and ask about what you see: a word, a grammar rule, an exercise or a game.
+        </p>
+        <Es text="Conecta tu IA favorita y pregúntale en tiempo real sobre lo que ves en pantalla." />
+      </section>
+      <AiTutorSetup />
+    </div>
+  );
+}
+
+/** Connect the learner's favourite AI (Claude, ChatGPT or Gemini) for live questions. Also used in the Home "AI tutor" tab. */
+export function AiTutorSetup() {
   const { session } = useAuth();
   const conn = useAiConnection();
   const [provider, setProvider] = useState<ProviderId>(conn?.provider ?? getPreferredProvider());
@@ -60,20 +81,7 @@ export default function AiTutorPage() {
   }
 
   return (
-    <div className="ai-page">
-      <nav className="breadcrumb">
-        <Link to="/">Home</Link> › AI tutor
-      </nav>
-      <section className="hero">
-        <p className="eyebrow">Live help</p>
-        <h1>🤖 Your AI tutor</h1>
-        <p className="hero__lead">
-          Connect <strong>Claude</strong>, <strong>ChatGPT</strong> or <strong>Gemini</strong>. Then press <strong>Ask AI</strong> on any page
-          and ask about what you see: a word, a grammar rule, an exercise or a game.
-        </p>
-        <Es text="Conecta tu IA favorita y pregúntale en tiempo real sobre lo que ves en pantalla." />
-      </section>
-
+    <div className="ai-setup">
       {conn ? (
         <div className="card ai-connected">
           <div className="ai-connected__info">

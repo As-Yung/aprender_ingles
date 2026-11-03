@@ -7,15 +7,17 @@ import { useProgress } from '../core/progress/ProgressContext';
 import { isMastered } from '../core/progress/misses';
 import { isDue } from '../core/srs/leitner';
 import { BOSS_GAME, GAMES } from '../modules/arcade/engine';
+import { AiTutorSetup } from '../modules/ai-tutor/AiTutorPage';
 import { MODULES } from '../modules/registry';
 import '../styles/game-banner.css';
 
-type Tab = 'overview' | 'lessons' | 'games' | 'review';
+type Tab = 'overview' | 'lessons' | 'games' | 'review' | 'ai';
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'overview', icon: '✨', label: 'Overview' },
   { id: 'lessons', icon: '📚', label: 'Lessons' },
   { id: 'games', icon: '🎮', label: 'Games' },
   { id: 'review', icon: '🔁', label: 'Review' },
+  { id: 'ai', icon: '🤖', label: 'AI tutor' },
 ];
 const isTab = (t: string | null): t is Tab => TABS.some((x) => x.id === t);
 /** A few games shown directly on Home; the full list lives in the Arcade. */
@@ -351,6 +353,8 @@ export default function DashboardPage() {
             </Link>
           </div>
         )}
+
+        {tab === 'ai' && <AiTutorSetup />}
       </div>
     </div>
   );
