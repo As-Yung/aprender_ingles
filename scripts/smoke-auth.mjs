@@ -68,6 +68,12 @@ try {
   if (created.error) throw new Error(`createUser: ${created.error.message}`);
   userId = created.data.user.id;
 
+  console.log('▶ 0. La service role puede usar las tablas de dispositivos');
+  for (const table of ['trusted_devices', 'trusted_sessions']) {
+    const { error } = await service.from(table).select('*').limit(1);
+    check(!error, `acceso a ${table}`, error ? `${error.code ?? ''} ${error.message}` : '');
+  }
+
   console.log('▶ 1. Primer acceso: contraseña + alta del 2FA');
   const a = newClient();
   const s1 = await a.auth.signInWithPassword({ email, password });
@@ -83,11 +89,8 @@ try {
   console.log('▶ 2. Recordar este dispositivo (device.trust)');
   const trust = await invoke(a, { action: 'device.trust' });
   check(trust.status === 200 && typeof trust.data?.token === 'string', 'token de dispositivo recibido', `${trust.status} ${trust.error ?? ''}`);
-  const { count: devCount, error: devErr } = await service
-    .from('trusted_devices')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId);
-  check(!devErr && devCount === 1, 'dispositivo guardado en la base de datos', devErr?.message ?? `count=${devCount}`);
+  const { data: devs, error: devErr } = await service.from('trusted_devices').select('id').eq('user_id', userId);
+  check(!devErr && devs?.length === 1, 'dispositivo guardado en la base de datos', devErr ? `${devErr.code ?? ''} ${devErr.message}` : `filas=${devs?.length}`);
   await a.auth.signOut();
 
   console.log('▶ 3. Segundo acceso solo con contraseña');
