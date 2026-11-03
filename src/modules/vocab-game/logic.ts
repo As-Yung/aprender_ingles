@@ -30,12 +30,12 @@ export interface PersonajeBase {
 }
 
 export const PERSONAJES: Record<PersonajeId, PersonajeBase> = {
-  paladin: { id: 'paladin', nombre: 'Paladín', vida: 34, ataque: 10, velocidad: 9, esquiva: 9, secreto: false, lema: 'Aguanta muchos golpes.' },
-  asesino: { id: 'asesino', nombre: 'Asesino', vida: 26, ataque: 10, velocidad: 13, esquiva: 13, secreto: false, lema: 'Rápido y difícil de golpear.' },
-  mago: { id: 'mago', nombre: 'Mago', vida: 28, ataque: 15, velocidad: 7, esquiva: 11, secreto: false, lema: 'Golpes muy fuertes.' },
-  arquero: { id: 'arquero', nombre: 'Arquero', vida: 28, ataque: 12, velocidad: 11, esquiva: 9, secreto: false, lema: 'Equilibrado en todo.' },
-  hacker: { id: 'hacker', nombre: 'Hacker', vida: 40, ataque: 40, velocidad: 8, esquiva: 8, secreto: true, lema: 'Un solo exploit.' },
-  ia: { id: 'ia', nombre: 'Robot IA', vida: 34, ataque: 14, velocidad: 22, esquiva: 18, secreto: true, lema: 'Siempre hace doble jugada.' },
+  paladin: { id: 'paladin', nombre: 'Paladin', vida: 34, ataque: 10, velocidad: 9, esquiva: 9, secreto: false, lema: 'Takes lots of hits.' },
+  asesino: { id: 'asesino', nombre: 'Assassin', vida: 26, ataque: 10, velocidad: 13, esquiva: 13, secreto: false, lema: 'Fast and hard to hit.' },
+  mago: { id: 'mago', nombre: 'Wizard', vida: 28, ataque: 15, velocidad: 7, esquiva: 11, secreto: false, lema: 'Very strong hits.' },
+  arquero: { id: 'arquero', nombre: 'Archer', vida: 28, ataque: 12, velocidad: 11, esquiva: 9, secreto: false, lema: 'Balanced in everything.' },
+  hacker: { id: 'hacker', nombre: 'Hacker', vida: 40, ataque: 40, velocidad: 8, esquiva: 8, secreto: true, lema: 'One single exploit.' },
+  ia: { id: 'ia', nombre: 'AI Robot', vida: 34, ataque: 14, velocidad: 22, esquiva: 18, secreto: true, lema: 'Always strikes twice.' },
 };
 
 export const PERSONAJES_NORMALES: PersonajeId[] = ['paladin', 'asesino', 'mago', 'arquero'];
@@ -158,10 +158,10 @@ export interface PalabraJuego {
 export type TipoPregunta = 'significado' | 'traduce' | 'escucha' | 'completa';
 
 export const NOMBRE_TIPO: Record<TipoPregunta, string> = {
-  significado: '¿Qué significa?',
-  traduce: '¿Cómo se dice en inglés?',
-  escucha: 'Escucha y elige',
-  completa: 'Completa la frase',
+  significado: 'What does it mean?',
+  traduce: 'Say it in English',
+  escucha: 'Listen and choose',
+  completa: 'Complete the sentence',
 };
 
 export interface Pregunta {
@@ -357,7 +357,7 @@ export class Juego {
       const danio = Math.round(pj.ataque * (critico ? MULTIPLICADOR_CRITICO : 1));
       let golpes = 0;
       if (rnd() < probEsquiva(bs, pj, 0.1)) {
-        eventos.push({ tipo: 'bossEsquiva', texto: `${bs.nombre} esquivó tu ataque.` });
+        eventos.push({ tipo: 'bossEsquiva', texto: `${bs.nombre} dodged your attack.` });
       } else {
         golpes = 1;
         // El Robot IA siempre hace doble jugada; el resto depende de la velocidad.
@@ -372,7 +372,7 @@ export class Juego {
           golpe: g,
           critico,
           exp: ganada,
-          texto: `${critico ? '¡Golpe crítico! ' : ''}${g === 2 ? '¡Segundo golpe! ' : '¡Le diste! '}${bs.nombre} pierde ${danio} de vida.`,
+          texto: `${critico ? 'Critical hit! ' : ''}${g === 2 ? 'Second hit! ' : 'Hit! '}${bs.nombre} loses ${danio} HP.`,
         });
       }
     } else {
@@ -385,19 +385,19 @@ export class Juego {
         this.mazo.splice(Math.min(3 + veces * 3, this.mazo.length), 0, pregunta.palabra);
       }
       if (rnd() < probEsquiva(pj, bs, 0.25)) {
-        eventos.push({ tipo: 'jugadorEsquiva', texto: `¡Esquivaste el ataque de ${bs.nombre}!` });
+        eventos.push({ tipo: 'jugadorEsquiva', texto: `You dodged ${bs.nombre}’s attack!` });
       } else {
         const golpesBoss = rnd() < probDoble(bs, pj) ? 2 : 1;
         const danioBoss = this.danioBoss();
         for (let h = 1; h <= golpesBoss && pj.vida > 0; h++) {
           pj.vida = Math.max(0, pj.vida - danioBoss);
-          eventos.push({ tipo: 'golpeBoss', danio: danioBoss, golpe: h, texto: `${h === 2 ? '¡Otra vez! ' : ''}${bs.nombre} te quita ${danioBoss} de vida.` });
+          eventos.push({ tipo: 'golpeBoss', danio: danioBoss, golpe: h, texto: `${h === 2 ? 'Again! ' : ''}${bs.nombre} deals ${danioBoss} damage to you.` });
         }
       }
     }
 
     if (bs.vida <= 0) {
-      eventos.push({ tipo: 'bossDerrotado', nivel: bs.nivel, nombre: bs.nombre, texto: `¡Venciste a ${bs.nombre}!` });
+      eventos.push({ tipo: 'bossDerrotado', nivel: bs.nivel, nombre: bs.nombre, texto: `You beat ${bs.nombre}!` });
       if (bs.nivel >= NIVEL_FINAL) return this.terminar('victoria', eventos);
       const antes = pj.vida;
       pj.vida = Math.min(pj.vidaMax, pj.vida + Math.round(pj.vidaMax * CURACION_AL_VENCER));
@@ -408,7 +408,7 @@ export class Juego {
         nivel: this.bs.nivel,
         nombre: this.bs.nombre,
         curado,
-        texto: `¡Aparece ${this.bs.nombre}!${curado > 0 ? ` Recuperas ${curado} de vida.` : ''}`,
+        texto: `${this.bs.nombre} appears!${curado > 0 ? ` You recover ${curado} HP.` : ''}`,
       });
     }
 
@@ -419,7 +419,7 @@ export class Juego {
       this.exp.actual -= this.exp.necesaria;
       this.exp.necesaria += 20;
       this.puntosPendientes = this.puntosPorNivel;
-      eventos.push({ tipo: 'subeNivel', nivel: pj.nivel, puntos: this.puntosPorNivel, texto: `¡Subiste a nivel ${pj.nivel}! Tienes ${this.puntosPorNivel} puntos para mejorar.` });
+      eventos.push({ tipo: 'subeNivel', nivel: pj.nivel, puntos: this.puntosPorNivel, texto: `You reached level ${pj.nivel}! You have ${this.puntosPorNivel} points to spend.` });
       return { eventos, fin: null };
     }
 

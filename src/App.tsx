@@ -15,6 +15,8 @@ const TopicPage = lazy(() => import('./pages/TopicPage'));
 const VoicePage = lazy(() => import('./pages/VoicePage'));
 const VocabGamePage = lazy(() => import('./modules/vocab-game/VocabGamePage'));
 const DuelPage = lazy(() => import('./modules/vocab-duel/DuelPage'));
+const ArcadePage = lazy(() => import('./modules/arcade/ArcadePage'));
+const PlayPage = lazy(() => import('./modules/arcade/PlayPage'));
 const ReviewPage = lazy(() => import('./modules/review/ReviewPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -51,6 +53,8 @@ export function App() {
                 <Route path="voz" element={<VoicePage />} />
                 <Route path="juego" element={<VocabGamePage />} />
                 <Route path="duelo" element={<DuelPage />} />
+                <Route path="arcade" element={<ArcadePage />} />
+                <Route path="arcade/:gameId" element={<PlayPage />} />
                 <Route path="repaso" element={<ReviewPage />} />
                 <Route
                   path="admin"

@@ -33,6 +33,9 @@ import {
   type PersonajeDuelo,
 } from './api';
 import { preguntaDuelo } from './questions';
+import { BOSS_GAME, buildCtx, findGame, GAMES, gameEmoji, gameName, type ArcadeQuestion, type Ctx } from '../arcade/engine';
+import { QuestionView } from '../arcade/QuestionView';
+import { Es } from '../../components/Es';
 
 const PERSONAJES_DUELO: PersonajeDuelo[] = ['paladin', 'asesino', 'mago', 'arquero'];
 const PREFS_KEY = 'aprender-ingles.vocab-duel';
@@ -43,13 +46,15 @@ const ESPERA_DESAFIO_MS = 60_000;
 interface Prefs {
   nivel: LevelId;
   personaje: PersonajeDuelo;
+  juego: string;
 }
 
 function leerPrefs(): Prefs {
   const p = readJson<Partial<Prefs>>('local', PREFS_KEY, {});
-  const juego = readJson<{ nivel?: LevelId }>('local', JUEGO_PREFS_KEY, {});
-  const nivel = [p.nivel, juego.nivel].find((n) => LEVELS.some((l) => l.id === n)) ?? 'a1';
-  return { nivel, personaje: PERSONAJES_DUELO.includes(p.personaje!) ? p.personaje! : 'paladin' };
+  const prefsJuego = readJson<{ nivel?: LevelId }>('local', JUEGO_PREFS_KEY, {});
+  const nivel = [p.nivel, prefsJuego.nivel].find((n) => LEVELS.some((l) => l.id === n)) ?? 'a1';
+  const juego = p.juego === 'boss' || findGame(p.juego) ? p.juego! : 'boss';
+  return { nivel, personaje: PERSONAJES_DUELO.includes(p.personaje!) ? p.personaje! : 'paladin', juego };
 }
 
 function leerSonido(): { sonido: boolean; voz: boolean } {
@@ -57,7 +62,7 @@ function leerSonido(): { sonido: boolean; voz: boolean } {
   return { sonido: p.sonido !== false, voz: p.voz !== false };
 }
 
-const ELOGIOS = ['¡Muy bien!', '¡Genial!', '¡Correcto!', 'Nice!', 'Great job!'];
+const ELOGIOS = ['Well done!', 'Great!', 'Correct!', 'Nice!', 'Great job!'];
 
 export default function DuelPage() {
   const { service, session } = useAuth();
@@ -65,10 +70,10 @@ export default function DuelPage() {
   if (service.mode !== 'supabase') {
     return (
       <div className="vbg">
-        <h1 className="titulo">Duelos</h1>
-        <p className="lema">Los duelos en línea solo funcionan en la web publicada (con el servidor de usuarios). En el modo local de desarrollo no hay otros jugadores.</p>
+        <h1 className="titulo">Duels</h1>
+        <p className="lema">Online duels only work on the published site (with the user server). There are no other players in local development mode.</p>
         <Link to="/juego" className="boton" style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
-          Volver al juego
+          Back to the game
         </Link>
       </div>
     );
@@ -134,8 +139,8 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
       }
       if (enviadoRef.current?.id === d.id && (d.status === 'declined' || d.status === 'expired' || d.status === 'cancelled')) {
         setEnviado(null);
-        if (d.status === 'declined') setAviso(`${d.opponent_name} rechazó el desafío.`);
-        if (d.status === 'expired') setAviso(`${d.opponent_name} no respondió a tiempo.`);
+        if (d.status === 'declined') setAviso(`${d.opponent_name} declined the challenge.`);
+        if (d.status === 'expired') setAviso(`${d.opponent_name} did not answer in time.`);
       }
       setRecibido((r) => (r?.id === d.id && d.status !== 'pending' ? null : r));
       setActivo((prev) => (prev?.id === d.id ? d : prev));
@@ -181,7 +186,7 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
     if (enviado && ahora - Date.parse(enviado.created_at) > ESPERA_DESAFIO_MS + 3000) {
       void cancelarDesafio(client, enviado.id).catch(() => undefined);
       setEnviado(null);
-      setAviso(`${enviado.opponent_name} no respondió a tiempo.`);
+      setAviso(`${enviado.opponent_name} did not answer in time.`);
     }
     if (recibido && ahora - Date.parse(recibido.created_at) > ESPERA_DESAFIO_MS) setRecibido(null);
   }, [ahora, enviado, recibido, client]);
@@ -189,11 +194,11 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
   async function retar(j: EnSala) {
     setAviso('');
     try {
-      const d = await desafiar(client, j.id, prefs.nivel, prefs.personaje);
+      const d = await desafiar(client, j.id, prefs.nivel, prefs.personaje, prefs.juego);
       setEnviado(d);
       sonarSi('golpe');
     } catch (e) {
-      setAviso(e instanceof DueloError ? e.message : 'No se pudo enviar el desafío.');
+      setAviso(e instanceof DueloError ? e.message : 'Could not send the challenge.');
     }
   }
 
@@ -207,10 +212,10 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
         setPrefs({ personaje: miRespuesta });
         setActivo(r);
       } else if (r.status === 'expired') {
-        setAviso('Ese desafío ya caducó.');
+        setAviso('That challenge has expired.');
       }
     } catch (e) {
-      setAviso(e instanceof DueloError ? e.message : 'No se pudo responder al desafío.');
+      setAviso(e instanceof DueloError ? e.message : 'Could not answer the challenge.');
     }
   }
 
@@ -237,20 +242,20 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
     <div className="vbg">
       <FiltroTiza />
       <header className="cabecera">
-        <h1 className="titulo">Duelos</h1>
+        <h1 className="titulo">Duels</h1>
         <Link to="/juego" className="boton-sonido" style={{ textDecoration: 'none' }}>
-          ← Volver al juego
+          ← Back to the game
         </Link>
       </header>
       <main className="pantalla">
         <p className="lema">
-          Desafía a otra persona que esté en línea en tu mismo nivel. Las dos responden las mismas preguntas: cada acierto ataca a tu
-          rival y cada fallo le da un contraataque. Gana quien deje al otro sin vida.
+          Challenge someone who is online at your level. You both answer the same questions: each right answer attacks your
+          rival and each mistake gives them a counterattack. Knock out your rival to win.
         </p>
 
         <section className="bloque" aria-labelledby="duelo-nivel">
           <h2 id="duelo-nivel" className="subtitulo">
-            <span className="paso">1</span> Elige el nivel del duelo
+            <span className="paso">1</span> Choose the duel level
           </h2>
           <div className="dificultades niveles" role="radiogroup" aria-labelledby="duelo-nivel">
             {LEVELS.map((l) => (
@@ -264,26 +269,42 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
                 onClick={() => setPrefs({ nivel: l.id })}
               >
                 <b>{l.name}</b>
-                <span>{jugadores.filter((j) => j.level === l.id).length} en línea</span>
+                <span>{jugadores.filter((j) => j.level === l.id).length} online</span>
               </button>
             ))}
           </div>
         </section>
 
+        <section className="bloque" aria-labelledby="duelo-juego">
+          <h2 id="duelo-juego" className="subtitulo">
+            <span className="paso">⚔</span> Game
+          </h2>
+          <select className="arc-select" value={prefs.juego} disabled={!!enviado} onChange={(e) => setPrefs({ juego: e.target.value })} aria-label="Game">
+            <option value="boss">
+              {BOSS_GAME.emoji} {BOSS_GAME.name}
+            </option>
+            {GAMES.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.emoji} {g.name}
+              </option>
+            ))}
+          </select>
+        </section>
+
         <section className="bloque" aria-labelledby="duelo-personaje">
           <h2 id="duelo-personaje" className="subtitulo">
-            <span className="paso">2</span> Elige tu personaje
+            <span className="paso">2</span> Choose your character
           </h2>
-          <p className="nota">En los duelos no se pueden usar los personajes secretos.</p>
+          <p className="nota">Secret characters can’t be used in duels.</p>
           <SelectorPersonaje valor={prefs.personaje} alCambiar={(p) => setPrefs({ personaje: p })} />
         </section>
 
         <section className="bloque" aria-labelledby="duelo-sala">
           <h2 id="duelo-sala" className="subtitulo">
-            <span className="paso">3</span> Desafía a alguien
+            <span className="paso">3</span> Challenge someone
           </h2>
-          {conectado === false && <p className="mensaje">No se pudo entrar en la sala. Revisa tu conexión y recarga la página.</p>}
-          {conectado === null && <p className="nota">Entrando en la sala…</p>}
+          {conectado === false && <p className="mensaje">Could not join the lobby. Check your connection and reload the page.</p>}
+          {conectado === null && <p className="nota">Joining the lobby…</p>}
           {aviso && (
             <p className="mensaje" role="status">
               {aviso}
@@ -291,8 +312,8 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
           )}
           {conectado && mismoNivel.length === 0 && (
             <p className="nota">
-              Ahora no hay nadie más en {prefs.nivel.toUpperCase()}. Deja esta página abierta: cuando alguien entre aparecerá aquí.
-              {otrosNiveles.length > 0 && ` Hay ${otrosNiveles.length} persona(s) en otros niveles.`}
+              Nobody else is in {prefs.nivel.toUpperCase()} right now. Keep this page open: when someone joins they will appear here.
+              {otrosNiveles.length > 0 && ` ${otrosNiveles.length} player(s) in other levels.`}
             </p>
           )}
           <ul className="sala">
@@ -300,9 +321,9 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
               <li key={j.id}>
                 <span className="sala__punto" aria-hidden="true" />
                 <b>{j.name}</b>
-                <span className="nota">{j.busy ? 'ocupado' : 'disponible'}</span>
+                <span className="nota">{j.busy ? 'busy' : 'available'}</span>
                 <button type="button" className="boton" disabled={j.busy || !!enviado} onClick={() => void retar(j)}>
-                  Desafiar
+                  Challenge
                 </button>
               </li>
             ))}
@@ -310,15 +331,15 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
         </section>
 
         <details className="bloque instrucciones">
-          <summary className="subtitulo">Reglas del duelo</summary>
+          <summary className="subtitulo">Duel rules</summary>
           <ul>
-            <li>Las dos personas tienen que estar en línea y en el mismo nivel. Quien recibe el desafío tiene 60 segundos para aceptarlo.</li>
-            <li>Las preguntas son las mismas para las dos y se ponen más difíciles poco a poco. Cada una responde a su ritmo.</li>
+            <li>Both players must be online and at the same level. The challenged player has 60 seconds to accept.</li>
+            <li>Both players get the same questions, which slowly get harder. Each one answers at their own pace.</li>
             <li>
-              Acierto: atacas (con {RACHA_CRITICO} seguidos, golpe crítico). Fallo: tu rival te contraataca con la mitad de su ataque.
+              Right answer: you attack ({RACHA_CRITICO} in a row is a critical hit). Wrong answer: your rival counterattacks with half their attack.
             </li>
-            <li>La vida de cada personaje se triplica en los duelos, y el servidor calcula los golpes para que el combate sea justo.</li>
-            <li>Si tu rival pasa 45 segundos sin responder, puedes reclamar la victoria.</li>
+            <li>Every character has triple HP in duels, and the server calculates the hits so the fight is fair.</li>
+            <li>If your rival doesn’t answer for 45 seconds, you can claim the win.</li>
           </ul>
         </details>
       </main>
@@ -327,10 +348,10 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
         <div className="capa">
           <div className="ventana ventana-fin" role="dialog" aria-modal="true" aria-labelledby="duelo-esperando">
             <h2 id="duelo-esperando" className="subtitulo">
-              Esperando a {enviado.opponent_name}…
+              Waiting for {enviado.opponent_name}…
             </h2>
             <p>
-              Nivel {enviado.level.toUpperCase()} · te quedan {restante(enviado)} s
+              {gameEmoji(enviado.game)} {gameName(enviado.game)} · Level {enviado.level.toUpperCase()} · {restante(enviado)} s left
             </p>
             <div className="acciones">
               <button
@@ -341,7 +362,7 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
                   setEnviado(null);
                 }}
               >
-                Cancelar desafío
+                Cancel challenge
               </button>
             </div>
           </div>
@@ -352,20 +373,20 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
         <div className="capa">
           <div className="ventana" role="dialog" aria-modal="true" aria-labelledby="duelo-recibido">
             <h2 id="duelo-recibido" className="subtitulo">
-              ⚔️ ¡{recibido.challenger_name} te desafía!
+              ⚔️ {recibido.challenger_name} challenges you!
             </h2>
             <p>
-              Nivel <b>{recibido.level.toUpperCase()}</b>. Su personaje: {PERSONAJES[recibido.challenger_char].nombre}. Tienes{' '}
-              {restante(recibido)} s para responder.
+              Game: <b>{gameEmoji(recibido.game)} {gameName(recibido.game)}</b>. Level <b>{recibido.level.toUpperCase()}</b>. Their character: {PERSONAJES[recibido.challenger_char].nombre}. You have{' '}
+              {restante(recibido)} s to answer.
             </p>
-            <p className="etiqueta">Elige tu personaje</p>
+            <p className="etiqueta">Choose your character</p>
             <SelectorPersonaje valor={miRespuesta} alCambiar={setMiRespuesta} compacto />
             <div className="acciones">
               <button type="button" className="boton boton-secundario" onClick={() => void contestar(false)}>
-                Rechazar
+                Decline
               </button>
               <button type="button" className="boton" onClick={() => void contestar(true)}>
-                ¡Aceptar!
+                Accept!
               </button>
             </div>
           </div>
@@ -377,7 +398,7 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
 
 function SelectorPersonaje({ valor, alCambiar, compacto }: { valor: PersonajeDuelo; alCambiar: (p: PersonajeDuelo) => void; compacto?: boolean }) {
   return (
-    <div className={`selector-personaje ${compacto ? 'compacto' : ''}`} role="radiogroup" aria-label="Personaje">
+    <div className={`selector-personaje ${compacto ? 'compacto' : ''}`} role="radiogroup" aria-label="Character">
       {PERSONAJES_DUELO.map((id) => {
         const b = PERSONAJES[id];
         return (
@@ -404,9 +425,10 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
   const { reviewWord } = useProgress();
   const [duelo, setDuelo] = useState<Duelo>(inicial);
   const [palabras, setPalabras] = useState<PalabraJuego[] | null>(null);
+  const [ctx, setCtx] = useState<Ctx | null>(null);
   const [respondida, setRespondida] = useState<{ elegida: string; acierto: boolean; indice: number } | null>(null);
   const [mensaje, setMensaje] = useState<{ texto: string; clase?: string } | null>(null);
-  const [anuncio, setAnuncio] = useState<{ texto: string; n: number } | null>({ texto: '¡Duelo!', n: 0 });
+  const [anuncio, setAnuncio] = useState<{ texto: string; n: number } | null>({ texto: 'Duel!', n: 0 });
   const [capa, setCapa] = useState<'rendirse' | null>(null);
   const [fallos, setFallos] = useState<PalabraJuego[]>([]);
   const [error, setError] = useState('');
@@ -447,8 +469,11 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
 
   useEffect(() => {
     void loadLevel(duelo.level)
-      .then((l) => setPalabras(palabrasDelNivel(l)))
-      .catch(() => setError('No se pudo cargar el vocabulario del nivel.'));
+      .then((l) => {
+        setPalabras(palabrasDelNivel(l));
+        setCtx(buildCtx(l));
+      })
+      .catch(() => setError('Could not load the vocabulary for this level.'));
   }, [duelo.level]);
 
   useEffect(() => {
@@ -484,9 +509,15 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, inicial.id, yo, refrescar]);
 
+  const juegoArc = duelo.game && duelo.game !== 'boss' ? findGame(duelo.game) : undefined;
+  const indiceVisible = respondida ? respondida.indice : yoP.q;
   const pregunta = useMemo(
-    () => (palabras && duelo.seed !== null ? preguntaDuelo(palabras, duelo.seed, respondida ? respondida.indice : yoP.q) : null),
-    [palabras, duelo.seed, respondida, yoP.q],
+    () => (!juegoArc && palabras && duelo.seed !== null ? preguntaDuelo(palabras, duelo.seed, indiceVisible) : null),
+    [juegoArc, palabras, duelo.seed, indiceVisible],
+  );
+  const preguntaArc = useMemo<ArcadeQuestion | null>(
+    () => (juegoArc && ctx && duelo.seed !== null ? juegoArc.generate(ctx, duelo.seed, indiceVisible) : null),
+    [juegoArc, ctx, duelo.seed, indiceVisible],
   );
 
   useEffect(() => {
@@ -535,7 +566,7 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
       });
       await fx.proyectil(atacante, defensor, atacaYo ? '' : 'enemigo');
       sonarSi('esquiva');
-      fx.flotante(defensor, atacaYo ? '¡Esquivó!' : '¡Esquivaste!', 'esquiva');
+      fx.flotante(defensor, atacaYo ? 'Dodged!' : 'You dodged!', 'esquiva');
       await esperar(300);
       return;
     }
@@ -557,28 +588,39 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
         esc?.classList.add('dolor');
       }
       fx.particulas(defensor, color(atacaYo ? (j.critical ? '--tiza-naranja' : '--tiza-amarilla') : '--tiza-roja', raiz), j.critical ? 14 : 8);
-      fx.flotante(defensor, `${j.critical ? '¡Crítico! ' : ''}−${j.damage}`, j.critical ? 'critico' : '');
+      fx.flotante(defensor, `${j.critical ? 'Critical! ' : ''}−${j.damage}`, j.critical ? 'critico' : '');
       await esperar(380);
     }
   }
 
   async function responder(op: string) {
     if (!pregunta || respondida || enviando.current || terminado) return;
-    enviando.current = true;
-    const indice = yoP.q;
     const acierto = op === pregunta.respuesta;
     const { item } = pregunta.palabra;
+    setMensaje(
+      acierto
+        ? { texto: `${ELOGIOS[Math.floor(Math.random() * ELOGIOS.length)]} ${item.term} = ${item.es}`, clase: 'bien' }
+        : { texto: `Almost. It was “${pregunta.respuesta}”. ${item.term} = ${item.es}`, clase: 'mal' },
+    );
+    await enviar(op, acierto, pregunta.palabra, pregunta.audio);
+  }
+
+  async function responderArcade(acierto: boolean, dado: string) {
+    if (!preguntaArc || respondida || enviando.current || terminado) return;
+    setMensaje({ texto: `${acierto ? ELOGIOS[Math.floor(Math.random() * ELOGIOS.length)] + ' ' : ''}${preguntaArc.reveal}`, clase: acierto ? 'bien' : 'mal' });
+    await enviar(dado, acierto, preguntaArc.word, preguntaArc.say, preguntaArc.kind === 'choice' ? 1100 : 2000);
+  }
+
+  async function enviar(op: string, acierto: boolean, palabra: PalabraJuego | undefined, decir: string | undefined, pausaFallo = 1100) {
+    enviando.current = true;
+    const indice = yoP.q;
     setRespondida({ elegida: op, acierto, indice });
-    if (acierto) {
-      setMensaje({ texto: `${ELOGIOS[Math.floor(Math.random() * ELOGIOS.length)]} ${item.term} = ${item.es}`, clase: 'bien' });
-      sonarSi('acierto');
-    } else {
-      setMensaje({ texto: `Casi. Era «${pregunta.respuesta}». ${item.term} = ${item.es}`, clase: 'mal' });
-      sonarSi('error');
-      setFallos((f) => (f.some((p) => p.item.term === item.term) ? f : [...f, pregunta.palabra]));
+    sonarSi(acierto ? 'acierto' : 'error');
+    if (palabra) {
+      if (!acierto) setFallos((f) => (f.some((p) => p.item.term === palabra.item.term) ? f : [...f, palabra]));
+      reviewWord(`${duelo.level}/${palabra.topicId}/${palabra.item.term}`, acierto);
     }
-    reviewWord(`${duelo.level}/${pregunta.palabra.topicId}/${item.term}`, acierto);
-    if (sonidoRef.current.voz) setTimeout(() => void speak(pregunta.audio), 250);
+    if (sonidoRef.current.voz && decir) setTimeout(() => void speak(decir), 250);
     try {
       const j = await jugar(client, duelo.id, indice, acierto);
       encolar(j);
@@ -586,10 +628,10 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
       await refrescar();
     } catch (e) {
       if (e instanceof DueloError && e.code === 'too_fast') await esperar(700);
-      else setError(e instanceof DueloError ? e.message : 'Se perdió la conexión. Reintentando…');
+      else setError(e instanceof DueloError ? e.message : 'Connection lost. Retrying…');
       await refrescar();
     }
-    await esperar(acierto ? 300 : 1100);
+    await esperar(acierto ? 300 : pausaFallo);
     setRespondida(null);
     setMensaje(null);
     setError('');
@@ -599,16 +641,16 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
   // Teclas 1 a 4.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (capa || terminado) return;
+      if (capa || terminado || juegoArc) return;
       const i = parseInt(e.key, 10);
       if (i >= 1 && i <= 4) raizRef.current?.querySelectorAll<HTMLButtonElement>('.opciones .opcion')[i - 1]?.click();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [capa, terminado]);
+  }, [capa, terminado, juegoArc]);
 
   useEffect(() => {
-    if (anuncio?.n === 0) setTimeout(() => setAnuncio({ texto: `¡${rival.nombre} acepta el reto!`, n: 1 }), 50);
+    if (anuncio?.n === 0) setTimeout(() => setAnuncio({ texto: `${rival.nombre} accepts the challenge!`, n: 1 }), 50);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -617,39 +659,41 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
   const razon =
     duelo.finish_reason === 'forfeit'
       ? gane
-        ? `${rival.nombre} se rindió.`
-        : 'Te rendiste.'
+        ? `${rival.nombre} gave up.`
+        : 'You gave up.'
       : duelo.finish_reason === 'abandon'
         ? gane
-          ? `${rival.nombre} dejó de responder.`
-          : 'Pasaste demasiado tiempo sin responder.'
+          ? `${rival.nombre} stopped answering.`
+          : 'You went too long without answering.'
         : gane
-          ? `Dejaste a ${rival.nombre} sin vida. ¡Tu vocabulario manda!`
-          : `${rival.nombre} te ganó esta vez. Repasa y pide la revancha.`;
+          ? `You knocked out ${rival.nombre}. Your vocabulary rules!`
+          : `${rival.nombre} won this time. Review and ask for a rematch.`;
   const llenas = Math.min(yoP.racha, RACHA_CRITICO);
 
   return (
     <div className="vbg" ref={raizRef}>
       <FiltroTiza />
       <header className="cabecera">
-        <h1 className="titulo">Duelo {duelo.level.toUpperCase()}</h1>
+        <h1 className="titulo">
+          {juegoArc ? `${juegoArc.emoji} ${juegoArc.name}` : 'Duel'} {duelo.level.toUpperCase()}
+        </h1>
         <p className="nota">
-          Tú: {yoP.ok} aciertos · {rival.nombre}: {rival.ok} aciertos (pregunta {rival.q + 1})
+          You: {yoP.ok} correct · {rival.nombre}: {rival.ok} correct (question {rival.q + 1})
         </p>
       </header>
       <main className="pantalla">
-        <section className="escenario" ref={escenarioRef} aria-label="Combate">
+        <section className="escenario" ref={escenarioRef} aria-label="Battle">
           <div className="luchador jugador">
             <div className="sprite" ref={spriteYoRef}>
               <PersonajeDibujo id={yoP.char} />
             </div>
             <div className="placa">
               <p className="nombre">
-                <span>{yoP.nombre} (tú)</span> <span className="nivel">{PERSONAJES[yoP.char].nombre}</span>
+                <span>{yoP.nombre} (you)</span> <span className="nivel">{PERSONAJES[yoP.char].nombre}</span>
               </p>
-              <Barra clase={`barra-vida ${yoP.hp / yoP.max <= 0.3 ? 'baja' : yoP.hp / yoP.max <= 0.6 ? 'media' : ''}`} etiqueta="Tu vida" actual={yoP.hp} maximo={yoP.max} />
+              <Barra clase={`barra-vida ${yoP.hp / yoP.max <= 0.3 ? 'baja' : yoP.hp / yoP.max <= 0.6 ? 'media' : ''}`} etiqueta="Your HP" actual={yoP.hp} maximo={yoP.max} />
               <p className="cifras">
-                Vida {yoP.hp} / {yoP.max}
+                HP {yoP.hp} / {yoP.max}
               </p>
             </div>
           </div>
@@ -661,9 +705,9 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
               <p className="nombre">
                 <span>{rival.nombre}</span> <span className="nivel">{PERSONAJES[rival.char].nombre}</span>
               </p>
-              <Barra clase="barra-vida" etiqueta={`Vida de ${rival.nombre}`} actual={rival.hp} maximo={rival.max} />
+              <Barra clase="barra-vida" etiqueta={`${rival.nombre}’s HP`} actual={rival.hp} maximo={rival.max} />
               <p className="cifras">
-                Vida {rival.hp} / {rival.max}
+                HP {rival.hp} / {rival.max}
               </p>
             </div>
           </div>
@@ -675,17 +719,26 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
           )}
         </section>
 
-        <section className="pregunta" aria-label="Pregunta">
+        <section className="pregunta" aria-label="Question">
           <div className="pregunta-cabecera">
-            <p className="tipo-pregunta">{pregunta ? `${NOMBRE_TIPO[pregunta.tipo]} · pregunta ${(respondida?.indice ?? yoP.q) + 1}` : ''}</p>
+            <p className="tipo-pregunta">
+              {pregunta
+                ? `${NOMBRE_TIPO[pregunta.tipo]} · question ${indiceVisible + 1}`
+                : preguntaArc
+                  ? `${juegoArc!.emoji} ${juegoArc!.name} · ${preguntaArc.prompt.ask} · #${indiceVisible + 1}`
+                  : ''}
+            </p>
             <div className={`racha ${yoP.racha >= RACHA_CRITICO - 1 ? 'lista' : ''}`} aria-live="polite">
-              <span>{yoP.racha >= RACHA_CRITICO - 1 ? '¡Próximo acierto: crítico!' : 'Racha'}</span>
+              <span>{yoP.racha >= RACHA_CRITICO - 1 ? 'Next hit: critical!' : 'Streak'}</span>
               {Array.from({ length: RACHA_CRITICO }, (_, i) => (
                 <Estrella key={i} className={i < llenas ? 'llena' : ''} />
               ))}
             </div>
           </div>
-          {!pregunta && !error && <p className="nota">Cargando preguntas…</p>}
+          {!pregunta && !preguntaArc && !error && <p className="nota">Loading questions…</p>}
+          {preguntaArc && !terminado && (
+            <QuestionView key={`arc-${indiceVisible}`} q={preguntaArc} disabled={!!respondida || !!capa} onAnswer={(ok, dado) => void responderArcade(ok, dado)} />
+          )}
           {pregunta && !terminado && (
             <>
               <Enunciado key={`${respondida?.indice ?? yoP.q}`} pregunta={pregunta} revelada={!!respondida} />
@@ -699,7 +752,7 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
                       className={`opcion ${clase}`}
                       disabled={!!respondida || !!capa}
                       onClick={() => void responder(op)}
-                      aria-label={`Responder ${op}`}
+                      aria-label={`Answer ${op}`}
                     >
                       <span className="tecla">{i + 1}</span>
                       {op}
@@ -722,16 +775,16 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
               onClick={() =>
                 void reclamarAbandono(client, duelo.id)
                   .then(setDuelo)
-                  .catch((e) => setError(e instanceof DueloError ? e.message : 'No se pudo reclamar la victoria.'))
+                  .catch((e) => setError(e instanceof DueloError ? e.message : 'Could not claim the win.'))
               }
             >
-              {rival.nombre} no responde: reclamar victoria
+              {rival.nombre} is not answering: claim the win
             </button>
           ) : (
             <span />
           )}
           <button type="button" className="boton boton-secundario" disabled={terminado} onClick={() => setCapa('rendirse')}>
-            Rendirse
+            Give up
           </button>
         </div>
       </main>
@@ -740,12 +793,12 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
         <div className="capa">
           <div className="ventana" role="dialog" aria-modal="true" aria-labelledby="duelo-rendirse">
             <h2 id="duelo-rendirse" className="subtitulo">
-              ¿Rendirte?
+              Give up?
             </h2>
-            <p>{rival.nombre} ganará el duelo.</p>
+            <p>{rival.nombre} will win the duel.</p>
             <div className="acciones">
               <button type="button" className="boton boton-secundario" onClick={() => setCapa(null)}>
-                Seguir jugando
+                Keep playing
               </button>
               <button
                 type="button"
@@ -757,7 +810,7 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
                     .catch(() => void refrescar());
                 }}
               >
-                Rendirme
+                Give up
               </button>
             </div>
           </div>
@@ -771,12 +824,12 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
               <PersonajeDibujo id={yoP.char} />
             </div>
             <h2 id="duelo-fin" className="subtitulo">
-              {gane ? '¡Ganaste el duelo!' : '¡Buen intento!'}
+              {gane ? 'You won the duel!' : 'Nice try!'}
             </h2>
             <p>{razon}</p>
             <dl className="resumen">
               <div>
-                <dt>Tus aciertos</dt>
+                <dt>Your correct answers</dt>
                 <dd>
                   {yoP.ok}/{yoP.q}
                 </dd>
@@ -788,22 +841,22 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
                 </dd>
               </div>
               <div>
-                <dt>Tu vida</dt>
+                <dt>Your HP</dt>
                 <dd>{yoP.hp}</dd>
               </div>
             </dl>
             {fallos.length > 0 && (
               <>
-                <p className="etiqueta">Palabras para repasar</p>
+                <p className="etiqueta">Words to review</p>
                 <ul className="repaso">
                   {fallos.map((w) => (
                     <li key={w.item.term}>
-                      <button type="button" className="boton-sonido" onClick={() => void speak(w.item.term)} aria-label={`Escuchar ${w.item.term}`}>
+                      <button type="button" className="boton-sonido" onClick={() => void speak(w.item.term)} aria-label={`Listen to ${w.item.term}`}>
                         🔊
                       </button>
                       <span aria-hidden="true">{w.item.emoji}</span>
                       <b>{w.item.term}</b>
-                      <span>{w.item.es}</span>
+                      <Es text={w.item.es} level={duelo.level} />
                     </li>
                   ))}
                 </ul>
@@ -811,7 +864,7 @@ function Combate({ client, yo, inicial, alSalir }: { client: SupabaseClient; yo:
             )}
             <div className="acciones">
               <button type="button" className="boton" onClick={alSalir}>
-                Volver a la sala
+                Back to the lobby
               </button>
             </div>
           </div>

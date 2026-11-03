@@ -26,6 +26,9 @@ import {
   type Pregunta,
   type Stat,
 } from './logic';
+import { useServerRun } from '../arcade/api';
+import { Leaderboard } from '../arcade/Leaderboard';
+import { Es } from '../../components/Es';
 import './vocab-game.css';
 
 const PREFS_KEY = 'aprender-ingles.vocab-game';
@@ -52,19 +55,21 @@ function leerPrefs(): Prefs {
 
 const NUM = new Intl.NumberFormat('es');
 const n = (x: number) => NUM.format(x);
-const ELOGIOS = ['¡Muy bien!', '¡Genial!', '¡Correcto!', '¡Eso es!', '¡Excelente!', '¡Bravo!', 'Nice!', 'Great job!'];
+const ELOGIOS = ['Well done!', 'Great!', 'Correct!', 'That’s it!', 'Excellent!', 'Bravo!', 'Nice!', 'Great job!'];
 
 const MEJORAS: { stat: Stat; nombre: string; ayuda: string; valor: (pj: Personaje) => number; suma: number }[] = [
-  { stat: 'vida', nombre: 'Vida', ayuda: 'Aguantas más golpes', valor: (pj) => pj.vidaMax, suma: VIDA_POR_PUNTO },
-  { stat: 'ataque', nombre: 'Ataque', ayuda: 'Quitas más vida', valor: (pj) => pj.ataque, suma: 1 },
-  { stat: 'velocidad', nombre: 'Velocidad', ayuda: 'Más golpes dobles', valor: (pj) => pj.velocidad, suma: 1 },
-  { stat: 'esquiva', nombre: 'Esquiva', ayuda: 'Evitas más golpes', valor: (pj) => pj.esquiva, suma: 1 },
+  { stat: 'vida', nombre: 'HP', ayuda: 'Take more hits', valor: (pj) => pj.vidaMax, suma: VIDA_POR_PUNTO },
+  { stat: 'ataque', nombre: 'Attack', ayuda: 'Deal more damage', valor: (pj) => pj.ataque, suma: 1 },
+  { stat: 'velocidad', nombre: 'Speed', ayuda: 'More double hits', valor: (pj) => pj.velocidad, suma: 1 },
+  { stat: 'esquiva', nombre: 'Dodge', ayuda: 'Avoid more hits', valor: (pj) => pj.esquiva, suma: 1 },
 ];
 
 type Linea = { texto: string; clase?: string };
 
 export default function VocabGamePage() {
   const { reviewWord } = useProgress();
+  const server = useServerRun();
+  const [boardKey, setBoardKey] = useState(0);
   const [prefs, setPrefsState] = useState<Prefs>(leerPrefs);
   const setPrefs = (cambio: Partial<Prefs>) =>
     setPrefsState((prev) => {
@@ -127,15 +132,16 @@ export default function VocabGamePage() {
       const level = await loadLevel(prefs.nivel);
       sonarSi('nivel');
       juegoRef.current = new Juego(id, level);
+      void server.start('boss', prefs.nivel);
     } catch {
-      setError('No se pudo cargar el vocabulario de este nivel. Revisa tu conexión e inténtalo de nuevo.');
+      setError('Could not load the vocabulary for this level. Check your connection and try again.');
       setCargando(false);
       return;
     }
     const j = juegoRef.current!;
     ocupado.current = false;
     efectos()?.limpiar();
-    setRegistro([{ texto: `Empiezas como ${j.pj.nombre} en el nivel ${prefs.nivel.toUpperCase()}.`, clase: 'especial' }]);
+    setRegistro([{ texto: `You start as ${j.pj.nombre} at level ${prefs.nivel.toUpperCase()}.`, clase: 'especial' }]);
     setRespondida(null);
     setMensaje(null);
     setFin(null);
@@ -145,19 +151,19 @@ export default function VocabGamePage() {
     setMostrada(j.pregunta);
     setPreguntaN((x) => x + 1);
     window.scrollTo(0, 0);
-    anunciar(`¡Aparece ${j.bs.nombre}!`);
+    anunciar(`${j.bs.nombre} appears!`);
   }
 
   function enviarAdivinanza(e: FormEvent) {
     e.preventDefault();
     const id = seleccionarSecreto(adivinanza);
     if (!id) {
-      setMsgAdivinanza({ texto: 'Mmm, no es eso. ¡Prueba otra vez! (responde en inglés)' });
+      setMsgAdivinanza({ texto: 'Hmm, that’s not it. Try again! (answer in English)' });
       sonarSi('error');
       return;
     }
     if (!prefs.secretos.includes(id)) setPrefs({ secretos: [...prefs.secretos, id] });
-    setMsgAdivinanza({ texto: `¡Correcto! Desbloqueaste a ${PERSONAJES[id].nombre}.`, clase: 'bien' });
+    setMsgAdivinanza({ texto: `Correct! You unlocked ${PERSONAJES[id].nombre}.`, clase: 'bien' });
     setAdivinanza('');
     sonarSi('victoria');
   }
@@ -180,14 +186,15 @@ export default function VocabGamePage() {
       setMensaje({ texto: `${ELOGIOS[Math.floor(Math.random() * ELOGIOS.length)]} ${traduccion}`, clase: 'bien' });
       sonarSi('acierto');
     } else {
-      setMensaje({ texto: `Casi. Era «${p.respuesta}». ${traduccion}`, clase: 'mal' });
+      setMensaje({ texto: `Almost. It was “${p.respuesta}”. ${traduccion}`, clase: 'mal' });
       sonarSi('error');
     }
     reviewWord(`${j.nivelIngles}/${p.palabra.topicId}/${item.term}`, acierto);
     setTimeout(() => decir(p.audio), 250);
 
+    void server.answer(j.turno, acierto);
     const resultado = j.responder(valor);
-    anotar(`Pregunta ${j.turno}: ${traduccion}${acierto ? ' (acertaste)' : ` (respondiste «${valor}»)`}`, 'turno');
+    anotar(`Question ${j.turno}: ${traduccion}${acierto ? ' (correct)' : ` (you answered “${valor}”)`}`, 'turno');
     repintar();
 
     for (const ev of resultado.eventos) await mostrarEvento(ev);
@@ -238,7 +245,7 @@ export default function VocabGamePage() {
           { duration: 380 },
         );
         fx.particulas(spriteB, color(ev.critico ? '--tiza-naranja' : '--tiza-amarilla', raiz), ev.critico ? 14 : 8);
-        fx.flotante(spriteB, `${ev.critico ? '¡Crítico! ' : ''}−${n(ev.danio)}`, ev.critico ? 'critico' : '');
+        fx.flotante(spriteB, `${ev.critico ? 'Critical! ' : ''}−${n(ev.danio)}`, ev.critico ? 'critico' : '');
         anotar(ev.texto, 'bueno');
         repintar();
         await esperar(450);
@@ -248,7 +255,7 @@ export default function VocabGamePage() {
         void animar(spriteB, [{ transform: 'none' }, { transform: 'translateX(26%) skewX(8deg)', offset: 0.4 }, { transform: 'none' }], { duration: 650 });
         await fx.proyectil(spriteJ, spriteB);
         sonarSi('esquiva');
-        fx.flotante(spriteB, '¡Esquivó!', 'esquiva');
+        fx.flotante(spriteB, 'Dodged!', 'esquiva');
         anotar(ev.texto, 'malo');
         await esperar(450);
         return;
@@ -279,7 +286,7 @@ export default function VocabGamePage() {
         void animar(spriteJ, [{ transform: 'none' }, { transform: 'translateX(-26%) skewX(-8deg)', offset: 0.4 }, { transform: 'none' }], { duration: 650 });
         await fx.proyectil(spriteB, spriteJ, 'enemigo');
         sonarSi('esquiva');
-        fx.flotante(spriteJ, '¡Esquivaste!', 'esquiva');
+        fx.flotante(spriteJ, 'You dodged!', 'esquiva');
         anotar(ev.texto, 'bueno');
         await esperar(450);
         return;
@@ -287,7 +294,7 @@ export default function VocabGamePage() {
       case 'bossDerrotado':
         sonarSi('victoria');
         fx.particulas(spriteB, color('--tiza', raiz), 18);
-        anunciar(`¡Venciste a ${ev.nombre}!`);
+        anunciar(`You beat ${ev.nombre}!`);
         anotar(ev.texto, 'especial');
         confeti(confetiRef.current, raiz, 70, 1800);
         await animar(
@@ -316,7 +323,7 @@ export default function VocabGamePage() {
           ],
           { duration: 700, easing: 'ease-out' },
         );
-        anunciar(`¡Aparece ${ev.nombre}!`);
+        anunciar(`${ev.nombre} appears!`);
         if (ev.curado > 0) fx.flotante(spriteJ, `+${n(ev.curado)}`, 'cura');
         anotar(ev.texto, 'especial');
         await esperar(1300);
@@ -324,7 +331,7 @@ export default function VocabGamePage() {
 
       case 'subeNivel':
         sonarSi('nivel');
-        anunciar(`¡Nivel ${ev.nivel}!`);
+        anunciar(`Level ${ev.nivel}!`);
         anotar(ev.texto, 'especial');
         repintar();
         await esperar(900);
@@ -337,7 +344,7 @@ export default function VocabGamePage() {
     if (!j) return;
     j.asignarPunto(stat);
     sonarSi('acierto');
-    anotar(`+${suma} a ${nombre}.`, 'bueno');
+    anotar(`+${suma} ${nombre}.`, 'bueno');
     if (j.puntosPendientes === 0) {
       setCapa(null);
       siguientePregunta();
@@ -358,10 +365,12 @@ export default function VocabGamePage() {
     }
     setFin(resultado);
     setCapa('fin');
+    void server.finish().then(() => setBoardKey((k) => k + 1));
   }
 
   function volverAlInicio() {
     stopSpeaking();
+    void server.finish().then(() => setBoardKey((k) => k + 1));
     setCapa(null);
     setFin(null);
     juegoRef.current = null;
@@ -408,10 +417,10 @@ export default function VocabGamePage() {
           setPrefs({ sonido: !prefs.sonido });
           sonar('acierto', !prefs.sonido);
         }}>
-          Sonido: {prefs.sonido ? 'sí' : 'no'}
+          Sound: {prefs.sonido ? 'on' : 'off'}
         </button>
         <button type="button" className="boton-sonido" aria-pressed={prefs.voz} onClick={() => setPrefs({ voz: !prefs.voz })}>
-          Voz: {prefs.voz ? 'sí' : 'no'}
+          Voice: {prefs.voz ? 'on' : 'off'}
         </button>
       </div>
     </header>
@@ -425,13 +434,13 @@ export default function VocabGamePage() {
         {cabecera}
         <main className="pantalla">
           <p className="lema">
-            Responde preguntas de vocabulario en inglés para atacar a los bosses. Vence a los 10 para ganar. Usa todo el
-            vocabulario del nivel: sistemas, IoT, ciberseguridad, IA, datos y servidores.
+            Answer English vocabulary questions to attack the bosses. Beat all 10 to win. It uses all the vocabulary of
+            your level: systems, IoT, cybersecurity, AI, data and servers.
           </p>
 
           <section className="bloque" aria-labelledby="vbg-nivel">
             <h2 id="vbg-nivel" className="subtitulo">
-              <span className="paso">1</span> Elige tu nivel
+              <span className="paso">1</span> Choose your level
             </h2>
             <div className="dificultades niveles" role="radiogroup" aria-labelledby="vbg-nivel">
               {LEVELS.map((l) => (
@@ -456,17 +465,17 @@ export default function VocabGamePage() {
 
           <section className="bloque" aria-labelledby="vbg-personajes">
             <h2 id="vbg-personajes" className="subtitulo">
-              <span className="paso">2</span> Elige tu personaje
+              <span className="paso">2</span> Choose your character
             </h2>
             {error && <p className="mensaje">{error}</p>}
             <div className="personajes">
               {personajes.map((id) => {
                 const b = PERSONAJES[id];
                 const filas: [string, number, number][] = [
-                  ['Vida', b.vida, 40],
-                  ['Ataque', b.ataque, 40],
-                  ['Velocidad', b.velocidad, 22],
-                  ['Esquiva', b.esquiva, 18],
+                  ['HP', b.vida, 40],
+                  ['Attack', b.ataque, 40],
+                  ['Speed', b.velocidad, 22],
+                  ['Dodge', b.esquiva, 18],
                 ];
                 return (
                   <button key={id} type="button" className={`carta ${b.secreto ? 'secreta' : ''}`} disabled={cargando} onClick={() => void empezar(id)}>
@@ -477,7 +486,7 @@ export default function VocabGamePage() {
                           {b.nombre}
                         </span>
                         <span className="carta-lema" style={{ display: 'block' }}>
-                          {b.secreto ? '⭐ Secreto · ' : ''}
+                          {b.secreto ? '⭐ Secret · ' : ''}
                           {b.lema}
                         </span>
                       </span>
@@ -497,25 +506,25 @@ export default function VocabGamePage() {
                 );
               })}
             </div>
-            {cargando && <p className="nota">Cargando vocabulario…</p>}
+            {cargando && <p className="nota">Loading vocabulary…</p>}
           </section>
 
           <section className="bloque adivinanzas" aria-labelledby="vbg-adivinanzas">
             <h2 id="vbg-adivinanzas" className="subtitulo">
-              ¡Adivinanzas bonus!
+              Bonus riddles!
             </h2>
-            <p className="nota">Responde en inglés. Si aciertas una, desbloqueas un personaje secreto que gana 4 puntos por nivel.</p>
+            <p className="nota">Answer in English. Solve one to unlock a secret character that gets 4 points per level.</p>
             <ol className="lista-adivinanzas">
               {ADIVINANZAS.map((a) => (
                 <li key={a.en}>
                   {a.en}
-                  <small>{a.es}</small>
+                  <small><Es text={a.es} level={prefs.nivel} /></small>
                 </li>
               ))}
             </ol>
             <form className="form-adivinanza" autoComplete="off" onSubmit={enviarAdivinanza}>
               <label htmlFor="vbg-respuesta" className="etiqueta">
-                Tu respuesta
+                Your answer
               </label>
               <div className="fila-adivinanza">
                 <input
@@ -529,7 +538,7 @@ export default function VocabGamePage() {
                   onChange={(e) => setAdivinanza(e.target.value)}
                 />
                 <button type="submit" className="boton">
-                  Probar
+                  Try
                 </button>
               </div>
               <p className={`mensaje ${msgAdivinanza?.clase ?? ''}`} role="status">
@@ -538,41 +547,48 @@ export default function VocabGamePage() {
             </form>
           </section>
 
+          <section className="bloque" aria-labelledby="vbg-ranking">
+            <h2 id="vbg-ranking" className="subtitulo">
+              🏆 Leaderboard
+            </h2>
+            <Leaderboard game="boss" level={prefs.nivel} onLevel={(l) => setPrefs({ nivel: l })} refreshKey={boardKey} />
+          </section>
+
           <section className="bloque" aria-labelledby="vbg-duelo">
             <h2 id="vbg-duelo" className="subtitulo">
-              ⚔️ Duelo contra otros jugadores
+              ⚔️ Duel other players
             </h2>
-            <p className="nota">Desafía a alguien que esté en línea en tu mismo nivel. Gana quien deje sin vida al otro respondiendo bien.</p>
+            <p className="nota">Challenge someone who is online at your level. Answer correctly to knock out your rival.</p>
             <div>
               <Link to="/duelo" className="boton" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                Ir a la sala de duelos
+                Go to the duel lobby
               </Link>
             </div>
           </section>
 
           <details className="bloque instrucciones">
-            <summary className="subtitulo">Cómo se juega</summary>
+            <summary className="subtitulo">How to play</summary>
             <ul>
-              <li>Si respondes bien, atacas al boss. Si respondes mal, el boss te ataca.</li>
+              <li>A right answer attacks the boss. A wrong answer lets the boss attack you.</li>
               <li>
-                Con {RACHA_CRITICO} aciertos seguidos haces un <b>golpe crítico</b>, que quita más vida.
+                With {RACHA_CRITICO} right answers in a row you land a <b>critical hit</b> that deals extra damage.
               </li>
               <li>
-                Hay 4 tipos de pregunta: <b>¿Qué significa?</b>, <b>¿Cómo se dice en inglés?</b>, <b>Escucha y elige</b> y{' '}
-                <b>Completa la frase</b>. Cada dos bosses las preguntas se ponen un poco más difíciles.
+                There are 4 question types: <b>What does it mean?</b>, <b>Say it in English</b>, <b>Listen and choose</b> and{' '}
+                <b>Complete the sentence</b>. Every two bosses the questions get a bit harder.
               </li>
-              <li>Las palabras que fallas vuelven a salir pronto, y al final verás una lista para repasarlas.</li>
-              <li>Cada respuesta cuenta para tu repaso de vocabulario (repetición espaciada).</li>
+              <li>Words you miss come back soon, and at the end you get a list to review them.</li>
+              <li>Every answer counts toward your vocabulary review (spaced repetition).</li>
               <li>
-                <b>Vida</b>: cuánto daño aguantas. <b>Ataque</b>: cuánto daño haces. <b>Velocidad</b>: probabilidad de golpear
+                <b>HP</b>: how much damage you can take. <b>Attack</b>: how much damage you deal. <b>Speed</b>: chance to hit
                 dos veces. <b>Esquiva</b>: probabilidad de evitar los golpes.
               </li>
-              <li>Al vencer a un boss recuperas vida y aparece el siguiente.</li>
-              <li>En el ordenador puedes responder con las teclas 1 a 4.</li>
+              <li>When you beat a boss you recover HP and the next one appears.</li>
+              <li>On a computer you can answer with keys 1 to 4.</li>
             </ul>
           </details>
         </main>
-        <footer className="pie">Basado en Logic Boss Game, el proyecto universitario de Santiago Quiroga Torres.</footer>
+        <footer className="pie">Based on Logic Boss Game, the university project by Santiago Quiroga Torres.</footer>
       </div>
     );
   }
@@ -597,27 +613,27 @@ export default function VocabGamePage() {
             const nivel = i + 1;
             const estado = nivel < bs.nivel || fin === 'victoria' ? 'vencido' : nivel === bs.nivel ? 'actual' : '';
             return (
-              <li key={b.nombre} className={estado} aria-label={`Boss ${nivel}: ${b.nombre}${estado === 'vencido' ? ', vencido' : estado === 'actual' ? ', ahora' : ''}`}>
+              <li key={b.nombre} className={estado} aria-label={`Boss ${nivel}: ${b.nombre}${estado === 'vencido' ? ', defeated' : estado === 'actual' ? ', now' : ''}`}>
                 <BossDibujo forma={b.forma} corona={b.corona} />
               </li>
             );
           })}
         </ol>
 
-        <section className="escenario" ref={escenarioRef} aria-label="Combate">
+        <section className="escenario" ref={escenarioRef} aria-label="Battle">
           <div className="luchador jugador">
             <div className="sprite" ref={spriteJRef}>
               <PersonajeDibujo id={pj.id} />
             </div>
             <div className="placa">
               <p className="nombre">
-                <span>{pj.nombre}</span> <span className="nivel">Nv. {pj.nivel}</span>
+                <span>{pj.nombre}</span> <span className="nivel">Lv. {pj.nivel}</span>
               </p>
-              <Barra clase={`barra-vida ${claseVida(pj.vida, pj.vidaMax)}`} etiqueta="Tu vida" actual={pj.vida} maximo={pj.vidaMax} />
+              <Barra clase={`barra-vida ${claseVida(pj.vida, pj.vidaMax)}`} etiqueta="Your HP" actual={pj.vida} maximo={pj.vidaMax} />
               <p className="cifras">
-                Vida {n(pj.vida)} / {n(pj.vidaMax)}
+                HP {n(pj.vida)} / {n(pj.vidaMax)}
               </p>
-              <Barra clase="barra-exp" etiqueta="Experiencia" actual={juego.exp.actual} maximo={juego.exp.necesaria} />
+              <Barra clase="barra-exp" etiqueta="Experience" actual={juego.exp.actual} maximo={juego.exp.necesaria} />
               <p className="cifras">
                 EXP {n(Math.max(0, juego.exp.actual))} / {n(juego.exp.necesaria)}
               </p>
@@ -631,12 +647,12 @@ export default function VocabGamePage() {
               <p className="nombre">
                 <span>{bs.nombre}</span>{' '}
                 <span className="nivel">
-                  Nv. {bs.nivel} de {NIVEL_FINAL}
+                  Lv. {bs.nivel} of {NIVEL_FINAL}
                 </span>
               </p>
-              <Barra clase="barra-vida" etiqueta="Vida del boss" actual={bs.vida} maximo={bs.vidaMax} />
+              <Barra clase="barra-vida" etiqueta="Boss HP" actual={bs.vida} maximo={bs.vidaMax} />
               <p className="cifras">
-                Vida {n(bs.vida)} / {n(bs.vidaMax)}
+                HP {n(bs.vida)} / {n(bs.vidaMax)}
               </p>
             </div>
           </div>
@@ -648,11 +664,11 @@ export default function VocabGamePage() {
           )}
         </section>
 
-        <section className="pregunta" aria-label="Pregunta">
+        <section className="pregunta" aria-label="Question">
           <div className="pregunta-cabecera">
             <p className="tipo-pregunta">{mostrada ? `${NOMBRE_TIPO[mostrada.tipo]} · ${juego.nivelIngles.toUpperCase()}` : ''}</p>
             <div className={`racha ${rachaLista ? 'lista' : ''}`} aria-live="polite">
-              <span>{rachaLista ? '¡Próximo acierto: crítico!' : 'Racha'}</span>
+              <span>{rachaLista ? 'Next hit: critical!' : 'Streak'}</span>
               {Array.from({ length: RACHA_CRITICO }, (_, i) => (
                 <Estrella key={i} className={i < llenas ? 'llena' : ''} />
               ))}
@@ -678,7 +694,7 @@ export default function VocabGamePage() {
                       className={`opcion ${clase}`}
                       disabled={!!respondida || !!capa}
                       onClick={() => void responder(op)}
-                      aria-label={`Responder ${op}`}
+                      aria-label={`Answer ${op}`}
                     >
                       <span className="tecla">{i + 1}</span>
                       {op}
@@ -686,7 +702,7 @@ export default function VocabGamePage() {
                   );
                 })}
               </div>
-              <p className="tema">Tema: {mostrada.palabra.topicTitle}</p>
+              <p className="tema">Topic: {mostrada.palabra.topicTitle}</p>
             </>
           )}
           <p className={`respuesta-mensaje ${mensaje?.clase ?? ''}`} role="status">
@@ -696,7 +712,7 @@ export default function VocabGamePage() {
 
         <div className="pie-batalla">
           <details className="registro">
-            <summary>Registro de combate</summary>
+            <summary>Battle log</summary>
             <ol className="lista-registro">
               {registro.map((l, i) => (
                 <li key={i} className={l.clase}>
@@ -706,7 +722,7 @@ export default function VocabGamePage() {
             </ol>
           </details>
           <button type="button" className="boton boton-secundario" onClick={() => setCapa('rendirse')}>
-            Rendirse
+            Give up
           </button>
         </div>
       </main>
@@ -715,11 +731,11 @@ export default function VocabGamePage() {
         <div className="capa">
           <div className="ventana" role="dialog" aria-modal="true" aria-labelledby="vbg-titulo-nivel">
             <h2 id="vbg-titulo-nivel" className="subtitulo">
-              ¡Subiste de nivel!
+              Level up!
             </h2>
             <p>
-              Te quedan <b>{juego.puntosPendientes === 1 ? '1 punto' : `${juego.puntosPendientes} puntos`}</b> para mejorar a tu
-              personaje.
+              You have <b>{juego.puntosPendientes === 1 ? '1 point' : `${juego.puntosPendientes} points`}</b> left to upgrade your
+              character.
             </p>
             <div className="mejoras">
               {MEJORAS.map((m) => (
@@ -743,41 +759,46 @@ export default function VocabGamePage() {
               <PersonajeDibujo id={pj.id} />
             </div>
             <h2 id="vbg-titulo-fin" className="subtitulo">
-              {fin === 'victoria' ? '¡Venciste a todos los bosses!' : '¡Buen intento!'}
+              {fin === 'victoria' ? 'You beat every boss!' : 'Nice try!'}
             </h2>
             <p>
               {fin === 'victoria'
-                ? `${pj.nombre} derrotó al ${bs.nombre}. ¡Tu vocabulario ${juego.nivelIngles.toUpperCase()} es de campeón!`
-                : `${bs.nombre} te ganó esta vez. Repasa las palabras y vuelve a intentarlo.`}
+                ? `${pj.nombre} defeated ${bs.nombre}. Your ${juego.nivelIngles.toUpperCase()} vocabulary is champion level!`
+                : `${bs.nombre} won this time. Review the words and try again.`}
             </p>
             <dl className="resumen">
               <div>
-                <dt>Bosses vencidos</dt>
+                <dt>Bosses beaten</dt>
                 <dd>{fin === 'victoria' ? NIVEL_FINAL : bs.nivel - 1}</dd>
               </div>
               <div>
-                <dt>Aciertos</dt>
+                <dt>Correct</dt>
                 <dd>
                   {juego.aciertos}/{juego.turno}
                 </dd>
               </div>
               <div>
-                <dt>Mejor racha</dt>
+                <dt>Best streak</dt>
                 <dd>{juego.mejorRacha}</dd>
               </div>
             </dl>
+            {server.current() && (
+              <p className="nota">
+                ⭐ Score: <b>{server.current()!.score.toLocaleString('en')}</b> (saved on the leaderboard)
+              </p>
+            )}
             {repaso.length > 0 && (
               <>
-                <p className="etiqueta">Palabras para repasar</p>
+                <p className="etiqueta">Words to review</p>
                 <ul className="repaso">
                   {repaso.map((w) => (
                     <li key={w.item.term}>
-                      <button type="button" className="boton-sonido" onClick={() => void speak(w.item.term)} aria-label={`Escuchar ${w.item.term}`}>
+                      <button type="button" className="boton-sonido" onClick={() => void speak(w.item.term)} aria-label={`Listen to ${w.item.term}`}>
                         🔊
                       </button>
                       <span aria-hidden="true">{w.item.emoji}</span>
                       <b>{w.item.term}</b>
-                      <span>{w.item.es}</span>
+                      <Es text={w.item.es} level={juego.nivelIngles} />
                     </li>
                   ))}
                 </ul>
@@ -785,7 +806,7 @@ export default function VocabGamePage() {
             )}
             <div className="acciones">
               <button type="button" className="boton" onClick={volverAlInicio}>
-                Jugar de nuevo
+                Play again
               </button>
             </div>
           </div>
@@ -796,15 +817,15 @@ export default function VocabGamePage() {
         <div className="capa">
           <div className="ventana" role="dialog" aria-modal="true" aria-labelledby="vbg-titulo-rendirse">
             <h2 id="vbg-titulo-rendirse" className="subtitulo">
-              ¿Rendirte?
+              Give up?
             </h2>
-            <p>Perderás esta partida y volverás a elegir personaje.</p>
+            <p>You will lose this game and go back to choosing a character.</p>
             <div className="acciones">
               <button type="button" className="boton boton-secundario" onClick={() => setCapa(null)}>
-                Seguir jugando
+                Keep playing
               </button>
               <button type="button" className="boton" onClick={volverAlInicio}>
-                Rendirme
+                Give up
               </button>
             </div>
           </div>
@@ -828,7 +849,7 @@ export function Barra({ clase, etiqueta, actual, maximo }: { clase: string; etiq
 export function Enunciado({ pregunta, revelada }: { pregunta: Pregunta; revelada: boolean }) {
   const { item } = pregunta.palabra;
   const oir = (texto: string, grande = false) => (
-    <button type="button" className={`boton-oir ${grande ? 'grande' : ''}`} onClick={() => void speak(texto)} aria-label={`Escuchar: ${texto}`}>
+    <button type="button" className={`boton-oir ${grande ? 'grande' : ''}`} onClick={() => void speak(texto)} aria-label={`Listen: ${texto}`}>
       🔊
     </button>
   );
@@ -860,7 +881,7 @@ export function Enunciado({ pregunta, revelada }: { pregunta: Pregunta; revelada
         <>
           <div className="palabra nueva">{oir(item.term, true)}</div>
           <p className="pista" lang={revelada ? 'en' : undefined}>
-            {revelada ? item.term : 'Toca 🔊 para oírla otra vez'}
+            {revelada ? item.term : 'Tap 🔊 to hear it again'}
           </p>
         </>
       );
