@@ -1,0 +1,35 @@
+name: Prueba de humo del login
+
+# Ejecución MANUAL. Recorre el inicio de sesión real (contraseña, 2FA y "recordar dispositivo")
+# con un alumno temporal que se borra al terminar. No imprime secretos.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-auth
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prueba de humo
+        run: node scripts/smoke-auth.mjs
+        env:
+          SUPABASE_URL: https://${{ secrets.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          USERNAME_EMAIL_DOMAIN: ${{ vars.VITE_USERNAME_EMAIL_DOMAIN || 'usuarios.aprender-ingles.app' }}
