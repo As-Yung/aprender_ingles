@@ -422,6 +422,9 @@ export default function VocabGamePage() {
         <button type="button" className="boton-sonido" aria-pressed={prefs.voz} onClick={() => setPrefs({ voz: !prefs.voz })}>
           Voice: {prefs.voz ? 'on' : 'off'}
         </button>
+        <Link to="/arcade" className="boton-sonido" style={{ display: 'inline-block', textDecoration: 'none' }}>
+          ← Arcade
+        </Link>
       </div>
     </header>
   );

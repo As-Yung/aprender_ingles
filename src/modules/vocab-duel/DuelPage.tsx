@@ -72,8 +72,8 @@ export default function DuelPage() {
       <div className="vbg">
         <h1 className="titulo">Duels</h1>
         <p className="lema">Online duels only work on the published site (with the user server). There are no other players in local development mode.</p>
-        <Link to="/juego" className="boton" style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
-          Back to the game
+        <Link to="/arcade" className="boton" style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
+          ← Arcade
         </Link>
       </div>
     );
@@ -243,8 +243,8 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
       <FiltroTiza />
       <header className="cabecera">
         <h1 className="titulo">Duels</h1>
-        <Link to="/juego" className="boton-sonido" style={{ textDecoration: 'none' }}>
-          ← Back to the game
+        <Link to="/arcade" className="boton-sonido" style={{ textDecoration: 'none' }}>
+          ← Arcade
         </Link>
       </header>
       <main className="pantalla">
