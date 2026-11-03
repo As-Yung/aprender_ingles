@@ -18,6 +18,7 @@ const DuelPage = lazy(() => import('./modules/vocab-duel/DuelPage'));
 const ArcadePage = lazy(() => import('./modules/arcade/ArcadePage'));
 const PlayPage = lazy(() => import('./modules/arcade/PlayPage'));
 const ReviewPage = lazy(() => import('./modules/review/ReviewPage'));
+const AiTutorPage = lazy(() => import('./modules/ai-tutor/AiTutorPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
@@ -56,6 +57,7 @@ export function App() {
                 <Route path="arcade" element={<ArcadePage />} />
                 <Route path="arcade/:gameId" element={<PlayPage />} />
                 <Route path="repaso" element={<ReviewPage />} />
+                <Route path="ia" element={<AiTutorPage />} />
                 <Route
                   path="admin"
                   element={

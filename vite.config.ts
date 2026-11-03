@@ -14,7 +14,8 @@ function securityHeadersPlugin(): Plugin {
     "style-src 'self'",
     "img-src 'self' data:",
     "font-src 'self'",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    // AI tutor: the learner's own key goes straight to these three providers (never to our servers).
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com",
     "media-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

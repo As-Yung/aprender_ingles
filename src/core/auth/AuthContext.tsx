@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { syncAiOwner } from '../ai/store';
 import { getAuthService, type AuthService, type Session } from './index';
 
 interface AuthState {
@@ -40,6 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsub?.();
     };
   }, []);
+
+  // La conexión con la IA (clave en memoria) muere al cerrar sesión o cambiar de usuario.
+  const userId = session?.user.id ?? null;
+  useEffect(() => {
+    if (!loading) syncAiOwner(userId);
+  }, [userId, loading]);
 
   // Cierre automático por inactividad
   useEffect(() => {

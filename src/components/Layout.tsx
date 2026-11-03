@@ -5,6 +5,7 @@ import { useAuth } from '../core/auth/AuthContext';
 import { SPANISH_HELP_LABEL, setSpanishHelp, useSpanishHelp, type SpanishHelp } from '../core/i18n/spanishHelp';
 import { isMastered } from '../core/progress/misses';
 import { useProgress } from '../core/progress/ProgressContext';
+import { AskAiPanel } from '../modules/ai-tutor/AskAiPanel';
 import '../styles/game-banner.css';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -121,6 +122,9 @@ export function Layout() {
                   🛡️ Admin
                 </button>
               )}
+              <button className="menu__item" type="button" role="menuitem" onClick={() => navigate('/ia')}>
+                🤖 AI tutor
+              </button>
               <button className="menu__item" type="button" role="menuitem" onClick={() => navigate('/cambiar-contrasena')}>
                 🔑 Change password
               </button>
@@ -147,6 +151,7 @@ export function Layout() {
       <footer className="footer muted">
         Tech Talk English · Casual, spoken English for systems, IoT, security, AI, data and servers · Levels A1–C2
       </footer>
+      <AskAiPanel />
       <nav className="tabbar" aria-label="Main (mobile)">
         {navLinks('tabbar__link')}
       </nav>
