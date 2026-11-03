@@ -563,7 +563,7 @@ export default function VocabGamePage() {
             </h2>
             <p className="nota">Challenge someone who is online at your level. Answer correctly to knock out your rival.</p>
             <div>
-              <Link to="/duelo" className="boton" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              <Link to="/duelo?game=boss" className="boton" style={{ display: 'inline-block', textDecoration: 'none' }}>
                 Go to the duel lobby
               </Link>
             </div>

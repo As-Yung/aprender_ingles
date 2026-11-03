@@ -285,7 +285,7 @@ export default function DashboardPage() {
                 </span>
                 <span>
                   <strong>Online duels</strong>
-                  <small>Challenge another player in real time. Fastest correct answer wins the round.</small>
+                  <small>Challenge another player in real time in any of the {totalGames} games, at the same level.</small>
                 </span>
               </Link>
             </div>

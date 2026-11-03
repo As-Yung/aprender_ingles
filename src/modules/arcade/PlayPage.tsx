@@ -199,7 +199,7 @@ export default function PlayPage() {
               {rules.lives > 99 ? 'no lives to lose' : `❤️ ${rules.lives} lives`}
             </li>
             <li>⭐ 100 points per right answer + streak bonus + speed bonus</li>
-            <li>⚔️ You can also play it against someone in Duels</li>
+            <li>⚔️ Play it solo (PvE) or challenge someone online (PvP)</li>
           </ul>
           <section className="bloque" aria-labelledby="arc-level">
             <h2 id="arc-level" className="subtitulo">
@@ -222,10 +222,13 @@ export default function PlayPage() {
             </div>
           </section>
           {!available && <p className="mensaje">This game needs more content than this level has. Try another level.</p>}
-          <div>
+          <div className="arc-modes">
             <button type="button" className="boton arc-start" disabled={!ctx || !available || starting} onClick={() => void start()}>
-              {ctx ? (starting ? 'Starting…' : '▶ Start') : 'Loading…'}
+              {ctx ? (starting ? 'Starting…' : '▶ Play solo') : 'Loading…'}
             </button>
+            <Link to={`/duelo?game=${game.id}`} className="boton boton-secundario arc-start arc-link">
+              ⚔️ Duel someone
+            </Link>
           </div>
           <section className="bloque">
             <h2 className="subtitulo">🏆 Leaderboard</h2>
@@ -313,6 +316,9 @@ export default function PlayPage() {
             <div className="acciones">
               <Link to="/arcade" className="boton boton-secundario arc-link">
                 All games
+              </Link>
+              <Link to={`/duelo?game=${game.id}`} className="boton boton-secundario arc-link">
+                ⚔️ Duel someone
               </Link>
               <button type="button" className="boton" onClick={() => void start()}>
                 Play again
