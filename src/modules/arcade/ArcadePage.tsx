@@ -84,7 +84,7 @@ export default function ArcadePage() {
                 </span>
                 <span className="arc-game__name">{BOSS_GAME.name}</span>
                 <span className="arc-game__blurb">{BOSS_GAME.blurb}</span>
-                <span className="arc-game__skill">Featured · Vocabulary</span>
+                <span className="arc-game__skill">Featured · Vocabulary · Solo &amp; Duel</span>
               </Link>
             )}
             {list.map((g) => (
@@ -96,7 +96,7 @@ export default function ArcadePage() {
                 <span className="arc-game__blurb">{g.blurb}</span>
                 <span className="arc-game__skill">
                   {g.skill}
-                  {g.timeLimit ? ` · ${g.timeLimit}s` : ''}
+                  {g.timeLimit ? ` · ${g.timeLimit}s` : ''} · Solo &amp; Duel
                 </span>
               </Link>
             ))}

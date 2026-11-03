@@ -1,6 +1,6 @@
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { LEVELS, loadLevel } from '../../content';
 import type { LevelId } from '../../content/types';
 import { useAuth } from '../../core/auth/AuthContext';
@@ -13,6 +13,7 @@ import { animar, color, confeti, Efectos, esperar, sonar, type Sonido } from '..
 import { NOMBRE_TIPO, PERSONAJES, palabrasDelNivel, RACHA_CRITICO, type PalabraJuego } from '../vocab-game/logic';
 import { Barra, Enunciado } from '../vocab-game/VocabGamePage';
 import '../vocab-game/vocab-game.css';
+import '../arcade/arcade.css';
 import './duel.css';
 import {
   cancelarDesafio,
@@ -86,7 +87,12 @@ export default function DuelPage() {
 /* ===================================================================== */
 
 export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: string; miNombre: string }) {
-  const [prefs, setPrefsState] = useState<Prefs>(leerPrefs);
+  const [params] = useSearchParams();
+  const [prefs, setPrefsState] = useState<Prefs>(() => {
+    const p = leerPrefs();
+    const g = params.get('game');
+    return g && (g === 'boss' || findGame(g)) ? { ...p, juego: g } : p;
+  });
   const setPrefs = (c: Partial<Prefs>) =>
     setPrefsState((prev) => {
       const next = { ...prev, ...c };
@@ -277,23 +283,31 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
 
         <section className="bloque" aria-labelledby="duelo-juego">
           <h2 id="duelo-juego" className="subtitulo">
-            <span className="paso">⚔</span> Game
+            <span className="paso">2</span> Choose the game
           </h2>
-          <select className="arc-select" value={prefs.juego} disabled={!!enviado} onChange={(e) => setPrefs({ juego: e.target.value })} aria-label="Game">
-            <option value="boss">
-              {BOSS_GAME.emoji} {BOSS_GAME.name}
-            </option>
-            {GAMES.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.emoji} {g.name}
-              </option>
+          <p className="nota">
+            All {GAMES.length + 1} games can be played as a duel. Selected: <b>{gameEmoji(prefs.juego)} {gameName(prefs.juego)}</b>
+          </p>
+          <div className="arc-duel-games" role="radiogroup" aria-labelledby="duelo-juego">
+            {[BOSS_GAME, ...GAMES].map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                role="radio"
+                aria-checked={prefs.juego === g.id}
+                className={`arc-duel-game ${prefs.juego === g.id ? 'on' : ''}`}
+                disabled={!!enviado}
+                onClick={() => setPrefs({ juego: g.id })}
+              >
+                <span aria-hidden="true">{g.emoji}</span> {g.name}
+              </button>
             ))}
-          </select>
+          </div>
         </section>
 
         <section className="bloque" aria-labelledby="duelo-personaje">
           <h2 id="duelo-personaje" className="subtitulo">
-            <span className="paso">2</span> Choose your character
+            <span className="paso">3</span> Choose your character
           </h2>
           <p className="nota">Secret characters can’t be used in duels.</p>
           <SelectorPersonaje valor={prefs.personaje} alCambiar={(p) => setPrefs({ personaje: p })} />
@@ -301,7 +315,7 @@ export function Sala({ client, yo, miNombre }: { client: SupabaseClient; yo: str
 
         <section className="bloque" aria-labelledby="duelo-sala">
           <h2 id="duelo-sala" className="subtitulo">
-            <span className="paso">3</span> Challenge someone
+            <span className="paso">4</span> Challenge someone
           </h2>
           {conectado === false && <p className="mensaje">Could not join the lobby. Check your connection and reload the page.</p>}
           {conectado === null && <p className="nota">Joining the lobby…</p>}
