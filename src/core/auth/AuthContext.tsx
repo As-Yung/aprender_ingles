@@ -6,7 +6,8 @@ interface AuthState {
   service: AuthService | null;
   session: Session | null;
   loading: boolean;
-  refresh: () => Promise<void>;
+  /** Vuelve a leer la sesión del proveedor y la publica en el contexto antes de resolver. */
+  refresh: () => Promise<Session | null>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -18,11 +19,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const lastActivity = useRef(Date.now());
+  // Cada lectura de sesión lleva un número; solo se aplica la más reciente.
+  // Evita que una respuesta lenta y antigua (p. ej. la del evento SIGNED_IN, que aún dice aal1)
+  // pise a otra más nueva (p. ej. la que ya trae aal2 tras el 2FA).
+  const loadSeq = useRef(0);
+
+  const load = useCallback(async (svc: AuthService): Promise<Session | null> => {
+    const seq = ++loadSeq.current;
+    const s = await svc.getSession();
+    if (seq === loadSeq.current) setSession(s);
+    return s;
+  }, []);
 
   const refresh = useCallback(async () => {
-    if (!service) return;
-    setSession(await service.getSession());
-  }, [service]);
+    if (!service) return null;
+    return load(service);
+  }, [service, load]);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -31,8 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       setService(svc);
       if (svc) {
-        setSession(await svc.getSession());
-        unsub = svc.subscribe((s) => setSession(s));
+        await load(svc);
+        if (cancelled) return;
+        unsub = svc.subscribe(() => void load(svc));
       }
       setLoading(false);
     });
@@ -40,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       unsub?.();
     };
-  }, []);
+  }, [load]);
 
   // La conexión con la IA (clave en memoria) muere al cerrar sesión o cambiar de usuario.
   const userId = session?.user.id ?? null;
