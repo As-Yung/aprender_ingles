@@ -7,7 +7,7 @@ import { useAuth } from '../core/auth/AuthContext';
 import { AuthError } from '../core/auth/types';
 
 export default function LoginPage() {
-  const { service, session, loading } = useAuth();
+  const { service, session, loading, refresh } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +17,8 @@ export default function LoginPage() {
   if (loading) return <Loading />;
   if (!service) return <NotConfigured />;
   if (session?.aal === 'aal2') return <Navigate to="/" replace />;
+  // Contraseña ya validada pero falta el 2FA (p. ej. tras recargar): continuar en el paso del código
+  if (session && !busy) return <Navigate to="/mfa" replace />;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,8 +26,11 @@ export default function LoginPage() {
     setBusy(true);
     try {
       await service.signIn(username, password);
+      // Publica la sesión nueva en el contexto ANTES de navegar. Si no, la página del 2FA podía
+      // montarse con la sesión aún vacía y devolver al login (había que escribir las credenciales dos veces).
+      await refresh();
       setPassword('');
-      navigate('/mfa');
+      navigate('/mfa', { replace: true });
     } catch (err) {
       setError(err instanceof AuthError ? err.message : 'Could not sign in. Please try again.');
     } finally {
