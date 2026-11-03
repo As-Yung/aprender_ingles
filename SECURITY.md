@@ -16,6 +16,8 @@ Abre un *Security advisory* privado en GitHub (*Security → Report a vulnerabil
 | Fuerza bruta de TOTP / reutilización | Supabase limita intentos; en modo local: bloqueo tras 5 fallos y rechazo de códigos ya usados. |
 | Sesiones abandonadas | Cierre automático tras 30 min de inactividad; tokens de refresco rotativos. |
 | Contraseñas filtradas a terceros | Contraseñas temporales aleatorias criptográficas, mostradas una sola vez; cambio obligatorio. |
+| Fuga de la clave de IA del alumno (tutor IA) | La clave (Claude/ChatGPT/Gemini) vive **solo en memoria** (`src/core/ai/store.ts`): nunca en localStorage, sessionStorage, cookies, Supabase ni nuestros servidores. Se borra al cerrar sesión, por inactividad, al cambiar de usuario, al recargar o cerrar la pestaña: **hay que reconectar en cada inicio de sesión**. Las peticiones van directo del navegador al proveedor (CSP `connect-src` solo permite esos 3 hosts) con `credentials: 'omit'` y sin referrer. Los errores nunca muestran la clave. |
+| Inyección de instrucciones vía contenido de pantalla | El texto de la pantalla se envía delimitado en `<screen_content>` (el delimitador se neutraliza dentro del texto) y el prompt de sistema indica tratarlo como datos. Las respuestas se muestran como texto plano (sin HTML). No se captura nada en admin, cambio de contraseña ni 2FA; no se envían valores de formularios; el alumno puede desactivar o previsualizar lo que se comparte. |
 | Abuso de la Edge Function | CORS restringido a orígenes permitidos, límite de tamaño, validación estricta (UUID, patrón de usuario), auditoría en `admin_audit_log`. |
 
 ## Cadena de suministro (amenaza más activa de los últimos meses)
