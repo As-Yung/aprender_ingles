@@ -1,3 +1,4 @@
+import type { LevelLabs } from '../../content/labs/types';
 import type { Level } from '../../content/types';
 
 /**
@@ -18,9 +19,12 @@ export interface SpeechItem {
   text: string;
 }
 
+import { correctedSentence } from '../../content/labs/fix';
+
 export const normalizeSpeechText = (t: string) => t.normalize('NFC').trim();
 
-export function collectSpeech(levels: Level[]): SpeechItem[] {
+/** `labs` (Hands-on Lab content by level id) is optional so callers that only need topics keep working. */
+export function collectSpeech(levels: Level[], labs: Partial<Record<string, LevelLabs>> = {}): SpeechItem[] {
   const out = new Map<string, SpeechItem>();
   const add = (voice: VoiceSlot, text: string | undefined) => {
     if (!text) return;
@@ -46,6 +50,15 @@ export function collectSpeech(levels: Level[]): SpeechItem[] {
       topic.notes.forEach((n) => {
         if (n.kind === 'examples') n.items.forEach((e) => add(0, e.en));
       });
+      const lab = labs[level.id]?.[topic.id];
+      if (lab) {
+        lab.chats.forEach((c) => {
+          add(1, c.message); // the teammate speaks with the second voice
+          c.replies.filter((r) => r.ok).forEach((r) => add(0, r.text));
+        });
+        lab.fixes.forEach((f) => add(0, correctedSentence(f)));
+        lab.flow.steps.forEach((s) => add(0, s.text));
+      }
     }
   }
   return [...out.values()];

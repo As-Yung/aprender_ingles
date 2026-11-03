@@ -37,6 +37,14 @@ export const MODULES: LearningModule[] = [
     isAvailable: (t) => t.vocabulary.length >= 4,
   },
   {
+    id: 'lab',
+    label: 'Hands-on Lab',
+    emoji: '🧪',
+    description: 'Real tech situations: team chats, spot the mistake, flow diagrams, screens to read, memory, spelling bee and speed run.',
+    component: lazy(() => import('./lab/LabSection')),
+    isAvailable: (t) => t.vocabulary.length >= 4,
+  },
+  {
     id: 'conversacion',
     label: 'Conversation',
     emoji: '💬',
