@@ -1,0 +1,1 @@
+var e=(e,t,n,r,...i)=>({from:e,avatar:t,message:n,replies:[{text:r[0],why:r[1],ok:!0},...i.map(([e,t])=>({text:e,why:t,ok:!1}))]}),t=(e,t,n,r,i)=>({sentence:e,wrong:t,right:n,alts:r,why:i}),n=(e,...t)=>({title:e,steps:t.map(e=>{let t=e.indexOf(` `);return{emoji:e.slice(0,t),text:e.slice(t+1)}})});export{t as n,n as r,e as t};

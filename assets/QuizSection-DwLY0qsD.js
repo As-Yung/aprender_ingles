@@ -1,0 +1,1 @@
+import{t as e}from"./QuizRunner-CBmmZelq.js";import{t}from"./jsx-runtime-CkXRJ162.js";var n=t();function r({topic:t,onComplete:r}){return(0,n.jsx)(e,{title:`Self-check: ${t.title}`,questions:t.quiz,onFinish:r},t.id)}export{r as default};

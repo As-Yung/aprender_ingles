@@ -1,0 +1,1 @@
+var e=(e,t,n,r,i,a,o)=>({term:e,es:t,emoji:n,category:r,example:i,exampleEs:a,ipa:o}),t=(e,t,n,r)=>({prompt:e,options:t,answer:n,explanation:r});export{e as n,t};

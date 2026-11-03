@@ -1,0 +1,1 @@
+var e=class extends Error{code;constructor(e,t=`auth_error`){super(e),this.code=t,this.name=`AuthError`}};export{e as t};

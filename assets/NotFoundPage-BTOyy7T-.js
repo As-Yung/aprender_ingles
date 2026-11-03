@@ -1,0 +1,1 @@
+import{w as e}from"./index-DDwt6ewD.js";import{t}from"./jsx-runtime-CkXRJ162.js";var n=t();function r(){return(0,n.jsxs)(`div`,{className:`card center`,children:[(0,n.jsx)(`p`,{className:`big`,children:`🧭`}),(0,n.jsx)(`h2`,{children:`Page not found`}),(0,n.jsx)(e,{className:`btn`,to:`/`,children:`Back to home`})]})}export{r as default};
